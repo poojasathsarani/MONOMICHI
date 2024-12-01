@@ -7,9 +7,9 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100 font-serif">
     <!-- Navbar -->
-    <header class="bg-red-100 shadow">
+    <header class="bg-red-100 shadow sticky top-0 z-50">
         <div class="container mx-auto px-6 py-4 flex items-center justify-between">
             <!-- Logo -->
             <div class="flex items-center">
@@ -97,12 +97,15 @@
             </div>
             
             <!-- Redirect Arrow to Products Page -->
-            <div class="bg-gradient-to-r from-pink-300 via-gray-200 to-pink-300 shadow-lg rounded-lg flex items-center justify-center py-6 transition-transform duration-300 transform hover:scale-105">
-                <a href="../views/products.php" class="flex flex-col items-center text-gray-800 transition-colors duration-300 hover:text-pink-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 transition-transform duration-300 transform group-hover:scale-125" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden flex items-center justify-center bg-gray-100 transform hover:scale-105 transition duration-300 ease-in-out relative">
+                <div class="absolute inset-0 bg-cover bg-center filter blur-sm" style="background-image: url('https://m.media-amazon.com/images/I/61iF8RXU1lL._AC_UF1000,1000_QL80_.jpg');"></div>
+
+                <!-- Content (Text and Icon) -->
+                <a href="culturalinsights.php" class="flex flex-col items-center text-gray-800 hover:text-white transition relative z-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
-                    <span class="mt-2 text-xl font-medium">View All Products</span>
+                    <span class="mt-2 text-lg font-medium">View All Products</span>
                 </a>
             </div>
         </div>
@@ -141,29 +144,32 @@
         <h3 class="text-3xl font-semibold text-center text-gray-800">Featured Products</h3>
         <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- Product 1 -->
-            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 ease-in-out">
                 <img src="https://m.media-amazon.com/images/I/81J4pyKvIaL._AC_UL480_FMwebp_QL65_.jpg" alt="Product 1" class="w-full h-48 object-cover">
                 <div class="p-4">
                     <h4 class="text-xl font-semibold">Japanese Tea Set</h4>
                     <p class="mt-2 text-gray-600">Experience traditional Japanese tea ceremonies with this beautiful tea set.</p>
-                    <p class="mt-2 text-lg font-semibold text-pink-600">Rs. 11599.66</p>
+                    <p class="mt-2 text-lg font-semibold text-pink-600">Rs. 11 999.99</p>
                 </div>
             </div>
 
             <!-- Product 2 (Popular One) -->
-            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 ease-in-out">
                 <img src="https://lh5.googleusercontent.com/proxy/9HZjyXtQYIRMv7cWRSWA3PQf-25MKF0kLOelp8OlkS2liexKIb0fpxAwsVYm4C8VSaWOHcNFO8E5YVQPyuGgsPXm07RmRecRzWdGe4Pig8OfjJ7q" alt="Product 2" class="w-full h-48 object-cover">
                 <div class="p-4">
                     <h4 class="text-xl font-semibold">Japanese Calligraphy Set</h4>
                     <p class="mt-2 text-gray-600">Perfect for artists and enthusiasts to explore the art of Japanese calligraphy.</p>
-                    <p class="mt-2 text-lg font-semibold text-pink-600">Rs. 8699.02</p>
+                    <p class="mt-2 text-lg font-semibold text-pink-600">Rs. 8 999.99</p>
                     <span class="text-sm text-red-500 bg-gray-100 px-2 py-1 rounded-full">Popular</span>
                 </div>
             </div>
 
             <!-- View All Products Button -->
-            <div class="bg-gradient-to-r from-pink-300 via-gray-200 to-pink-300 shadow-lg rounded-lg flex items-center justify-center py-6">
-                <a href="../views/products.php" class="flex flex-col items-center text-gray-800 hover:text-pink-500 transition">
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden flex items-center justify-center bg-gray-100 transform hover:scale-105 transition duration-300 ease-in-out relative">
+                <div class="absolute inset-0 bg-cover bg-center filter blur-sm" style="background-image: url('https://blog.janbox.com/wp-content/uploads/2021/09/sake-best-things-to-buy-in-japan.png');"></div>
+
+                <!-- Content (Text and Icon) -->
+                <a href="culturalinsights.php" class="flex flex-col items-center text-gray-800 hover:text-white transition relative z-10">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
@@ -184,60 +190,143 @@
     <section id="cultural-insights" class="container mx-auto px-6 py-16">
         <h3 class="text-3xl font-semibold text-center text-gray-800">Learn About Japanese Culture</h3>
         <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-                <img src="https://example.com/culture1.jpg" alt="Culture 1" class="w-full h-48 object-cover">
+            <!-- First Insight Tile -->
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
+                <img src="https://www.alonereaders.com/Images/Article/Img_202493_151312_391.png" alt="Culture 1" class="w-full h-48 object-cover">
                 <div class="p-4">
                     <h4 class="text-xl font-semibold">Tea Ceremony</h4>
                     <p class="mt-2 text-gray-600">Discover the traditional Japanese tea ceremony and its significance.</p>
-                    <a href="../views/culture.php#tea-ceremony" class="mt-4 inline-block bg-pink-600 text-white py-2 px-6 rounded-full text-lg">Learn More</a>
+                    <a href="../views/culturalinsights.php#tea-ceremony" class="mt-4 inline-block bg-pink-600 text-white py-2 px-6 rounded-full text-lg">Learn More</a>
                 </div>
             </div>
-            <!-- Add more insights here -->
+
+            <!-- Second Insight Tile -->
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
+                <img src="https://c02.purpledshub.com/uploads/sites/40/2020/04/GettyImages-1166914367-2788542-scaled.jpg" alt="Culture 2" class="w-full h-48 object-cover">
+                <div class="p-4">
+                    <h4 class="text-xl font-semibold">Japanese Gardens</h4>
+                    <p class="mt-2 text-gray-600">Explore the beauty and tranquility of traditional Japanese gardens.</p>
+                    <a href="../views/culturalinsights.php#japanese-gardens" class="mt-4 inline-block bg-pink-600 text-white py-2 px-6 rounded-full text-lg">Learn More</a>
+                </div>
+            </div>
+
+            <!-- Third Insight Tile (Arrow for Redirection) -->
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden flex items-center justify-center bg-gray-100 transform hover:scale-105 transition duration-300 ease-in-out relative">
+                <div class="absolute inset-0 bg-cover bg-center filter blur-sm" style="background-image: url('https://blog.janbox.com/wp-content/uploads/2021/09/sake-best-things-to-buy-in-japan.png');"></div>
+
+                <!-- Content (Text and Icon) -->
+                <a href="culturalinsights.php" class="flex flex-col items-center text-gray-800 hover:text-white transition relative z-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                    <span class="mt-2 text-lg font-medium">Explore More Insights</span>
+                </a>
+            </div>
         </div>
     </section>
 
     <!-- New Arrivals Section -->
     <section id="new-arrivals" class="container mx-auto px-6 py-16">
         <h3 class="text-3xl font-semibold text-center text-gray-800">New Arrivals</h3>
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-                <img src="https://example.com/new-product1.jpg" alt="New Product 1" class="w-full h-48 object-cover">
+        <div class="mt-8 flex space-x-8">
+            <!-- New Product 1 -->
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
+                <img src="https://miro.medium.com/v2/resize:fit:1400/1*pfbYYn7wUSmNQFqtirn21A.png" alt="New Product 1" class="w-full h-48 object-cover">
                 <div class="p-4">
                     <h4 class="text-xl font-semibold">Japanese Bento Box</h4>
                     <p class="mt-2 text-gray-600">A sleek and modern bento box for your lunch, inspired by Japanese design.</p>
-                    <p class="mt-2 text-gray-800 font-semibold">$25.00</p>
-                    <a href="../views/product-detail.php?id=3" class="mt-4 inline-block bg-pink-600 text-white py-2 px-6 rounded-full text-lg">View Details</a>
+                    <p class="mt-2 text-gray-800 font-semibold">Rs. 7999.99</p>
+                    <!-- Rating -->
+                    <div class="flex items-center mt-2">
+                        <!-- Star ratings -->
+                    </div>
+                    <!-- Buttons: View Details & Add to Cart -->
+                    <div class="mt-4 flex justify-between">
+                        <a href="../views/product-detail.php?id=3" class="inline-block bg-pink-600 text-white py-2 px-6 rounded-full text-lg hover:bg-pink-700 transition">View Details</a>
+                        <a href="#" class="inline-block bg-green-600 text-white py-2 px-6 rounded-full text-lg hover:bg-green-700 transition">Add to Cart</a>
+                    </div>
                 </div>
             </div>
-            <!-- Add more new arrivals here -->
+
+            <!-- New Product 2 -->
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
+                <img src="https://m.media-amazon.com/images/S/aplus-media-library-service-media/1314a45a-9401-4010-b7ee-3071e10f7aa4.__CR0,0,970,600_PT0_SX970_V1___.jpg" alt="New Product 2" class="w-full h-48 object-cover">
+                <div class="p-4">
+                    <h4 class="text-xl font-semibold">Japanese Tea Set</h4>
+                    <p class="mt-2 text-gray-600">A beautiful tea set for the perfect Japanese tea ceremony experience.</p>
+                    <p class="mt-2 text-gray-800 font-semibold">Rs. 13 999.99</p>
+                    <!-- Rating -->
+                    <div class="flex items-center mt-2">
+                        <!-- Star ratings -->
+                    </div>
+                    <!-- Buttons: View Details & Add to Cart -->
+                    <div class="mt-4 flex justify-between">
+                        <a href="../views/product-detail.php?id=4" class="inline-block bg-pink-600 text-white py-2 px-6 rounded-full text-lg hover:bg-pink-700 transition">View Details</a>
+                        <a href="#" class="inline-block bg-green-600 text-white py-2 px-6 rounded-full text-lg hover:bg-green-700 transition">Add to Cart</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Product 3 -->
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
+                <img src="https://zenbird.media/wp-content/uploads/2022/10/kimono_top.jpg" alt="New Product 3" class="w-full h-48 object-cover">
+                <div class="p-4">
+                    <h4 class="text-xl font-semibold">Japanese Kimono</h4>
+                    <p class="mt-2 text-gray-600">A traditional Japanese kimono made from high-quality silk.</p>
+                    <p class="mt-2 text-gray-800 font-semibold">Rs. 34 999.99</p>
+                    <!-- Rating -->
+                    <div class="flex items-center mt-2">
+                        <!-- Star ratings -->
+                    </div>
+                    <!-- Buttons: View Details & Add to Cart -->
+                    <div class="mt-4 flex justify-between">
+                        <a href="../views/product-detail.php?id=5" class="inline-block bg-pink-600 text-white py-2 px-6 rounded-full text-lg hover:bg-pink-700 transition">View Details</a>
+                        <a href="#" class="inline-block bg-green-600 text-white py-2 px-6 rounded-full text-lg hover:bg-green-700 transition">Add to Cart</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
+    <!-- Arrow Key Bar to Redirect to New Arrival Page -->
+    <div class="flex justify-center mt-8">
+        <a href="../views/newarrivals.php" class="flex items-center text-pink-600 font-semibold hover:text-pink-700 transition duration-300 transform hover:scale-110">
+            <span class="mr-2 text-5xl">See All New Arrivals</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transform transition-transform duration-300 hover:translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m0 0l-6-6m6 6l-6 6" />
+            </svg>
+        </a>
+    </div>
+
     <!-- Newsletter Call to Action in Hero Section -->
-    <div class="mt-6">
-        <p class="text-lg">Subscribe to our newsletter for exclusive deals and the latest updates on Japanese culture!</p>
-        <form action="#" method="POST" class="mt-4 flex justify-center">
-            <input type="email" placeholder="Enter your email" class="py-2 px-4 rounded-l-lg border border-gray-300 w-1/3" required>
-            <button type="submit" class="bg-pink-600 text-white py-2 px-4 rounded-r-lg">Subscribe</button>
+    <div class="mt-12 bg-gray-100 py-8 rounded-lg shadow-md">
+        <p class="text-xl text-center text-gray-800 font-semibold">Stay Updated with Our Latest Offers</p>
+        <p class="text-lg text-center text-gray-600 mt-2">Subscribe to our newsletter for exclusive deals and the latest updates on Japanese culture!</p>
+        <form action="#" method="POST" class="mt-6 flex justify-center" onsubmit="showMessage(event)">
+            <input type="email" id="emailInput" placeholder="Enter your email" class="py-3 px-6 rounded-l-lg border border-gray-300 w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-pink-500" required>
+            <button type="submit" class="bg-pink-600 text-white py-3 px-6 rounded-r-lg font-semibold hover:bg-pink-700 transition ease-in-out duration-300">Subscribe</button>
         </form>
     </div>
 
+    <!-- Success Modal -->
+    <div id="popupMessage" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-white p-8 rounded-lg shadow-lg text-center max-w-sm mx-auto transform transition-all duration-300 scale-0">
+            <p id="popupText" class="text-xl text-gray-800 font-semibold mb-4"></p>
+            <button onclick="closePopup()" class="mt-4 bg-pink-600 text-white py-2 px-6 rounded-full hover:bg-pink-700 transition duration-300 focus:outline-none">Close</button>
+        </div>
+    </div>
+
     <!-- Event Promo Banner -->
-    <section class="bg-blue-500 text-white text-center py-8">
+    <section class="bg-pink-500 text-white text-center py-8">
         <h3 class="text-3xl font-semibold">Join Us for the Cherry Blossom Festival!</h3>
         <p class="mt-4">Celebrate Japan’s culture with us and explore exclusive seasonal items.</p>
-        <a href="../views/events.php" class="mt-6 inline-block bg-white text-blue-600 py-3 px-8 rounded-full text-lg font-semibold">Learn More</a>
+        <a href="../views/events.php" class="mt-6 inline-block bg-white text-pink-600 py-3 px-8 rounded-full text-lg font-semibold hover:bg-pink-600 hover:text-white hover:scale-105">Learn More</a>
     </section>
 
-    <!-- Press Mentions Section -->
-    <section id="press" class="container mx-auto px-6 py-16">
-        <h3 class="text-3xl font-semibold text-center text-gray-800">As Seen In</h3>
-        <div class="mt-8 flex justify-center space-x-6">
-            <img src="https://example.com/press-logo1.png" alt="Press 1" class="h-12">
-            <img src="https://example.com/press-logo2.png" alt="Press 2" class="h-12">
-            <img src="https://example.com/press-logo3.png" alt="Press 3" class="h-12">
-        </div>
-    </section>
+    <!-- Scroll to Top Button -->
+    <button id="scrollToTopBtn" class="fixed bottom-4 right-4 bg-pink-500 text-white py-2 px-4 rounded-full text-lg hidden hover:bg-red-600 transition duration-300 ease-in-out">
+        ↑ Scroll to Top
+    </button>
 
     <!-- Footer -->
     <footer class="bg-gray-50 py-10 text-gray-700">
@@ -336,20 +425,6 @@
         });
     });
 
-    // Function to trigger confetti effect
-    function triggerConfetti() {
-        confetti({
-            particleCount: 100,  // Number of confetti particles
-            spread: 70,  // Spread angle of confetti
-            origin: { y: 0.6 },  // Y-axis origin (from the bottom of the screen)
-        });
-    }
-
-    // Trigger the confetti effect when the Explore Now button is clicked
-    document.getElementById('exploreBtn').addEventListener('click', function() {
-        triggerConfetti();
-    });
-
     const menuBtn = document.getElementById('menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
 
@@ -375,5 +450,78 @@
 
     setInterval(changeBackground, 5000);
     changeBackground();
+
+    // Function to launch confetti inside the "Limited Time Offers" section
+    function launchConfettiInSection() {
+        // Get the "Limited Time Offers" section
+        const section = document.querySelector('#limited-time-offers');
+        if (section) {
+            const rect = section.getBoundingClientRect(); // Get section dimensions and position
+            confetti({
+                particleCount: 100, // Number of confetti pieces
+                spread: 70,         // Spread angle
+                origin: {
+                    x: (rect.left + rect.width / 2) / window.innerWidth, // Center the X position within the section
+                    y: (rect.top + rect.height / 2) / window.innerHeight // Center the Y position within the section
+                },
+                colors: ['#FF0000', '#FFC0CB', '#BEBEBE', '#FFFF00'],
+            });
+        }
+    }
+
+    // Loop the confetti effect only for the red section
+    setInterval(launchConfettiInSection, 1500); // Trigger confetti every 1.5 seconds
+
+    function showMessage(event) {
+        event.preventDefault();  // Prevent form from submitting
+
+        // Get the email input value
+        const email = document.getElementById('emailInput').value;
+
+        // Display the success message with the email
+        const popupText = document.getElementById('popupText');
+        popupText.innerHTML = `We sent an email to <strong>${email}</strong>. Please check your inbox.`;
+
+        // Show the popup with animation
+        const popup = document.getElementById('popupMessage');
+        const popupContent = popup.querySelector('div');
+        popup.classList.remove('hidden');
+        popupContent.classList.remove('scale-0');
+        popupContent.classList.add('scale-100');
+    }
+
+    function closePopup() {
+        // Close the popup with animation
+        const popup = document.getElementById('popupMessage');
+        const popupContent = popup.querySelector('div');
+        popupContent.classList.remove('scale-100');
+        popupContent.classList.add('scale-0');
+
+        // Hide the popup after animation ends
+        setTimeout(() => {
+            popup.classList.add('hidden');
+        }, 300);
+    }
+
+    // Get the button
+    let scrollToTopBtn = document.getElementById("scrollToTopBtn");
+
+    // When the user scrolls down 100px from the top, show the button
+    window.onscroll = function() {
+        if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
+            scrollToTopBtn.classList.remove("hidden");
+        } else {
+            scrollToTopBtn.classList.add("hidden");
+        }
+    };
+
+    // When the button is clicked, scroll to the top smoothly
+    scrollToTopBtn.onclick = function() {
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: "smooth" // Scroll smoothly
+        });
+    };
 </script>
 </html>

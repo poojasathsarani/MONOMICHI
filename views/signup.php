@@ -6,9 +6,9 @@
     <title>Sign Up - MONOMICHI</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100 font-serif">
     <!-- Navbar -->
-    <header class="bg-red-100 shadow">
+    <header class="bg-red-100 shadow sticky top-0 z-50">
         <div class="container mx-auto px-6 py-4 flex items-center justify-between">
             <!-- Logo -->
             <div class="flex items-center">
