@@ -66,61 +66,38 @@
     </section>
 
     <!-- Products Grid -->
-    <section id="products" class="py-16">
+    <section class="py-6 bg-gray-100">
         <div class="container mx-auto px-6">
-            <h3 class="text-2xl font-bold text-gray-800 mb-10 text-center">Our Collections</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                <!-- Product Card: Traditional Fan -->
-                <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow">
-                    <img src="https://img.icons8.com/doodle/200/fan.png" alt="Traditional Japanese Fan" class="rounded-t-lg w-full h-56 object-cover">
-                    <div class="p-6">
-                        <h4 class="text-xl font-semibold text-gray-800 mb-2">Traditional Japanese Fan</h4>
-                        <p class="text-gray-600 mb-4">Beautifully crafted hand fans with traditional designs.</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-800 font-bold">Rs. 3,000</span>
-                            <button class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600">Add to Cart</button>
-                        </div>
-                    </div>
-                </div>
+            <!-- Filters Section -->
+            <div class="flex justify-between items-center mb-6">
+                <select id="category-filter" class="border rounded-lg py-2 px-4">
+                    <option value="all">All Categories</option>
+                    <option value="traditional">Traditional</option>
+                    <option value="beverages">Beverages</option>
+                    <option value="home-decor">Home Decor</option>
+                    <option value="stationery">Stationery</option>
+                </select>
 
-                <!-- Product Card: Matcha Tea -->
-                <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow">
-                    <img src="https://img.icons8.com/color/200/tea.png" alt="Matcha Green Tea" class="rounded-t-lg w-full h-56 object-cover">
-                    <div class="p-6">
-                        <h4 class="text-xl font-semibold text-gray-800 mb-2">Matcha Green Tea</h4>
-                        <p class="text-gray-600 mb-4">Premium-grade matcha tea for authentic Japanese tea ceremonies.</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-800 font-bold">Rs. 2,500</span>
-                            <button class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600">Add to Cart</button>
-                        </div>
-                    </div>
-                </div>
+                <input id="search-bar" type="text" placeholder="Search Products" class="border rounded-lg py-2 px-4">
+            </div>
 
-                <!-- Product Card: Koi Fish Lamp -->
-                <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow">
-                    <img src="https://img.icons8.com/doodle/200/koi-fish.png" alt="Koi Fish Lamp" class="rounded-t-lg w-full h-56 object-cover">
-                    <div class="p-6">
-                        <h4 class="text-xl font-semibold text-gray-800 mb-2">Koi Fish Lamp</h4>
-                        <p class="text-gray-600 mb-4">Elegant home decor with a soft glow inspired by Japanese culture.</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-800 font-bold">Rs. 4,500</span>
-                            <button class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600">Add to Cart</button>
+            <!-- Products Grid -->
+            <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                <!-- Product Card: Example -->
+                <div class="product-card" data-category="traditional" data-tags="fan,decor">
+                    <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                        <img src="https://img.icons8.com/doodle/200/fan.png" alt="Traditional Japanese Fan" class="rounded-t-lg w-full h-56 object-cover">
+                        <div class="p-6">
+                            <h4 class="text-xl font-semibold text-gray-800 mb-2">Traditional Japanese Fan</h4>
+                            <p class="text-gray-600 mb-4">Beautifully crafted hand fans with traditional designs.</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-800 font-bold">Rs. 3,000</span>
+                                <button class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600">Add to Cart</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Product Card: Sakura Notebook -->
-                <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow">
-                    <img src="https://img.icons8.com/color/200/sakura.png" alt="Sakura Notebook" class="rounded-t-lg w-full h-56 object-cover">
-                    <div class="p-6">
-                        <h4 class="text-xl font-semibold text-gray-800 mb-2">Sakura Notebook</h4>
-                        <p class="text-gray-600 mb-4">Beautifully designed notebooks inspired by cherry blossoms.</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-800 font-bold">Rs. 1,200</span>
-                            <button class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600">Add to Cart</button>
-                        </div>
-                    </div>
-                </div>
+                <!-- Repeat for Other Products -->
             </div>
         </div>
     </section>
@@ -189,6 +166,35 @@
             </div>
         </div>
     </footer>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const categoryFilter = document.getElementById("category-filter");
+            const searchBar = document.getElementById("search-bar");
+            const productGrid = document.getElementById("product-grid");
+            const productCards = document.querySelectorAll(".product-card");
 
+            function filterProducts() {
+                const selectedCategory = categoryFilter.value.toLowerCase();
+                const searchTerm = searchBar.value.toLowerCase();
+
+                productCards.forEach((card) => {
+                    const category = card.getAttribute("data-category");
+                    const tags = card.getAttribute("data-tags");
+
+                    const matchesCategory = selectedCategory === "all" || category === selectedCategory;
+                    const matchesSearch = tags.toLowerCase().includes(searchTerm);
+
+                    if (matchesCategory && matchesSearch) {
+                        card.style.display = "block";
+                    } else {
+                        card.style.display = "none";
+                    }
+                });
+            }
+
+            categoryFilter.addEventListener("change", filterProducts);
+            searchBar.addEventListener("input", filterProducts);
+        });
+    </script>
 </body>
 </html>

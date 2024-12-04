@@ -13,7 +13,7 @@
         <div class="container mx-auto px-6 py-4 flex items-center justify-between">
             <!-- Logo -->
             <div class="flex items-center">
-                <h1 class="text-2xl font-bold text-gray-800 flex items-center">
+                <h1 class="text-2xl font-bold text-gray-800 flex items-center mx-60">
                     <img src="../images/logo.png" alt="MONOMICHI Logo" class="h-16 w-16 mr-2">
                     MONOMICHI
                 </h1>
@@ -26,15 +26,46 @@
                 </svg>
             </button>
 
-            <!-- Navigation Links -->
-            <nav id="menu" class="hidden lg:flex space-x-10 items-center">
-                <a href="../index.php" class="text-gray-600 hover:text-pink-600 text-lg">HOME</a>
-                <a href="../views/products.php" class="text-gray-600 hover:text-pink-600 text-lg">PRODUCTS</a>
-                <a href="../views/services.php" class="text-gray-600 hover:text-pink-600 text-lg">SERVICES</a>
-                <a href="../views/faqs.php" class="text-gray-600 hover:text-pink-600 text-lg">FAQs</a>
-                <a href="../views/contactus.php" class="text-gray-600 hover:text-pink-600 text-lg">CONTACT US</a>
-                <a href="../views/aboutus.php" class="text-gray-600 hover:text-pink-600 text-lg">ABOUT US</a>
-            </nav>
+            <!-- Sidebar -->
+            <aside id="sidebar" class="fixed top-0 left-0 h-full bg-gray-50 shadow-lg flex flex-col items-center py-6 px-2 transition-all duration-300 w-16 hover:w-64 overflow-hidden">
+                <!-- Expand/Collapse Button -->
+                <button id="toggle-sidebar" class="text-gray-800 focus:outline-none mb-6">
+                    <svg id="expand-icon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 transition-transform duration-300 transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12h16m-8-8l8 8-8 8" />
+                    </svg>
+                    <svg id="collapse-icon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 hidden transition-transform duration-300 transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4m8 8l-8-8 8-8" />
+                    </svg>
+                </button>
+
+                <!-- Navigation Links -->
+                <nav class="flex flex-col space-y-4 items-start w-full">
+                    <a href="../index.php" class="flex items-center space-x-2 px-4 py-2 text-gray-800 hover:text-pink-600 w-full">
+                        <span class="w-8"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-10 0a1 1 0 001 1h6a1 1 0 001-1v-5a1 1 0 011-1h2m-6 5a1 1 0 001-1v-5a1 1 0 011-1h2" /></svg></span>
+                        <span class="hidden sidebar-text">Home</span>
+                    </a>
+                    <a href="../views/products.php" class="flex items-center space-x-2 px-4 py-2 text-gray-800 hover:text-pink-600 w-full">
+                        <span class="w-8"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V5a2 2 0 00-2-2H6a2 2 0 00-2 2v8m16 0v8a2 2 0 01-2 2H6a2 2 0 01-2-2v-8m16 0H4" /></svg></span>
+                        <span class="hidden sidebar-text">Products</span>
+                    </a>
+                    <a href="../views/services.php" class="flex items-center space-x-2 px-4 py-2 text-gray-800 hover:text-pink-600 w-full">
+                        <span class="w-8"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></span>
+                        <span class="hidden sidebar-text">Services</span>
+                    </a>
+                    <a href="../views/faqs.php" class="flex items-center space-x-2 px-4 py-2 text-gray-800 hover:text-pink-600 w-full">
+                        <span class="w-8"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9l-6 6-6-6" /></svg></span>
+                        <span class="hidden sidebar-text">FAQs</span>
+                    </a>
+                    <a href="../views/contactus.php" class="flex items-center space-x-2 px-4 py-2 text-gray-800 hover:text-pink-600 w-full">
+                        <span class="w-8"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h14M3 10h14m-7 5h7" /></svg></span>
+                        <span class="hidden sidebar-text">Contact Us</span>
+                    </a>
+                    <a href="../views/aboutus.php" class="flex items-center space-x-2 px-4 py-2 text-gray-800 hover:text-pink-600 w-full">
+                        <span class="w-8"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19a4 4 0 108 0m-2 2h.01M8 13a4 4 0 108 0m-6 2h.01M11 11a4 4 0 108 0m-6 2h.01" /></svg></span>
+                        <span class="hidden sidebar-text">About Us</span>
+                    </a>
+                </nav>
+            </aside>
 
             <!-- Right Navigation -->
             <div class="hidden lg:flex space-x-6">
@@ -395,6 +426,30 @@
 
 </body>
 <script>
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('toggle-sidebar');
+    const expandIcon = document.getElementById('expand-icon');
+    const collapseIcon = document.getElementById('collapse-icon');
+    const sidebarTexts = document.querySelectorAll('.sidebar-text');
+
+    toggleBtn.addEventListener('click', () => {
+        const isCollapsed = sidebar.classList.contains('w-16');
+        
+        if (isCollapsed) {
+            sidebar.classList.remove('w-16');
+            sidebar.classList.add('w-64');
+            expandIcon.classList.add('hidden');
+            collapseIcon.classList.remove('hidden');
+            sidebarTexts.forEach(text => text.classList.remove('hidden'));
+        } else {
+            sidebar.classList.remove('w-64');
+            sidebar.classList.add('w-16');
+            expandIcon.classList.remove('hidden');
+            collapseIcon.classList.add('hidden');
+            sidebarTexts.forEach(text => text.classList.add('hidden'));
+        }
+    });
+    
     document.querySelectorAll('.category-card').forEach(card => {
         card.addEventListener('mouseenter', () => {
             // Scale and rotate
