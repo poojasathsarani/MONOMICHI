@@ -13,7 +13,7 @@
         <div class="container mx-auto px-6 py-4 flex items-center justify-between">
             <!-- Logo -->
             <div class="flex items-center">
-                <h1 class="text-2xl font-bold text-gray-800 flex items-center mx-60">
+                <h1 class="text-2xl font-bold text-gray-800 flex items-center mx-20">
                     <img src="../images/logo.png" alt="MONOMICHI Logo" class="h-16 w-16 mr-2">
                     MONOMICHI
                 </h1>

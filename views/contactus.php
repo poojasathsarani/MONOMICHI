@@ -108,7 +108,7 @@
     <section class="container mx-auto py-16 px-6">
         <h3 class="text-3xl font-semibold text-center text-gray-800">Our Location</h3>
         <div class="mt-8">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d12812.276726140686!2d139.69825!3d35.69849!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188d2c5f0153df%3A0x65bcf8d01a35413e!2sShibuya%20Station!5e0!3m2!1sen!2sjp!4v1662099789172!5m2!1sen!2sjp" width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d12812.276726140686!2d79.961047!3d6.927078!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae2591b65c5b22f%3A0x5c55de24ab71220b!2sJapanese%20Items%20Shop%20Sri%20Lanka!5e0!3m2!1sen!2slk!4v1674635123456!5m2!1sen!2slk" width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
         </div>
     </section>
 
