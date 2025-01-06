@@ -1,3 +1,9 @@
+<?php
+    session_start();
+    $userIsLoggedIn = isset($_SESSION['user']);
+    $userProfileImage = $userIsLoggedIn ? $_SESSION['user']['profile_image'] : null;
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,17 +12,48 @@
     <title>MONOMICHI - Home</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        #search-bar::placeholder {
+            color: #6B7280;
+            font-weight: bold;
+        }   
+
+        @keyframes typing {
+            0% { opacity: 1; }
+            25% { content: "Search products or categories..."; }
+            50% { content: "Discover the best of Japan!"; }
+            75% { content: "Find your favorite items!"; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes erasing {
+            0% { opacity: 1; }
+            50% { content: " "; }
+            100% { opacity: 0; }
+        }
+    </style>
 </head>
-<body class="bg-gray-100 font-serif">
+<body class="bg-pink-50 font-serif">
     <!-- Navbar -->
     <header class="bg-red-100 shadow sticky top-0 z-50">
-        <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="container mx-auto px-2 py-4 flex items-center justify-between">
             <!-- Logo -->
             <div class="flex items-center">
-                <h1 class="text-2xl font-bold text-gray-800 flex items-center mx-20">
-                    <img src="../images/logo.png" alt="MONOMICHI Logo" class="h-16 w-16 mr-2">
-                    MONOMICHI
+                <h1 class="text-2xl font-bold text-gray-800 flex items-center mx-24 lg:pl-10">
+                    <img src="../images/stroke with shadow logo.png" alt="MONOMICHI Logo" class="h-28 w-28 mr-2">
                 </h1>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="hidden lg:flex items-center justify-center w-full max-w-lg">
+                <form action="../views/search-results.php" method="GET" class="w-full flex items-center bg-gray-200 rounded-full">
+                    <input type="text" name="query" placeholder="Search products or categories..." class="w-full px-4 py-2 bg-white-200 text-gray-800 rounded-l-full focus:outline-none placeholder-gray-500" id="search-bar"/>
+                    <button type="submit" class="px-4 py-2 bg-pink-600 text-white rounded-r-full hover:bg-pink-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l5 5m-5-5a7 7 0 10-7-7 7 7 0 007 7z"/>
+                        </svg>
+                    </button>
+                </form>
             </div>
 
             <!-- Hamburger Menu Button -->
@@ -67,12 +104,38 @@
                 </nav>
             </aside>
 
-            <!-- Right Navigation -->
-            <div class="hidden lg:flex space-x-6">
-                <a href="../views/signup.php" class="bg-pink-600 border-pink-600 text-white hover:bg-white hover:text-pink-600 py-2 px-6 rounded-full text-lg font-semibold transition duration-300 ease-in-out transform hover:scale-105">Sign Up</a>
-                <a href="../views/login.php" class="bg-white border-2 border-pink-600 text-pink-600 py-2 px-6 rounded-full text-lg font-semibold transition duration-300 ease-in-out transform hover:bg-pink-600 hover:text-white hover:scale-105">Log In</a>
+            <!-- Profile Section -->
+            <div class="relative">
+                <!-- Profile Icon (Trigger) -->
+                <button id="profile-button" class="flex items-center space-x-2 p-0 bg-gray-200 rounded-full hover:bg-gray-300 focus:outline-none">
+                    <!-- Conditional Rendering of User Avatar or Profile Icon -->
+                    <img src="<?php echo $userIsLoggedIn ? $userProfileImage : 'https://w7.pngwing.com/pngs/423/634/png-transparent-find-user-profile-person-avatar-people-account-search-general-pack-icon.png'; ?>" alt="User Profile" class="w-14 h-14 rounded-full border border-gray-300 transition-transform transform hover:scale-110 hover:shadow-lg">
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div id="profile-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
+                    <ul class="py-2 text-sm text-gray-700">
+                        <li>
+                            <a href="../views/signup.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Sign Up</a>
+                        </li>
+                        <li>
+                            <a href="../views/login.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Log In</a>
+                        </li>
+                        <li>
+                            <a href="../views/my-account.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
+                        </li>
+                        <li>
+                            <a href="../views/wishlist.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Wishlist</a>
+                        </li>
+                        <li>
+                            <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
+                        </li>
+                        <li>
+                            <a href="../views/settings.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Settings</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </div>
 
         <!-- Dropdown for Mobile -->
         <div id="mobile-menu" class="hidden bg-red-50 lg:hidden">
@@ -104,7 +167,7 @@
     </section>
 
     <!-- Categories Section -->
-    <section id="categories" class="container mx-auto px-6 py-16">
+    <section id="categories" class="container mx-auto px-40 py-16">
         <h3 class="text-3xl font-semibold text-center text-gray-800">Shop by Categories</h3>
         <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- Stationery Category -->
@@ -129,7 +192,7 @@
             
             <!-- Redirect Arrow to Products Page -->
             <div class="bg-white shadow-lg rounded-lg overflow-hidden flex items-center justify-center bg-gray-100 transform hover:scale-105 transition duration-300 ease-in-out relative">
-                <div class="absolute inset-0 bg-cover bg-center filter blur-sm" style="background-image: url('https://m.media-amazon.com/images/I/61iF8RXU1lL._AC_UF1000,1000_QL80_.jpg');"></div>
+                <div class="absolute inset-0 bg-cover bg-center filter blur-sm" style="background-image: url('https://thumbs.dreamstime.com/b/zen-home-decor-japanese-pottery-displayed-bamboo-mat-sunlit-room-view-blooming-cherry-garden-348802394.jpg');"></div>
 
                 <!-- Content (Text and Icon) -->
                 <a href="culturalinsights.php" class="flex flex-col items-center text-gray-800 hover:text-white transition relative z-10">
@@ -142,36 +205,8 @@
         </div>
     </section>
 
-    <!-- Testimonials Section -->
-    <section id="testimonials" class="container mx-auto px-6 py-16">
-        <h3 class="text-3xl font-semibold text-center text-gray-800">What Our Customers Say</h3>
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="bg-white shadow-lg rounded-lg p-6">
-                <p class="text-lg text-gray-600">"I love the Japanese tea set I bought from MONOMICHI. It's so authentic, and I use it every day!"</p>
-                <div class="mt-4 text-right">
-                    <p class="font-semibold text-gray-800">Tharushi Perera</p>
-                    <p class="text-sm text-gray-600">Jayawardhanapura, Sri Lanka</p>
-                </div>
-            </div>
-            <div class="bg-white shadow-lg rounded-lg p-6">
-                <p class="text-lg text-gray-600">"The bento box I purchased is perfect for my lunch breaks. It's so cute and practical!"</p>
-                <div class="mt-4 text-right">
-                    <p class="font-semibold text-gray-800">Nethmi Fernando</p>
-                    <p class="text-sm text-gray-600">Kottawa, Sri Lanka</p>
-                </div>
-            </div>
-            <div class="bg-white shadow-lg rounded-lg p-6">
-                <p class="text-lg text-gray-600">"MONOMICHI has an amazing selection of authentic Japanese products. I can't wait to shop more!"</p>
-                <div class="mt-4 text-right">
-                    <p class="font-semibold text-gray-800">Ayomi Withanage</p>
-                    <p class="text-sm text-gray-600">Anuradhapura, Sri Lanka</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Featured Products Section -->
-    <section id="featured-products" class="container mx-auto px-6 py-16">
+    <section id="featured-products" class="container mx-auto px-40 py-16">
         <h3 class="text-3xl font-semibold text-center text-gray-800">Featured Products</h3>
         <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- Product 1 -->
@@ -197,10 +232,10 @@
 
             <!-- View All Products Button -->
             <div class="bg-white shadow-lg rounded-lg overflow-hidden flex items-center justify-center bg-gray-100 transform hover:scale-105 transition duration-300 ease-in-out relative">
-                <div class="absolute inset-0 bg-cover bg-center filter blur-sm" style="background-image: url('https://blog.janbox.com/wp-content/uploads/2021/09/sake-best-things-to-buy-in-japan.png');"></div>
+                <div class="absolute inset-0 bg-cover bg-center filter blur-sm" style="background-image: url('https://cdn.shopify.com/s/files/1/0068/0394/7579/files/4535051_s_600x600.jpg?v=1650545998');"></div>
 
                 <!-- Content (Text and Icon) -->
-                <a href="culturalinsights.php" class="flex flex-col items-center text-gray-800 hover:text-white transition relative z-10">
+                <a href="culturalinsights.php" class="flex flex-col items-center text-white hover:text-black transition relative z-10">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
@@ -218,7 +253,7 @@
     </section>
 
     <!-- Cultural Insights Section -->
-    <section id="cultural-insights" class="container mx-auto px-6 py-16">
+    <section id="cultural-insights" class="container mx-auto px-40 py-16">
         <h3 class="text-3xl font-semibold text-center text-gray-800">Learn About Japanese Culture</h3>
         <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <!-- First Insight Tile -->
@@ -243,10 +278,10 @@
 
             <!-- Third Insight Tile (Arrow for Redirection) -->
             <div class="bg-white shadow-lg rounded-lg overflow-hidden flex items-center justify-center bg-gray-100 transform hover:scale-105 transition duration-300 ease-in-out relative">
-                <div class="absolute inset-0 bg-cover bg-center filter blur-sm" style="background-image: url('https://blog.janbox.com/wp-content/uploads/2021/09/sake-best-things-to-buy-in-japan.png');"></div>
+                <div class="absolute inset-0 bg-cover bg-center filter blur-sm" style="background-image: url('https://www.japan-experience.com/sites/default/files/styles/scale_crop_760x556/public/legacy/japan_experience/1448623388848.png.webp?itok=PBlLTWkq');"></div>
 
                 <!-- Content (Text and Icon) -->
-                <a href="culturalinsights.php" class="flex flex-col items-center text-gray-800 hover:text-white transition relative z-10">
+                <a href="culturalinsights.php" class="flex flex-col items-center text-white hover:text-black transition relative z-10">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
@@ -257,7 +292,7 @@
     </section>
 
     <!-- New Arrivals Section -->
-    <section id="new-arrivals" class="container mx-auto px-6 py-16">
+    <section id="new-arrivals" class="container mx-auto px-40 py-16">
         <h3 class="text-3xl font-semibold text-center text-gray-800">New Arrivals</h3>
         <div class="mt-8 flex space-x-8">
             <!-- New Product 1 -->
@@ -360,7 +395,7 @@
     </button>
 
     <!-- Footer -->
-    <footer class="bg-gray-50 py-10 text-gray-700">
+    <footer class="bg-gray-50 px-40 py-10 text-gray-700">
         <div class="container mx-auto px-6">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 <!-- Here For You Section -->
@@ -434,19 +469,95 @@
 
     toggleBtn.addEventListener('click', () => {
         const isCollapsed = sidebar.classList.contains('w-16');
-        
+        let maxTextWidth = 0;
+
+        // Dynamically calculate the width of the longest sidebar text
         if (isCollapsed) {
+            sidebarTexts.forEach(text => {
+                const tempSpan = document.createElement('span');
+                tempSpan.style.visibility = 'hidden';
+                tempSpan.style.position = 'absolute';
+                tempSpan.style.font = getComputedStyle(text).font;
+                tempSpan.textContent = text.textContent;
+                document.body.appendChild(tempSpan);
+                maxTextWidth = Math.max(maxTextWidth, tempSpan.offsetWidth);
+                document.body.removeChild(tempSpan);
+            });
+
+            // Add padding and icon space to calculate the full width
+            const finalSidebarWidth = maxTextWidth + 64;
+            sidebar.style.width = `${finalSidebarWidth}px`;
+
+            // Show sidebar in expanded mode
             sidebar.classList.remove('w-16');
-            sidebar.classList.add('w-64');
             expandIcon.classList.add('hidden');
             collapseIcon.classList.remove('hidden');
             sidebarTexts.forEach(text => text.classList.remove('hidden'));
         } else {
-            sidebar.classList.remove('w-64');
+            // Reset sidebar to collapsed mode
+            sidebar.style.width = '';
             sidebar.classList.add('w-16');
             expandIcon.classList.remove('hidden');
             collapseIcon.classList.add('hidden');
             sidebarTexts.forEach(text => text.classList.add('hidden'));
+        }
+    });
+
+    const profileButton = document.getElementById('profile-button');
+    const profileMenu = document.getElementById('profile-menu');
+
+    profileButton.addEventListener('click', () => {
+        profileMenu.classList.toggle('hidden');
+        profileMenu.classList.toggle('opacity-0');
+        profileMenu.classList.toggle('transform');
+        profileMenu.classList.toggle('-translate-y-2');
+    });
+
+    const placeholderTexts = [
+        "Search products or categories...",
+        "Discover the best of Japan!",
+        "Find your favorite items!"
+    ];
+
+    let currentTextIndex = 0;
+    let isErasing = false;
+    let textIndex = 0;
+    const typingSpeed = 100; // Typing speed in ms
+    const erasingSpeed = 50; // Erasing speed in ms
+    const searchInput = document.getElementById("search-bar");
+
+    function typeText() {
+        if (textIndex < placeholderTexts[currentTextIndex].length) {
+            searchInput.setAttribute("placeholder", placeholderTexts[currentTextIndex].substring(0, textIndex + 1));
+            textIndex++;
+            setTimeout(typeText, typingSpeed);
+        } else {
+            setTimeout(eraseText, 1500); // Wait before starting to erase
+        }
+    }
+
+    function eraseText() {
+        if (textIndex > 0) {
+            searchInput.setAttribute("placeholder", placeholderTexts[currentTextIndex].substring(0, textIndex - 1));
+            textIndex--;
+            setTimeout(eraseText, erasingSpeed);
+        } else {
+            currentTextIndex = (currentTextIndex + 1) % placeholderTexts.length; // Loop through texts
+            setTimeout(typeText, 500); // Wait before starting to type
+        }
+    }
+
+    window.onload = function() {
+        typeText(); // Start typing when the page loads
+    };
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (event) => {
+        if (!profileButton.contains(event.target) && !profileMenu.contains(event.target)) {
+            profileMenu.classList.add('hidden');
+            profileMenu.classList.add('opacity-0');
+            profileMenu.classList.add('transform');
+            profileMenu.classList.add('-translate-y-2');
         }
     });
     

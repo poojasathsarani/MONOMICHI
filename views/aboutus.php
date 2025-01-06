@@ -164,7 +164,7 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-50 py-10 text-gray-700">
+    <footer class="bg-gray-50 px-40 py-10 text-gray-700">
         <div class="container mx-auto px-6">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 <!-- Here For You Section -->
@@ -227,6 +227,5 @@
             </div>
         </div>
     </footer>
-
 </body>
 </html>
