@@ -12,12 +12,15 @@
     <title>MONOMICHI - Home</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
+        /* cannot add the ::placeholder selector directly in the inline CSS because inline styles only apply to elements directly and do not support pseudo-elements like ::placeholder, ::before, ::after, or any other pseudo-selectors. */
         #search-bar::placeholder {
             color: #6B7280;
             font-weight: bold;
         }   
 
+        /* Tailwind itself doesn’t support @keyframes or dynamic animations out-of-the-box for things like content changes, so you'll need to rely on regular CSS for that. */
         @keyframes typing {
             0% { opacity: 1; }
             25% { content: "Search products or categories..."; }
@@ -39,14 +42,12 @@
         <div class="container mx-auto px-2 py-4 flex items-center justify-between">
             <!-- Logo -->
             <div class="flex items-center">
-                <h1 class="text-2xl font-bold text-gray-800 flex items-center mx-24 lg:pl-10">
-                    <img src="../images/stroke with shadow logo.png" alt="MONOMICHI Logo" class="h-28 w-28 mr-2">
-                </h1>
+                    <img src="../images/logoo.png" alt="MONOMICHI Logo" class="h-16 w-24 mr-2 mx-44">
             </div>
 
             <!-- Search Bar -->
-            <div class="hidden lg:flex items-center justify-center w-full max-w-lg">
-                <form action="../views/search-results.php" method="GET" class="w-full flex items-center bg-gray-200 rounded-full">
+            <div class="hidden lg:flex items-center justify-center w-full max-w-xl ml-52">
+                <form action="../views/searchresults.php" method="GET" class="w-full flex items-center bg-gray-200 rounded-full">
                     <input type="text" name="query" placeholder="Search products or categories..." class="w-full px-4 py-2 bg-white-200 text-gray-800 rounded-l-full focus:outline-none placeholder-gray-500" id="search-bar"/>
                     <button type="submit" class="px-4 py-2 bg-pink-600 text-white rounded-r-full hover:bg-pink-700">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -64,7 +65,7 @@
             </button>
 
             <!-- Sidebar -->
-            <aside id="sidebar" class="fixed top-0 left-0 h-full bg-gray-50 shadow-lg flex flex-col items-center py-6 px-2 transition-all duration-300 w-16 hover:w-64 overflow-hidden">
+            <aside id="sidebar" class="fixed top-0 left-0 h-full bg-gray-50 shadow-lg flex flex-col items-center py-6 px-2 transition-all duration-300 w-16 hover:w-48 overflow-hidden">
                 <!-- Expand/Collapse Button -->
                 <button id="toggle-sidebar" class="text-gray-800 focus:outline-none mb-6">
                     <svg id="expand-icon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 transition-transform duration-300 transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -79,33 +80,49 @@
                 <nav class="flex flex-col space-y-4 items-start w-full">
                     <a href="../index.php" class="flex items-center space-x-2 px-4 py-2 text-gray-800 hover:text-pink-600 w-full">
                         <span class="w-8"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-10 0a1 1 0 001 1h6a1 1 0 001-1v-5a1 1 0 011-1h2m-6 5a1 1 0 001-1v-5a1 1 0 011-1h2" /></svg></span>
-                        <span class="hidden sidebar-text">Home</span>
+                        <span class="sidebar-text text-sm">Home</span>
                     </a>
                     <a href="../views/products.php" class="flex items-center space-x-2 px-4 py-2 text-gray-800 hover:text-pink-600 w-full">
                         <span class="w-8"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V5a2 2 0 00-2-2H6a2 2 0 00-2 2v8m16 0v8a2 2 0 01-2 2H6a2 2 0 01-2-2v-8m16 0H4" /></svg></span>
-                        <span class="hidden sidebar-text">Products</span>
+                        <span class="sidebar-text text-sm">Products</span>
                     </a>
                     <a href="../views/services.php" class="flex items-center space-x-2 px-4 py-2 text-gray-800 hover:text-pink-600 w-full">
                         <span class="w-8"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></span>
-                        <span class="hidden sidebar-text">Services</span>
+                        <span class="sidebar-text text-sm">Services</span>
                     </a>
                     <a href="../views/faqs.php" class="flex items-center space-x-2 px-4 py-2 text-gray-800 hover:text-pink-600 w-full">
                         <span class="w-8"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9l-6 6-6-6" /></svg></span>
-                        <span class="hidden sidebar-text">FAQs</span>
+                        <span class="sidebar-text text-sm">FAQs</span>
                     </a>
                     <a href="../views/contactus.php" class="flex items-center space-x-2 px-4 py-2 text-gray-800 hover:text-pink-600 w-full">
                         <span class="w-8"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h14M3 10h14m-7 5h7" /></svg></span>
-                        <span class="hidden sidebar-text">Contact Us</span>
+                        <span class="sidebar-text text-sm">Contact Us</span>
                     </a>
                     <a href="../views/aboutus.php" class="flex items-center space-x-2 px-4 py-2 text-gray-800 hover:text-pink-600 w-full">
                         <span class="w-8"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19a4 4 0 108 0m-2 2h.01M8 13a4 4 0 108 0m-6 2h.01M11 11a4 4 0 108 0m-6 2h.01" /></svg></span>
-                        <span class="hidden sidebar-text">About Us</span>
+                        <span class="sidebar-text text-sm">About Us</span>
                     </a>
                 </nav>
             </aside>
 
-            <!-- Profile Section -->
-            <div class="relative">
+            <!-- Right Side Icons -->
+            <div class="flex items-center space-x-6 pr-4 ml-auto">
+                <!-- Wishlist Icon -->
+                <a href="../views/wishlist.php" class="relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8a4 4 0 016-3.92A4 4 0 0121 8c0 4-6 8-9 8s-9-4-9-8z" />
+                    </svg>
+                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">5</span>
+                </a>
+
+                <!-- Shopping Cart Icon -->
+                <a href="../views/cart.php" class="relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.879 1.514M7 16a2 2 0 104 0M13 16a2 2 0 104 0M5.058 6H20.86l-2.35 7H7.609m2.788 5H6M21 21H6"></path>
+                    </svg>
+                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                </a>
+
                 <!-- Profile Icon (Trigger) -->
                 <button id="profile-button" class="flex items-center space-x-2 p-0 bg-gray-200 rounded-full hover:bg-gray-300 focus:outline-none">
                     <!-- Conditional Rendering of User Avatar or Profile Icon -->
@@ -113,7 +130,7 @@
                 </button>
 
                 <!-- Dropdown Menu -->
-                <div id="profile-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
+                <div id="profile-menu" class="absolute right-0 mt-80 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
                     <ul class="py-2 text-sm text-gray-700">
                         <li>
                             <a href="../views/signup.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Sign Up</a>
@@ -125,9 +142,6 @@
                             <a href="../views/my-account.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
                         </li>
                         <li>
-                            <a href="../views/wishlist.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Wishlist</a>
-                        </li>
-                        <li>
                             <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
                         </li>
                         <li>
@@ -136,34 +150,114 @@
                     </ul>
                 </div>
             </div>
-
-        <!-- Dropdown for Mobile -->
-        <div id="mobile-menu" class="hidden bg-red-50 lg:hidden">
-            <a href="../index.php" class="block px-4 py-2 text-gray-600 hover:text-pink-600">HOME</a>
-            <a href="../views/products.php" class="block px-4 py-2 text-gray-600 hover:text-pink-600">PRODUCTS</a>
-            <a href="../views/services.php" class="block px-4 py-2 text-gray-600 hover:text-pink-600">SERVICES</a>
-            <a href="../views/faqs.php" class="block px-4 py-2 text-gray-600 hover:text-pink-600">FAQs</a>
-            <a href="../views/contactus.php" class="block px-4 py-2 text-gray-600 hover:text-pink-600">CONTACT US</a>
-            <a href="../views/aboutus.php" class="block px-4 py-2 text-gray-600 hover:text-pink-600">ABOUT US</a>
-            <div class="mt-4 px-4">
-                <a href="../views/register.php" class="block bg-pink-600 text-white text-center py-2 rounded-full mb-2">Sign Up</a>
-                <a href="../views/login.php" class="block bg-white border-2 border-pink-600 text-pink-600 text-center py-2 rounded-full">Log In</a>
-            </div>
-        </div>
     </header>
 
     <!-- Hero Section -->
-    <section class="bg-cover bg-center h-screen" id="carousel">
-        <div class="flex items-center justify-center h-full bg-black bg-opacity-50">
-            <div class="w-3/4 text-center text-white transition-all duration-500 ease-in-out transform hover:scale-110 hover:text-pink-400 hover:shadow-2xl rounded-full">
+    <section class="h-96 bg-cover bg-center" id="carousel" style="background-image: url('path-to-your-image.jpg');">
+        <div class="h-full flex items-center justify-center bg-black bg-opacity-50">
+            <div class="text-center text-white w-3/4 transition-all duration-500 ease-in-out transform hover:scale-110 hover:text-pink-400 hover:shadow-2xl rounded-full">
                 <h2 class="text-7xl font-bold">Welcome to MONOMICHI</h2>
                 <p class="mt-4 text-lg">Explore authentic Japanese items and learn about Japanese culture.</p>
                 <div class="mt-6">
-                    <!-- Explore Now Button with JavaScript for Smooth Scroll -->
-                    <a href="#categories" class="px-6 py-3 bg-pink-600 hover:bg-pink-800 rounded-full text-white font-semibold" id="exploreBtn">Explore Now</a>
+                    <!-- Explore Now Button with Smooth Scroll -->
+                    <a href="#new-arrivals" class="px-6 py-3 bg-pink-600 rounded-full text-white font-semibold hover:bg-pink-800" id="exploreBtn">
+                        Explore Now
+                    </a>
                 </div>
             </div>
         </div>
+    </section>
+
+    <!-- New Arrivals Section -->
+    <section id="new-arrivals" class="container mx-auto px-40 py-16">
+        <h3 class="text-3xl font-semibold text-center text-gray-800">New Arrivals</h3>
+        <div class="mt-8 flex space-x-8">
+            <!-- New Product 1 -->
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
+                <img src="https://miro.medium.com/v2/resize:fit:1400/1*pfbYYn7wUSmNQFqtirn21A.png" alt="New Product 1" class="w-full h-48 object-cover">
+                <div class="p-4">
+                    <h4 class="text-xl font-semibold">Japanese Bento Box</h4>
+                    <p class="mt-2 text-gray-600">A sleek and modern bento box for your lunch, inspired by Japanese design.</p>
+                    <p class="mt-2 text-gray-800 font-semibold">Rs. 7999.99</p>
+                    <!-- Rating -->
+                    <div class="flex items-center mt-2" id="rating1">
+                        <i class="fas fa-star text-gray-300 star" data-index="1"></i>
+                        <i class="fas fa-star text-gray-300 star" data-index="2"></i>
+                        <i class="fas fa-star text-gray-300 star" data-index="3"></i>
+                        <i class="fas fa-star text-gray-300 star" data-index="4"></i>
+                        <i class="fas fa-star text-gray-300 star" data-index="5"></i>
+                    </div>
+                    <!-- Buttons: View Details & Add to Cart -->
+                    <div class="mt-4 flex justify-between">
+                        <a href="../views/product-detail.php?id=3" class="inline-block bg-pink-600 text-white py-2 px-6 rounded-full text-lg hover:bg-pink-700 transition">View Details</a>
+                        <a href="#" class="inline-block bg-green-600 text-white py-2 px-6 rounded-full text-lg hover:bg-green-700 transition">Add to Cart</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Product 2 -->
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
+                <img src="https://m.media-amazon.com/images/S/aplus-media-library-service-media/1314a45a-9401-4010-b7ee-3071e10f7aa4.__CR0,0,970,600_PT0_SX970_V1___.jpg" alt="New Product 2" class="w-full h-48 object-cover">
+                <div class="p-4">
+                    <h4 class="text-xl font-semibold">Japanese Tea Set</h4>
+                    <p class="mt-2 text-gray-600">A beautiful tea set for the perfect Japanese tea ceremony experience.</p>
+                    <p class="mt-2 text-gray-800 font-semibold">Rs. 13 999.99</p>
+                    <!-- Rating -->
+                    <div class="flex items-center mt-2" id="rating2">
+                        <i class="fas fa-star text-gray-300 star" data-index="1"></i>
+                        <i class="fas fa-star text-gray-300 star" data-index="2"></i>
+                        <i class="fas fa-star text-gray-300 star" data-index="3"></i>
+                        <i class="fas fa-star text-gray-300 star" data-index="4"></i>
+                        <i class="fas fa-star text-gray-300 star" data-index="5"></i>
+                    </div>
+                    <!-- Buttons: View Details & Add to Cart -->
+                    <div class="mt-4 flex justify-between">
+                        <a href="../views/product-detail.php?id=4" class="inline-block bg-pink-600 text-white py-2 px-6 rounded-full text-lg hover:bg-pink-700 transition">View Details</a>
+                        <a href="#" class="inline-block bg-green-600 text-white py-2 px-6 rounded-full text-lg hover:bg-green-700 transition">Add to Cart</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Product 3 -->
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
+                <img src="https://zenbird.media/wp-content/uploads/2022/10/kimono_top.jpg" alt="New Product 3" class="w-full h-48 object-cover">
+                <div class="p-4">
+                    <h4 class="text-xl font-semibold">Japanese Kimono</h4>
+                    <p class="mt-2 text-gray-600">A traditional Japanese kimono made from high-quality silk.</p>
+                    <p class="mt-2 text-gray-800 font-semibold">Rs. 34 999.99</p>
+                    <!-- Rating -->
+                    <div class="flex items-center mt-2" id="rating3">
+                        <i class="fas fa-star text-gray-300 star" data-index="1"></i>
+                        <i class="fas fa-star text-gray-300 star" data-index="2"></i>
+                        <i class="fas fa-star text-gray-300 star" data-index="3"></i>
+                        <i class="fas fa-star text-gray-300 star" data-index="4"></i>
+                        <i class="fas fa-star text-gray-300 star" data-index="5"></i>
+                    </div>
+                    <!-- Buttons: View Details & Add to Cart -->
+                    <div class="mt-4 flex justify-between">
+                        <a href="../views/product-detail.php?id=5" class="inline-block bg-pink-600 text-white py-2 px-6 rounded-full text-lg hover:bg-pink-700 transition">View Details</a>
+                        <a href="#" class="inline-block bg-green-600 text-white py-2 px-6 rounded-full text-lg hover:bg-green-700 transition">Add to Cart</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Arrow Key Bar to Redirect to New Arrival Page -->
+    <div class="flex justify-center mt-8">
+        <a href="../views/newarrivals.php" class="flex items-center text-pink-600 font-semibold hover:text-pink-700 transition duration-300 transform hover:scale-110">
+            <span class="mr-2 text-5xl">See All New Arrivals</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transform transition-transform duration-300 hover:translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m0 0l-6-6m6 6l-6 6" />
+            </svg>
+        </a>
+    </div><br><br><br>
+
+    <!-- Limited Time Offers Section -->
+    <section id="limited-time-offers" class="bg-red-600 text-white text-center py-8 relative overflow-visible">
+        <h3 class="text-4xl font-semibold">Limited Time Offers</h3>
+        <p class="mt-4 text-lg">Get up to 30% off on selected Japanese items. Don't miss out!</p>
+        <a href="../views/limitedtimeoffers.php" class="mt-6 inline-block bg-white text-red-600 py-3 px-8 rounded-full text-lg font-semibold">Shop Now</a>
     </section>
 
     <!-- Categories Section -->
@@ -206,10 +300,10 @@
     </section>
 
     <!-- Featured Products Section -->
-    <section id="featured-products" class="container mx-auto px-40 py-16">
+    <!-- <section id="featured-products" class="container mx-auto px-40 py-16">
         <h3 class="text-3xl font-semibold text-center text-gray-800">Featured Products</h3>
         <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Product 1 -->
+            Product 1
             <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 ease-in-out">
                 <img src="https://m.media-amazon.com/images/I/81J4pyKvIaL._AC_UL480_FMwebp_QL65_.jpg" alt="Product 1" class="w-full h-48 object-cover">
                 <div class="p-4">
@@ -219,7 +313,7 @@
                 </div>
             </div>
 
-            <!-- Product 2 (Popular One) -->
+            Product 2 (Popular One)
             <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 ease-in-out">
                 <img src="https://lh5.googleusercontent.com/proxy/9HZjyXtQYIRMv7cWRSWA3PQf-25MKF0kLOelp8OlkS2liexKIb0fpxAwsVYm4C8VSaWOHcNFO8E5YVQPyuGgsPXm07RmRecRzWdGe4Pig8OfjJ7q" alt="Product 2" class="w-full h-48 object-cover">
                 <div class="p-4">
@@ -230,11 +324,11 @@
                 </div>
             </div>
 
-            <!-- View All Products Button -->
+            View All Products Button
             <div class="bg-white shadow-lg rounded-lg overflow-hidden flex items-center justify-center bg-gray-100 transform hover:scale-105 transition duration-300 ease-in-out relative">
                 <div class="absolute inset-0 bg-cover bg-center filter blur-sm" style="background-image: url('https://cdn.shopify.com/s/files/1/0068/0394/7579/files/4535051_s_600x600.jpg?v=1650545998');"></div>
 
-                <!-- Content (Text and Icon) -->
+                Content (Text and Icon)
                 <a href="culturalinsights.php" class="flex flex-col items-center text-white hover:text-black transition relative z-10">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -243,14 +337,7 @@
                 </a>
             </div>
         </div>
-    </section>
-
-    <!-- Limited Time Offers Section -->
-    <section id="limited-time-offers" class="bg-red-600 text-white text-center py-8 relative overflow-visible">
-        <h3 class="text-4xl font-semibold">Limited Time Offers</h3>
-        <p class="mt-4 text-lg">Get up to 30% off on selected Japanese items. Don't miss out!</p>
-        <a href="../views/limitedtimeoffers.php" class="mt-6 inline-block bg-white text-red-600 py-3 px-8 rounded-full text-lg font-semibold">Shop Now</a>
-    </section>
+    </section> -->
 
     <!-- Cultural Insights Section -->
     <section id="cultural-insights" class="container mx-auto px-40 py-16">
@@ -290,79 +377,6 @@
             </div>
         </div>
     </section>
-
-    <!-- New Arrivals Section -->
-    <section id="new-arrivals" class="container mx-auto px-40 py-16">
-        <h3 class="text-3xl font-semibold text-center text-gray-800">New Arrivals</h3>
-        <div class="mt-8 flex space-x-8">
-            <!-- New Product 1 -->
-            <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
-                <img src="https://miro.medium.com/v2/resize:fit:1400/1*pfbYYn7wUSmNQFqtirn21A.png" alt="New Product 1" class="w-full h-48 object-cover">
-                <div class="p-4">
-                    <h4 class="text-xl font-semibold">Japanese Bento Box</h4>
-                    <p class="mt-2 text-gray-600">A sleek and modern bento box for your lunch, inspired by Japanese design.</p>
-                    <p class="mt-2 text-gray-800 font-semibold">Rs. 7999.99</p>
-                    <!-- Rating -->
-                    <div class="flex items-center mt-2">
-                        <!-- Star ratings -->
-                    </div>
-                    <!-- Buttons: View Details & Add to Cart -->
-                    <div class="mt-4 flex justify-between">
-                        <a href="../views/product-detail.php?id=3" class="inline-block bg-pink-600 text-white py-2 px-6 rounded-full text-lg hover:bg-pink-700 transition">View Details</a>
-                        <a href="#" class="inline-block bg-green-600 text-white py-2 px-6 rounded-full text-lg hover:bg-green-700 transition">Add to Cart</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- New Product 2 -->
-            <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
-                <img src="https://m.media-amazon.com/images/S/aplus-media-library-service-media/1314a45a-9401-4010-b7ee-3071e10f7aa4.__CR0,0,970,600_PT0_SX970_V1___.jpg" alt="New Product 2" class="w-full h-48 object-cover">
-                <div class="p-4">
-                    <h4 class="text-xl font-semibold">Japanese Tea Set</h4>
-                    <p class="mt-2 text-gray-600">A beautiful tea set for the perfect Japanese tea ceremony experience.</p>
-                    <p class="mt-2 text-gray-800 font-semibold">Rs. 13 999.99</p>
-                    <!-- Rating -->
-                    <div class="flex items-center mt-2">
-                        <!-- Star ratings -->
-                    </div>
-                    <!-- Buttons: View Details & Add to Cart -->
-                    <div class="mt-4 flex justify-between">
-                        <a href="../views/product-detail.php?id=4" class="inline-block bg-pink-600 text-white py-2 px-6 rounded-full text-lg hover:bg-pink-700 transition">View Details</a>
-                        <a href="#" class="inline-block bg-green-600 text-white py-2 px-6 rounded-full text-lg hover:bg-green-700 transition">Add to Cart</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- New Product 3 -->
-            <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
-                <img src="https://zenbird.media/wp-content/uploads/2022/10/kimono_top.jpg" alt="New Product 3" class="w-full h-48 object-cover">
-                <div class="p-4">
-                    <h4 class="text-xl font-semibold">Japanese Kimono</h4>
-                    <p class="mt-2 text-gray-600">A traditional Japanese kimono made from high-quality silk.</p>
-                    <p class="mt-2 text-gray-800 font-semibold">Rs. 34 999.99</p>
-                    <!-- Rating -->
-                    <div class="flex items-center mt-2">
-                        <!-- Star ratings -->
-                    </div>
-                    <!-- Buttons: View Details & Add to Cart -->
-                    <div class="mt-4 flex justify-between">
-                        <a href="../views/product-detail.php?id=5" class="inline-block bg-pink-600 text-white py-2 px-6 rounded-full text-lg hover:bg-pink-700 transition">View Details</a>
-                        <a href="#" class="inline-block bg-green-600 text-white py-2 px-6 rounded-full text-lg hover:bg-green-700 transition">Add to Cart</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Arrow Key Bar to Redirect to New Arrival Page -->
-    <div class="flex justify-center mt-8">
-        <a href="../views/newarrivals.php" class="flex items-center text-pink-600 font-semibold hover:text-pink-700 transition duration-300 transform hover:scale-110">
-            <span class="mr-2 text-5xl">See All New Arrivals</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transform transition-transform duration-300 hover:translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m0 0l-6-6m6 6l-6 6" />
-            </svg>
-        </a>
-    </div>
 
     <!-- Newsletter Call to Action in Hero Section -->
     <div class="mt-12 bg-gray-100 py-8 rounded-lg shadow-md">
@@ -461,45 +475,46 @@
 
 </body>
 <script>
+    // Show the header after the page loads
+    document.addEventListener("DOMContentLoaded", () => {
+        const header = document.getElementById("header");
+        header.classList.remove("hidden");
+        header.classList.add("opacity-100");
+    });
+
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('toggle-sidebar');
     const expandIcon = document.getElementById('expand-icon');
     const collapseIcon = document.getElementById('collapse-icon');
-    const sidebarTexts = document.querySelectorAll('.sidebar-text');
 
+    // Ensure the sidebar is expanded by default when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        // Expand sidebar on page load
+        sidebar.style.width = '160px';
+        sidebar.classList.remove('w-16');
+        sidebar.classList.add('w-auto');
+        expandIcon.classList.add('hidden');
+        collapseIcon.classList.remove('hidden');
+    });
+
+    // Toggle Sidebar when button is clicked
     toggleBtn.addEventListener('click', () => {
         const isCollapsed = sidebar.classList.contains('w-16');
-        let maxTextWidth = 0;
 
-        // Dynamically calculate the width of the longest sidebar text
         if (isCollapsed) {
-            sidebarTexts.forEach(text => {
-                const tempSpan = document.createElement('span');
-                tempSpan.style.visibility = 'hidden';
-                tempSpan.style.position = 'absolute';
-                tempSpan.style.font = getComputedStyle(text).font;
-                tempSpan.textContent = text.textContent;
-                document.body.appendChild(tempSpan);
-                maxTextWidth = Math.max(maxTextWidth, tempSpan.offsetWidth);
-                document.body.removeChild(tempSpan);
-            });
-
-            // Add padding and icon space to calculate the full width
-            const finalSidebarWidth = maxTextWidth + 64;
-            sidebar.style.width = `${finalSidebarWidth}px`;
-
-            // Show sidebar in expanded mode
+            // Expand sidebar when collapsed
+            sidebar.style.width = 'auto';
             sidebar.classList.remove('w-16');
+            sidebar.classList.add('w-auto');
             expandIcon.classList.add('hidden');
             collapseIcon.classList.remove('hidden');
-            sidebarTexts.forEach(text => text.classList.remove('hidden'));
         } else {
-            // Reset sidebar to collapsed mode
-            sidebar.style.width = '';
+            // Collapse sidebar
+            sidebar.style.width = '3.5rem';
+            sidebar.classList.remove('w-auto');
             sidebar.classList.add('w-16');
-            expandIcon.classList.remove('hidden');
             collapseIcon.classList.add('hidden');
-            sidebarTexts.forEach(text => text.classList.add('hidden'));
+            expandIcon.classList.remove('hidden');
         }
     });
 
@@ -586,17 +601,10 @@
     // Smooth Scroll to Categories Section
     document.getElementById('exploreBtn').addEventListener('click', function (e) {
         e.preventDefault();
-        document.querySelector('#categories').scrollIntoView({
+        document.querySelector('#new-arrivals').scrollIntoView({
             behavior: 'smooth'
         });
     });
-
-    const menuBtn = document.getElementById('menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-
-        menuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
     
     const images = [
         'https://t3.ftcdn.net/jpg/06/75/94/90/360_F_675949019_5piKZ1ScELyshhXbg24tFFUt0BwHuSWY.jpg',
@@ -689,5 +697,50 @@
             behavior: "smooth" // Scroll smoothly
         });
     };
+
+    // Get all the star rating elements
+    const ratings = document.querySelectorAll('.star');
+
+    ratings.forEach(star => {
+        // Hover effect
+        star.addEventListener('mouseenter', function () {
+            const index = parseInt(this.getAttribute('data-index'));
+            const stars = this.parentElement.querySelectorAll('.star');
+            stars.forEach((s, i) => {
+                if (i < index) {
+                    s.classList.add('text-yellow-500');
+                    s.classList.remove('text-gray-300');
+                } else {
+                    s.classList.remove('text-yellow-500');
+                    s.classList.add('text-gray-300');
+                }
+            });
+            this.style.cursor = "pointer"; // Change the cursor to pointer on hover
+        });
+
+        // Reset the color on mouse leave
+        star.addEventListener('mouseleave', function () {
+            const stars = this.parentElement.querySelectorAll('.star');
+            stars.forEach(s => {
+                s.classList.remove('text-yellow-500');
+                s.classList.add('text-gray-300');
+            });
+        });
+
+        // Click event to select the rating
+        star.addEventListener('click', function () {
+            const index = parseInt(this.getAttribute('data-index'));
+            const stars = this.parentElement.querySelectorAll('.star');
+            stars.forEach((s, i) => {
+                if (i <= index) {  // Color all stars to the left of and including the clicked star yellow
+                    s.classList.add('text-yellow-500');
+                    s.classList.remove('text-gray-300');
+                } else {
+                    s.classList.remove('text-yellow-500');
+                    s.classList.add('text-gray-300');
+                }
+            });
+        });
+    });
 </script>
 </html>
