@@ -368,7 +368,7 @@
                 <div class="absolute inset-0 bg-cover bg-center filter blur-sm" style="background-image: url('https://www.japan-experience.com/sites/default/files/styles/scale_crop_760x556/public/legacy/japan_experience/1448623388848.png.webp?itok=PBlLTWkq');"></div>
 
                 <!-- Content (Text and Icon) -->
-                <a href="culturalinsights.php" class="flex flex-col items-center text-white hover:text-black transition relative z-10">
+                <a href="../views/culturalinsights.php" class="flex flex-col items-center text-white hover:text-black transition relative z-10">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>

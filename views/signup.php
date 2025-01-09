@@ -110,7 +110,7 @@
     <section class="py-16 bg-gray-50 relative">
         <!-- Background Video with Blur Effect -->
         <video autoplay loop muted class="absolute inset-0 w-full h-full object-cover z-0" style="filter: blur(2px);">
-            <source src="../images/sakura.mp4" type="video/mp4">
+            <source src="../images/bg1.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
 
