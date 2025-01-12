@@ -153,7 +153,7 @@
     </header>
 
     <!-- Hero Section -->
-    <section class="h-96 bg-cover bg-center" id="carousel" style="background-image: url('path-to-your-image.jpg');">
+    <section id="carousel" class="bg-cover bg-center relative" style="height: 500px;">
         <div class="h-full flex items-center justify-center bg-black bg-opacity-50">
             <div class="text-center text-white w-3/4 transition-all duration-500 ease-in-out transform hover:scale-110 hover:text-pink-400 hover:shadow-2xl rounded-full">
                 <h2 class="text-7xl font-bold">Welcome to MONOMICHI</h2>
@@ -166,77 +166,52 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Left and Right Arrows for Carousel -->
+        <div class="absolute top-1/2 left-4 transform -translate-y-1/2 text-white cursor-pointer z-10">
+            <i class="fas fa-chevron-left text-3xl" id="prevArrow"></i>
+        </div>
+        <div class="absolute top-1/2 right-4 transform -translate-y-1/2 text-white cursor-pointer z-10">
+            <i class="fas fa-chevron-right text-3xl" id="nextArrow"></i>
+        </div>
     </section>
 
     <!-- New Arrivals Section -->
-    <section id="new-arrivals" class="container mx-auto px-40 py-16">
+    <section id="new-arrivals" class="container mx-auto px-44 py-16">
         <h3 class="text-3xl font-semibold text-center text-gray-800">New Arrivals</h3>
         <div class="mt-8 flex space-x-8">
-            <!-- New Product 1 -->
+            <!-- Product 1 -->
             <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
-                <img src="https://miro.medium.com/v2/resize:fit:1400/1*pfbYYn7wUSmNQFqtirn21A.png" alt="New Product 1" class="w-full h-48 object-cover">
-                <div class="p-4">
-                    <h4 class="text-xl font-semibold">Japanese Bento Box</h4>
-                    <p class="mt-2 text-gray-600">A sleek and modern bento box for your lunch, inspired by Japanese design.</p>
-                    <p class="mt-2 text-gray-800 font-semibold">Rs. 7999.99</p>
-                    <!-- Rating -->
-                    <div class="flex items-center mt-2" id="rating1">
-                        <i class="fas fa-star text-gray-300 star" data-index="1"></i>
-                        <i class="fas fa-star text-gray-300 star" data-index="2"></i>
-                        <i class="fas fa-star text-gray-300 star" data-index="3"></i>
-                        <i class="fas fa-star text-gray-300 star" data-index="4"></i>
-                        <i class="fas fa-star text-gray-300 star" data-index="5"></i>
-                    </div>
-                    <!-- Buttons: View Details & Add to Cart -->
-                    <div class="mt-4 flex justify-between">
-                        <a href="../views/product-detail.php?id=3" class="inline-block bg-pink-600 text-white py-2 px-6 rounded-full text-lg hover:bg-pink-700 transition">View Details</a>
-                        <a href="#" class="inline-block bg-green-600 text-white py-2 px-6 rounded-full text-lg hover:bg-green-700 transition">Add to Cart</a>
+                <div class="relative group">
+                    <img src="https://miro.medium.com/v2/resize:fit:1400/1*pfbYYn7wUSmNQFqtirn21A.png" alt="Bento Time" 
+                        class="w-full h-56 object-cover transition duration-300 ease-in-out group-hover:grayscale">
+                    <div class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition duration-300 ease-in-out">
+                        <h2 class="text-white text-2xl font-bold">BENTO TIME</h2>
+                        <a href="products.php" class="mt-4 bg-white text-black py-2 px-6 rounded-full text-lg hover:bg-gray-200 transition">TAKE A LOOK</a>
                     </div>
                 </div>
             </div>
 
-            <!-- New Product 2 -->
+            <!-- Product 2 -->
             <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
-                <img src="https://m.media-amazon.com/images/S/aplus-media-library-service-media/1314a45a-9401-4010-b7ee-3071e10f7aa4.__CR0,0,970,600_PT0_SX970_V1___.jpg" alt="New Product 2" class="w-full h-48 object-cover">
-                <div class="p-4">
-                    <h4 class="text-xl font-semibold">Japanese Tea Set</h4>
-                    <p class="mt-2 text-gray-600">A beautiful tea set for the perfect Japanese tea ceremony experience.</p>
-                    <p class="mt-2 text-gray-800 font-semibold">Rs. 13 999.99</p>
-                    <!-- Rating -->
-                    <div class="flex items-center mt-2" id="rating2">
-                        <i class="fas fa-star text-gray-300 star" data-index="1"></i>
-                        <i class="fas fa-star text-gray-300 star" data-index="2"></i>
-                        <i class="fas fa-star text-gray-300 star" data-index="3"></i>
-                        <i class="fas fa-star text-gray-300 star" data-index="4"></i>
-                        <i class="fas fa-star text-gray-300 star" data-index="5"></i>
-                    </div>
-                    <!-- Buttons: View Details & Add to Cart -->
-                    <div class="mt-4 flex justify-between">
-                        <a href="../views/product-detail.php?id=4" class="inline-block bg-pink-600 text-white py-2 px-6 rounded-full text-lg hover:bg-pink-700 transition">View Details</a>
-                        <a href="#" class="inline-block bg-green-600 text-white py-2 px-6 rounded-full text-lg hover:bg-green-700 transition">Add to Cart</a>
+                <div class="relative group">
+                    <img src="https://m.media-amazon.com/images/S/aplus-media-library-service-media/1314a45a-9401-4010-b7ee-3071e10f7aa4.__CR0,0,970,600_PT0_SX970_V1___.jpg" alt="Japanese Tea Set" 
+                        class="w-full h-56 object-cover transition duration-300 ease-in-out group-hover:grayscale">
+                    <div class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition duration-300 ease-in-out">
+                        <h2 class="text-white text-2xl font-bold">TEA TIME</h2>
+                        <a href="../views/product-detail.php?id=4" class="mt-4 bg-white text-black py-2 px-6 rounded-full text-lg hover:bg-gray-200 transition">TAKE A LOOK</a>
                     </div>
                 </div>
             </div>
 
-            <!-- New Product 3 -->
+            <!-- Product 3 -->
             <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
-                <img src="https://zenbird.media/wp-content/uploads/2022/10/kimono_top.jpg" alt="New Product 3" class="w-full h-48 object-cover">
-                <div class="p-4">
-                    <h4 class="text-xl font-semibold">Japanese Kimono</h4>
-                    <p class="mt-2 text-gray-600">A traditional Japanese kimono made from high-quality silk.</p>
-                    <p class="mt-2 text-gray-800 font-semibold">Rs. 34 999.99</p>
-                    <!-- Rating -->
-                    <div class="flex items-center mt-2" id="rating3">
-                        <i class="fas fa-star text-gray-300 star" data-index="1"></i>
-                        <i class="fas fa-star text-gray-300 star" data-index="2"></i>
-                        <i class="fas fa-star text-gray-300 star" data-index="3"></i>
-                        <i class="fas fa-star text-gray-300 star" data-index="4"></i>
-                        <i class="fas fa-star text-gray-300 star" data-index="5"></i>
-                    </div>
-                    <!-- Buttons: View Details & Add to Cart -->
-                    <div class="mt-4 flex justify-between">
-                        <a href="../views/product-detail.php?id=5" class="inline-block bg-pink-600 text-white py-2 px-6 rounded-full text-lg hover:bg-pink-700 transition">View Details</a>
-                        <a href="#" class="inline-block bg-green-600 text-white py-2 px-6 rounded-full text-lg hover:bg-green-700 transition">Add to Cart</a>
+                <div class="relative group">
+                    <img src="https://zenbird.media/wp-content/uploads/2022/10/kimono_top.jpg" alt="Japanese Kimono" 
+                        class="w-full h-56 object-cover transition duration-300 ease-in-out group-hover:grayscale">
+                    <div class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition duration-300 ease-in-out">
+                        <h2 class="text-white text-2xl font-bold">JAPANESE KIMONO</h2>
+                        <a href="../views/product-detail.php?id=5" class="mt-4 bg-white text-black py-2 px-6 rounded-full text-lg hover:bg-gray-200 transition">TAKE A LOOK</a>
                     </div>
                 </div>
             </div>
@@ -256,7 +231,7 @@
     <!-- Limited Time Offers Section -->
     <section id="limited-time-offers" class="bg-red-600 text-white text-center py-8 relative overflow-visible">
         <h3 class="text-4xl font-semibold">Limited Time Offers</h3>
-        <p class="mt-4 text-lg">Get up to 30% off on selected Japanese items. Don't miss out!</p>
+        <p class="mt-4 text-lg">Get up to 80% off on selected Japanese items. Don't miss out!</p>
         <a href="../views/limitedtimeoffers.php" class="mt-6 inline-block bg-white text-red-600 py-3 px-8 rounded-full text-lg font-semibold">Shop Now</a>
     </section>
 
@@ -405,7 +380,7 @@
 
     <!-- Scroll to Top Button -->
     <button id="scrollToTopBtn" class="fixed bottom-4 right-4 bg-pink-500 text-white py-2 px-4 rounded-full text-lg hidden hover:bg-red-600 transition duration-300 ease-in-out">
-        ↑ Scroll to Top
+        ↑
     </button>
 
     <!-- Footer -->
@@ -607,11 +582,11 @@
     });
     
     const images = [
-        'https://t3.ftcdn.net/jpg/06/75/94/90/360_F_675949019_5piKZ1ScELyshhXbg24tFFUt0BwHuSWY.jpg',
-        'https://images.rawpixel.com/image_800/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvdjExNTUtYi0wMTFjLXguanBn.jpg',
-        'https://t4.ftcdn.net/jpg/06/03/60/43/360_F_603604300_a64EoKEw3rM1P0c9ik9QjSB0shYRGewB.jpg',
-        'https://img.freepik.com/free-vector/pink-trees-sky-banner-vector_53876-127811.jpg?semt=ais_hybrid',
-        'https://static.vecteezy.com/system/resources/thumbnails/005/447/389/small_2x/spring-cherry-blossom-mountain-landscape-free-vector.jpg'
+        'https://i.pinimg.com/736x/31/21/b4/3121b48d9b633e8222efff5584929902.jpg',
+        'https://i.pinimg.com/736x/b4/49/a7/b449a7ffb3274ec71ddbb0be550e33b3.jpg',
+        'https://i.pinimg.com/736x/ef/f9/f5/eff9f536184c5b2ec92370e12a021d6f.jpg',
+        'https://i.pinimg.com/736x/80/94/f6/8094f6a439a837092e71f845d69892d7.jpg',
+        'https://i.pinimg.com/736x/cd/35/7d/cd357d4357befb94fe555a9113f9316b.jpg'
     ];
 
     let currentIndex = 0;
@@ -622,8 +597,28 @@
         currentIndex = (currentIndex + 1) % images.length;
     }
 
-    setInterval(changeBackground, 5000);
+    setInterval(changeBackground, 3000);
     changeBackground();
+
+    // Function to update the carousel image
+    function updateCarouselImage() {
+        carousel.style.backgroundImage = `url('${images[currentIndex]}')`;
+    }
+
+    // Event listener for previous arrow
+    document.getElementById("prevArrow").addEventListener("click", function() {
+        currentIndex = (currentIndex - 1 + images.length) % images.length; // Move to previous image
+        updateCarouselImage();
+    });
+
+    // Event listener for next arrow
+    document.getElementById("nextArrow").addEventListener("click", function() {
+        currentIndex = (currentIndex + 1) % images.length; // Move to next image
+        updateCarouselImage();
+    });
+
+    // Initialize the carousel with the first image
+    updateCarouselImage();
 
     // Function to launch confetti inside the "Limited Time Offers" section
     function launchConfettiInSection() {
