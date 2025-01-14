@@ -369,7 +369,7 @@
                 <h2 class="text-xl font-semibold mb-4">New Arrivals</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     <!-- Bento Set -->
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
+                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform" id="bento-set">
                         <img src="https://www.tourism.gov.my/images/uploads/6ab177ab-2125-438e-b49a-c9ca387ba497.jpg" alt="Bento Set" class="w-full h-64 object-cover">
                         <div class="p-4 text-center">
                             <h3 class="text-lg font-medium">Bento Set</h3>
@@ -380,7 +380,7 @@
                         </div>
                     </div>
                     <!-- Tea Set -->
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
+                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform" id="tea-set">
                         <img src="https://img.kwcdn.com/product/Fancyalgo/VirtualModelMatting/26e81e2f015876039e8164230450273b.jpg" alt="Tea Set" class="w-full h-64 object-cover">
                         <div class="p-4 text-center">
                             <h3 class="text-lg font-medium">Tea Set</h3>
@@ -391,7 +391,7 @@
                         </div>
                     </div>
                     <!-- Kimono -->
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
+                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform" id="kimono">
                         <img src="https://m.media-amazon.com/images/I/81hhMuhQJdL._AC_SX679_.jpg" alt="Kimono" class="w-full h-64 object-cover">
                         <div class="p-4 text-center">
                             <h3 class="text-lg font-medium">Kimono</h3>
@@ -448,7 +448,10 @@
                         <div class="p-4 text-center">
                             <h3 class="text-lg font-medium">Stylish Summer Sunglasses</h3>
                             <p class="text-gray-600 mt-2">Protect your eyes from the sun in style with these lightweight and durable sunglasses, perfect for all outdoor activities.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1,500</p>
+                            <div class="mt-2">
+                                <p class="text-gray-600 inline-block line-through">Rs. 2,000</p>
+                                <p class="text-red-600 inline-block font-semibold ml-2">Rs. 1,500</p>
+                            </div>
                             <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Stylish Summer Sunglasses" data-price="1500" data-img="https://www.eurooptica.com/cdn/shop/articles/matsuda-sunglass-2809h-v2-bg-dem-hero-v1618352057841-1682543583848.jpg?v=1682544755">Add to Cart</button>
                             <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Stylish Summer Sunglasses" data-price="1500" data-img="https://www.eurooptica.com/cdn/shop/articles/matsuda-sunglass-2809h-v2-bg-dem-hero-v1618352057841-1682543583848.jpg?v=1682544755">Add to Wishlist</button>
                         </div>
@@ -458,7 +461,10 @@
                         <div class="p-4 text-center">
                             <h3 class="text-lg font-medium">Cool Summer Hats</h3>
                             <p class="text-gray-600 mt-2">Stay cool and stylish with this breathable summer hat, offering excellent sun protection for all-day wear.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1,000</p>
+                            <div class="mt-2">
+                                <p class="text-gray-600 inline-block line-through">Rs. 1,500</p>
+                                <p class="text-red-600 inline-block font-semibold ml-2">Rs. 1,000</p>
+                            </div>
                             <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Cool Summer Hats" data-price="1000" data-img="https://japaneseonimasks.com/cdn/shop/products/S215a579443f7424c9eb9150cea372312h.jpg?v=1672387128&width=533">Add to Cart</button>
                             <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Cool Summer Hats" data-price="1000" data-img="https://japaneseonimasks.com/cdn/shop/products/S215a579443f7424c9eb9150cea372312h.jpg?v=1672387128&width=533">Add to Wishlist</button>
                         </div>
@@ -468,7 +474,10 @@
                         <div class="p-4 text-center">
                             <h3 class="text-lg font-medium">Spacious Beach Bag</h3>
                             <p class="text-gray-600 mt-2">Carry all your essentials in this spacious and stylish beach bag, designed for functionality and comfort.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 2,000</p>
+                            <div class="mt-2">
+                                <p class="text-gray-600 inline-block line-through">Rs. 2,500</p>
+                                <p class="text-red-600 inline-block font-semibold ml-2">Rs. 2,000</p>
+                            </div>
                             <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Spacious Beach Bag" data-price="2000" data-img="https://m.media-amazon.com/images/I/71TexojLP4L._AC_UY1000_.jpg">Add to Cart</button>
                             <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Spacious Beach Bag" data-price="2000" data-img="https://m.media-amazon.com/images/I/71TexojLP4L._AC_UY1000_.jpg">Add to Wishlist</button>
                         </div>
@@ -478,7 +487,10 @@
                         <div class="p-4 text-center">
                             <h3 class="text-lg font-medium">Trendy Swimwear</h3>
                             <p class="text-gray-600 mt-2">Dive into summer with this trendy and comfortable swimwear, perfect for the beach or pool.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 2,500</p>
+                            <div class="mt-2">
+                                <p class="text-gray-600 inline-block line-through">Rs. 2,500</p>
+                                <p class="text-red-600 inline-block font-semibold ml-2">Rs. 2,000</p>
+                            </div>
                             <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Trendy Swimwear" data-price="2500" data-img="https://i.pinimg.com/736x/6b/80/90/6b8090d90a2bce64d26f4deb912853e4.jpg">Add to Cart</button>
                             <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Trendy Swimwear" data-price="2500" data-img="https://i.pinimg.com/736x/6b/80/90/6b8090d90a2bce64d26f4deb912853e4.jpg">Add to Wishlist</button>
                         </div>
@@ -488,7 +500,10 @@
                         <div class="p-4 text-center">
                             <h3 class="text-lg font-medium">Comfy Flip Flops</h3>
                             <p class="text-gray-600 mt-2">Step into comfort with these lightweight and durable flip-flops, ideal for summer strolls.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 900</p>
+                            <div class="mt-2">
+                                <p class="text-gray-600 inline-block line-through">Rs. 900</p>
+                                <p class="text-red-600 inline-block font-semibold ml-2">Rs. 400</p>
+                            </div>
                             <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Comfy Flip Flops" data-price="900" data-img="https://learnjapanese123.com/wp-content/uploads/2017/07/getayukata.jpg">Add to Cart</button>
                             <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Comfy Flip Flops" data-price="900" data-img="https://learnjapanese123.com/wp-content/uploads/2017/07/getayukata.jpg">Add to Wishlist</button>
                         </div>
@@ -498,7 +513,10 @@
                         <div class="p-4 text-center">
                             <h3 class="text-lg font-medium">Light Summer Dress</h3>
                             <p class="text-gray-600 mt-2">Stay cool and stylish in this lightweight and breezy summer dress, perfect for sunny days.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1,700</p>
+                            <div class="mt-2">
+                                <p class="text-gray-600 inline-block line-through">Rs. 1,700</p>
+                                <p class="text-red-600 inline-block font-semibold ml-2">Rs. 1,000</p>
+                            </div>
                             <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Light Summer Dress" data-price="1700" data-img="https://i.pinimg.com/736x/ee/a7/e8/eea7e841d32544e006d6a76ebd022c40.jpg">Add to Cart</button>
                             <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Light Summer Dress" data-price="1700" data-img="https://i.pinimg.com/736x/ee/a7/e8/eea7e841d32544e006d6a76ebd022c40.jpg">Add to Wishlist</button>
                         </div>
@@ -512,6 +530,7 @@
             <div class="category-section" id="stationery-section">
                 <h2 class="text-xl font-semibold mb-4">Stationeries & Collectibles</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <!-- Pens -->
                     <div id="stationery-item-1" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
                         <img src="https://thejapaneseshop.co.uk/cdn/shop/files/premium-oak-wood-black-japanese-ballpoint-pen-3_a48407f6-9e68-457e-afde-984bd8b04405.jpg?v=1715416660&width=1946" alt="Premium Pen" class="w-full h-64 object-cover">
                         <div class="p-4 text-center">
@@ -522,6 +541,30 @@
                             <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Premium Pen" data-price="250" data-img="https://thejapaneseshop.co.uk/cdn/shop/files/premium-oak-wood-black-japanese-ballpoint-pen-3_a48407f6-9e68-457e-afde-984bd8b04405.jpg?v=1715416660&width=1946">Add to Wishlist</button>
                         </div>
                     </div>
+
+                    <div id="stationery-item-2" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
+                        <img src="https://pitchmanpens.com/cdn/shop/products/RainmakerBlueFountainPen1.jpg?v=1651008338" alt="Luxury Blue Pen" class="w-full h-64 object-cover">
+                        <div class="p-4 text-center">
+                            <h3 class="text-lg font-medium">Luxury Blue Pen</h3>
+                            <p class="text-gray-600 mt-2">A luxurious ballpoint pen in blue, crafted from high-quality materials for smooth writing.</p>
+                            <p class="text-gray-600 mt-2">Price: Rs. 350</p>
+                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Luxury Blue Pen" data-price="350" data-img="https://pitchmanpens.com/cdn/shop/products/RainmakerBlueFountainPen1.jpg?v=1651008338">Add to Cart</button>
+                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Luxury Blue Pen" data-price="350" data-img="https://pitchmanpens.com/cdn/shop/products/RainmakerBlueFountainPen1.jpg?v=1651008338">Add to Wishlist</button>
+                        </div>
+                    </div>
+
+                    <div id="stationery-item-3" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
+                        <img src="https://m.media-amazon.com/images/I/71hmC6Y2s5L._AC_SL1194_.jpg" alt="Black Pen" class="w-full h-64 object-cover">
+                        <div class="p-4 text-center">
+                            <h3 class="text-lg font-medium">Black Pen</h3>
+                            <p class="text-gray-600 mt-2">A smooth-writing ballpoint pen in sleek black, made with fine craftsmanship for professionals.</p>
+                            <p class="text-gray-600 mt-2">Price: Rs. 200</p>
+                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Black Pen" data-price="200" data-img="https://m.media-amazon.com/images/I/71hmC6Y2s5L._AC_SL1194_.jpg">Add to Cart</button>
+                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Black Pen" data-price="200" data-img="https://m.media-amazon.com/images/I/71hmC6Y2s5L._AC_SL1194_.jpg">Add to Wishlist</button>
+                        </div>
+                    </div>
+
+                    <!-- Notebooks -->
                     <div id="stationery-item-2" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
                         <img src="https://www.themakerhobart.com.au/cdn/shop/files/vintage_notebook_1.jpg?v=1715317519&width=1200" alt="Classic Notebook" class="w-full h-64 object-cover">
                         <div class="p-4 text-center">
@@ -532,6 +575,30 @@
                             <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Classic Notebook" data-price="600" data-img="https://www.themakerhobart.com.au/cdn/shop/files/vintage_notebook_1.jpg?v=1715317519&width=1200">Add to Wishlist</button>
                         </div>
                     </div>
+
+                    <div id="stationery-item-3" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
+                        <img src="https://images.squarespace-cdn.com/content/v1/5eaaf226e41012207079f359/1707219268877-WZGIOQLAGE8SB4EK5KYH/UNADJUSTEDNONRAW_thumb_1cf4.jpg?format=1000w" alt="Linen Notebook" class="w-full h-64 object-cover">
+                        <div class="p-4 text-center">
+                            <h3 class="text-lg font-medium">Linen Notebook</h3>
+                            <p class="text-gray-600 mt-2">An elegant linen-bound notebook with a soft cover, perfect for note-taking and sketching.</p>
+                            <p class="text-gray-600 mt-2">Price: Rs. 750</p>
+                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Linen Notebook" data-price="750" data-img="https://images.squarespace-cdn.com/content/v1/5eaaf226e41012207079f359/1707219268877-WZGIOQLAGE8SB4EK5KYH/UNADJUSTEDNONRAW_thumb_1cf4.jpg?format=1000w">Add to Cart</button>
+                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Linen Notebook" data-price="750" data-img="https://images.squarespace-cdn.com/content/v1/5eaaf226e41012207079f359/1707219268877-WZGIOQLAGE8SB4EK5KYH/UNADJUSTEDNONRAW_thumb_1cf4.jpg?format=1000w">Add to Wishlist</button>
+                        </div>
+                    </div>
+
+                    <div id="stationery-item-4" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
+                        <img src="https://images-cdn.ubuy.co.in/65048d58f13be73f071646d7-yansanido-spiral-notebook-4-pcs-4-color.jpg" alt="Spiral Notebook" class="w-full h-64 object-cover">
+                        <div class="p-4 text-center">
+                            <h3 class="text-lg font-medium">Spiral Notebook</h3>
+                            <p class="text-gray-600 mt-2">A practical spiral-bound notebook, perfect for students and professionals alike.</p>
+                            <p class="text-gray-600 mt-2">Price: Rs. 450</p>
+                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Spiral Notebook" data-price="450" data-img="https://images-cdn.ubuy.co.in/65048d58f13be73f071646d7-yansanido-spiral-notebook-4-pcs-4-color.jpg">Add to Cart</button>
+                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Spiral Notebook" data-price="450" data-img="https://images-cdn.ubuy.co.in/65048d58f13be73f071646d7-yansanido-spiral-notebook-4-pcs-4-color.jpg">Add to Wishlist</button>
+                        </div>
+                    </div>
+
+                    <!-- Markers -->
                     <div id="stationery-item-3" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
                         <img src="https://www.fadebomb.com/cdn/shop/products/sld700_e7000bba-23da-4a02-85cc-48c8990b08eb_1200x1200.jpg?v=1545137126" alt="Permanent Marker" class="w-full h-64 object-cover">
                         <div class="p-4 text-center">
@@ -542,16 +609,64 @@
                             <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Permanent Marker" data-price="150" data-img="https://www.fadebomb.com/cdn/shop/products/sld700_e7000bba-23da-4a02-85cc-48c8990b08eb_1200x1200.jpg?v=1545137126">Add to Wishlist</button>
                         </div>
                     </div>
+
                     <div id="stationery-item-4" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://www.thejournalshop.com/cdn/shop/files/kokuyo_miri_2_68ed0572-a16b-498e-a509-56f6b9e6e24a.jpg?v=1697124494" alt="White Eraser" class="w-full h-64 object-cover">
+                        <img src="https://marchante.mx/cdn/shop/files/D_NQ_NP_2X_752204-MLM48121786399_112021-F_1024x.webp?v=1706646142" alt="Chisel Tip Marker" class="w-full h-64 object-cover">
+                        <div class="p-4 text-center">
+                            <h3 class="text-lg font-medium">Chisel Tip Marker</h3>
+                            <p class="text-gray-600 mt-2">A versatile chisel-tip marker designed for bold, expressive strokes on a variety of surfaces.</p>
+                            <p class="text-gray-600 mt-2">Price: Rs. 200</p>
+                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Chisel Tip Marker" data-price="200" data-img="https://marchante.mx/cdn/shop/files/D_NQ_NP_2X_752204-MLM48121786399_112021-F_1024x.webp?v=1706646142">Add to Cart</button>
+                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Chisel Tip Marker" data-price="200" data-img="https://marchante.mx/cdn/shop/files/D_NQ_NP_2X_752204-MLM48121786399_112021-F_1024x.webp?v=1706646142">Add to Wishlist</button>
+                        </div>
+                    </div>
+
+                    <div id="stationery-item-5" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
+                        <img src="https://img.uline.com/is/image/uline/S-19421BL?$Mobile_SI$" alt="Fine Tip Marker" class="w-full h-64 object-cover">
+                        <div class="p-4 text-center">
+                            <h3 class="text-lg font-medium">Fine Tip Marker</h3>
+                            <p class="text-gray-600 mt-2">A fine-tip marker for precise, detailed writing and artwork on most surfaces.</p>
+                            <p class="text-gray-600 mt-2">Price: Rs. 180</p>
+                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Fine Tip Marker" data-price="180" data-img="https://img.uline.com/is/image/uline/S-19421BL?$Mobile_SI$">Add to Cart</button>
+                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Fine Tip Marker" data-price="180" data-img="https://img.uline.com/is/image/uline/S-19421BL?$Mobile_SI$">Add to Wishlist</button>
+                        </div>
+                    </div>
+
+                    <!-- Erasers -->
+                    <div id="stationery-item-4" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
+                        <img src="https://www.suratsuperstore.in/cdn/shop/files/apsara-non-dust-eraser.jpg?v=1690742785" alt="White Eraser" class="w-full h-64 object-cover">
                         <div class="p-4 text-center">
                             <h3 class="text-lg font-medium">White Eraser</h3>
                             <p class="text-gray-600 mt-2">A soft and effective eraser that removes pencil marks cleanly without damaging paper.</p>
                             <p class="text-gray-600 mt-2">Price: Rs. 50</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="White Eraser" data-price="50" data-img="https://www.thejournalshop.com/cdn/shop/files/kokuyo_miri_2_68ed0572-a16b-498e-a509-56f6b9e6e24a.jpg?v=1697124494">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="White Eraser" data-price="50" data-img="https://www.thejournalshop.com/cdn/shop/files/kokuyo_miri_2_68ed0572-a16b-498e-a509-56f6b9e6e24a.jpg?v=1697124494">Add to Wishlist</button>
+                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="White Eraser" data-price="50" data-img="https://www.suratsuperstore.in/cdn/shop/files/apsara-non-dust-eraser.jpg?v=1690742785">Add to Cart</button>
+                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="White Eraser" data-price="50" data-img="https://www.suratsuperstore.in/cdn/shop/files/apsara-non-dust-eraser.jpg?v=1690742785">Add to Wishlist</button>
                         </div>
                     </div>
+
+                    <div id="stationery-item-5" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
+                        <img src="https://www.donbookstore.com/donbook/outerweb/product_images/10106037l.png" alt="Pink Eraser" class="w-full h-64 object-cover">
+                        <div class="p-4 text-center">
+                            <h3 class="text-lg font-medium">Pink Eraser</h3>
+                            <p class="text-gray-600 mt-2">A smooth and gentle eraser that provides precise erasing without leaving marks or tearing paper.</p>
+                            <p class="text-gray-600 mt-2">Price: Rs. 70</p>
+                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Pink Eraser" data-price="70" data-img="https://www.donbookstore.com/donbook/outerweb/product_images/10106037l.png">Add to Cart</button>
+                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Pink Eraser" data-price="70" data-img="https://www.donbookstore.com/donbook/outerweb/product_images/10106037l.png">Add to Wishlist</button>
+                        </div>
+                    </div>
+
+                    <div id="stationery-item-6" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
+                        <img src="https://down-my.img.susercontent.com/file/my-11134208-7r98u-lyq2myf9iesgf3" alt="Miri Eraser" class="w-full h-64 object-cover">
+                        <div class="p-4 text-center">
+                            <h3 class="text-lg font-medium">Miri Eraser</h3>
+                            <p class="text-gray-600 mt-2">A high-quality, dust-free eraser that erases cleanly without leaving residue or smudges.</p>
+                            <p class="text-gray-600 mt-2">Price: Rs. 80</p>
+                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Miri Eraser" data-price="80" data-img="https://down-my.img.susercontent.com/file/my-11134208-7r98u-lyq2myf9iesgf3">Add to Cart</button>
+                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Miri Eraser" data-price="80" data-img="https://down-my.img.susercontent.com/file/my-11134208-7r98u-lyq2myf9iesgf3">Add to Wishlist</button>
+                        </div>
+                    </div>
+
+                    <!-- <Highlighters -->
                     <div id="stationery-item-5" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
                         <img src="https://cutethingsfromjapan.com/cdn/shop/products/100000001004262242_10209_a08e8dc9-0327-4b35-8ecd-0dd710e9f590.jpg?v=1617801303&width=720" alt="Neon Highlighter" class="w-full h-64 object-cover">
                         <div class="p-4 text-center">
@@ -564,6 +679,29 @@
                     </div>
 
                     <div id="stationery-item-6" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
+                        <img src="https://img.drz.lazcdn.com/static/lk/p/6ef712cbbdefeacd5254785f3a887288.jpg_720x720q80.jpg" alt="Pastel Highlighter" class="w-full h-64 object-cover">
+                        <div class="p-4 text-center">
+                            <h3 class="text-lg font-medium">Pastel Highlighter</h3>
+                            <p class="text-gray-600 mt-2">Price: Rs. 150</p>
+                            <p class="text-gray-500 mt-2">Subtle pastel shades for a softer, more refined highlight on your notes.</p>
+                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Pastel Highlighter" data-price="150" data-img="https://img.drz.lazcdn.com/static/lk/p/6ef712cbbdefeacd5254785f3a887288.jpg_720x720q80.jpg">Add to Cart</button>
+                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Pastel Highlighter" data-price="150" data-img="https://img.drz.lazcdn.com/static/lk/p/6ef712cbbdefeacd5254785f3a887288.jpg_720x720q80.jpg">Add to Wishlist</button>
+                        </div>
+                    </div>
+
+                    <div id="stationery-item-7" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
+                        <img src="https://img.drz.lazcdn.com/static/lk/p/d49798a634e891e2458e2ef36d58c800.jpg_720x720q80.jpg" alt="Fluorescent Highlighter" class="w-full h-64 object-cover">
+                        <div class="p-4 text-center">
+                            <h3 class="text-lg font-medium">Fluorescent Highlighter</h3>
+                            <p class="text-gray-600 mt-2">Price: Rs. 130</p>
+                            <p class="text-gray-500 mt-2">Intense fluorescent colors that will make any text pop for easy visibility.</p>
+                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Fluorescent Highlighter" data-price="130" data-img="https://img.drz.lazcdn.com/static/lk/p/d49798a634e891e2458e2ef36d58c800.jpg_720x720q80.jpg">Add to Cart</button>
+                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Fluorescent Highlighter" data-price="130" data-img="https://img.drz.lazcdn.com/static/lk/p/d49798a634e891e2458e2ef36d58c800.jpg_720x720q80.jpg">Add to Wishlist</button>
+                        </div>
+                    </div>
+
+                    <!-- Sticky notes -->
+                    <div id="stationery-item-6" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
                         <img src="https://down-sg.img.susercontent.com/file/sg-11134201-7rdyg-m0en0kbb6q4p29" alt="Colorful Sticky Notes" class="w-full h-64 object-cover">
                         <div class="p-4 text-center">
                             <h3 class="text-lg font-medium">Colorful Sticky Notes</h3>
@@ -575,6 +713,29 @@
                     </div>
 
                     <div id="stationery-item-7" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
+                        <img src="https://images-cdn.ubuy.co.in/6353e4437e944b52c93d044e-early-buy-6-pads-lined-sticky-notes-with.jpg" alt="Pastel Sticky Notes" class="w-full h-64 object-cover">
+                        <div class="p-4 text-center">
+                            <h3 class="text-lg font-medium">Pastel Sticky Notes</h3>
+                            <p class="text-gray-600 mt-2">Price: Rs. 180</p>
+                            <p class="text-gray-500 mt-2">A set of pastel-colored sticky notes, perfect for a soft and elegant organization.</p>
+                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Pastel Sticky Notes" data-price="180" data-img="https://images-cdn.ubuy.co.in/6353e4437e944b52c93d044e-early-buy-6-pads-lined-sticky-notes-with.jpg">Add to Cart</button>
+                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Pastel Sticky Notes" data-price="180" data-img="https://images-cdn.ubuy.co.in/6353e4437e944b52c93d044e-early-buy-6-pads-lined-sticky-notes-with.jpg">Add to Wishlist</button>
+                        </div>
+                    </div>
+
+                    <div id="stationery-item-8" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
+                        <img src="https://m.media-amazon.com/images/I/71mUHGatCzL.jpg" alt="Square Sticky Notes" class="w-full h-64 object-cover">
+                        <div class="p-4 text-center">
+                            <h3 class="text-lg font-medium">Square Sticky Notes</h3>
+                            <p class="text-gray-600 mt-2">Price: Rs. 250</p>
+                            <p class="text-gray-500 mt-2">A set of square sticky notes, perfect for writing larger notes and reminders.</p>
+                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Square Sticky Notes" data-price="250" data-img="https://m.media-amazon.com/images/I/71mUHGatCzL.jpg">Add to Cart</button>
+                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Square Sticky Notes" data-price="250" data-img="https://m.media-amazon.com/images/I/71mUHGatCzL.jpg">Add to Wishlist</button>
+                        </div>
+                    </div>
+
+                    <!-- Transparent tapes -->
+                    <div id="stationery-item-7" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
                         <img src="https://c.superdelivery.com/ip/n/sa/1200/630/www.superdelivery.com/product_image/012/253/855/12253855_s_1001.jpg" alt="Transparent Tape" class="w-full h-64 object-cover">
                         <div class="p-4 text-center">
                             <h3 class="text-lg font-medium">Transparent Tape</h3>
@@ -582,6 +743,28 @@
                             <p class="text-gray-500 mt-2">Durable and clear tape, ideal for wrapping, crafting, and general use.</p>
                             <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Transparent Tape" data-price="80" data-img="https://c.superdelivery.com/ip/n/sa/1200/630/www.superdelivery.com/product_image/012/253/855/12253855_s_1001.jpg">Add to Cart</button>
                             <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Transparent Tape" data-price="80" data-img="https://c.superdelivery.com/ip/n/sa/1200/630/www.superdelivery.com/product_image/012/253/855/12253855_s_1001.jpg">Add to Wishlist</button>
+                        </div>
+                    </div>
+
+                    <div id="stationery-item-8" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
+                        <img src="https://m.media-amazon.com/images/I/51dywgoD9zL._SL1500_.jpg" alt="Clear Packing Tape" class="w-full h-64 object-cover">
+                        <div class="p-4 text-center">
+                            <h3 class="text-lg font-medium">Clear Packing Tape</h3>
+                            <p class="text-gray-600 mt-2">Price: Rs. 120</p>
+                            <p class="text-gray-500 mt-2">Strong and adhesive packing tape for secure packaging and sealing.</p>
+                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Clear Packing Tape" data-price="120" data-img="https://m.media-amazon.com/images/I/51dywgoD9zL._SL1500_.jpg">Add to Cart</button>
+                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Clear Packing Tape" data-price="120" data-img="https://m.media-amazon.com/images/I/51dywgoD9zL._SL1500_.jpg">Add to Wishlist</button>
+                        </div>
+                    </div>
+
+                    <div id="stationery-item-9" class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
+                        <img src="https://img.drz.lazcdn.com/static/lk/p/6ed9f69fded6dddbecee8fd4d6cc28ec.jpg_720x720q80.jpg" alt="Office Transparent Tape" class="w-full h-64 object-cover">
+                        <div class="p-4 text-center">
+                            <h3 class="text-lg font-medium">Office Transparent Tape</h3>
+                            <p class="text-gray-600 mt-2">Price: Rs. 90</p>
+                            <p class="text-gray-500 mt-2">Versatile office tape for general use, ideal for documents and office projects.</p>
+                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Office Transparent Tape" data-price="90" data-img="https://img.drz.lazcdn.com/static/lk/p/6ed9f69fded6dddbecee8fd4d6cc28ec.jpg_720x720q80.jpg">Add to Cart</button>
+                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Office Transparent Tape" data-price="90" data-img="https://img.drz.lazcdn.com/static/lk/p/6ed9f69fded6dddbecee8fd4d6cc28ec.jpg_720x720q80.jpg">Add to Wishlist</button>
                         </div>
                     </div>
 

@@ -152,14 +152,24 @@
                         <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
                     </div>
 
-                    <div class="mb-6">
-                        <label for="confirm-password" class="block text-gray-600 font-medium">Confirm Password</label>
-                        <input type="password" id="confirm-password" name="confirm-password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
+                    <div class="mb-4">
+                        <label for="password_confirmation" class="block text-gray-600 font-medium">Confirm Password</label>
+                        <input type="password" id="password_confirmation" name="password_confirmation" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
                     </div>
 
-                    <button type="submit" class="w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 font-semibold">Sign Up</button>
+                    <div class="mb-4">
+                        <label for="terms" class="flex items-center space-x-2">
+                            <input type="checkbox" id="terms" name="terms" class="h-5 w-5 text-pink-600" required>
+                            <span class="text-gray-600">I agree to the terms and conditions</span>
+                        </label>
+                    </div>
+
+                    <div class="mb-6">
+                        <button type="submit" class="w-full bg-pink-600 text-white py-2 px-4 rounded-lg hover:bg-pink-700 focus:outline-none">Sign Up</button>
+                    </div>
+
+                    <p class="text-center text-gray-600">Already have an account? <a href="login.php" class="text-pink-600 hover:underline">Log in</a></p>
                 </form>
-                <p class="text-center text-gray-600 mt-4">Already have an account? <a href="../views/login.php" class="text-pink-600 hover:text-pink-700">Log In</a></p>
             </div>
         </div>
     </section>

@@ -108,19 +108,23 @@
             <!-- Right Side Icons -->
             <div class="flex items-center space-x-6 pr-4 ml-auto">
                 <!-- Wishlist Icon -->
-                <a href="products.php#wishlist-sidebar" class="relative">
+                <a href="../views/products.php#wishlist-sidebar" class="relative">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8a4 4 0 016-3.92A4 4 0 0121 8c0 4-6 8-9 8s-9-4-9-8z" />
                     </svg>
-                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"></span>
+                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        5
+                    </span>
                 </a>
 
                 <!-- Shopping Cart Icon -->
-                <a href="products.php#cart-sidebar" class="relative">
+                <a href="../views/products.php#cart-sidebar" class="relative">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.879 1.514M7 16a2 2 0 104 0M13 16a2 2 0 104 0M5.058 6H20.86l-2.35 7H7.609m2.788 5H6M21 21H6"></path>
                     </svg>
-                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"></span>
+                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        5
+                    </span>
                 </a>
 
                 <!-- Profile Icon (Trigger) -->
@@ -187,7 +191,7 @@
                         class="w-full h-56 object-cover transition duration-300 ease-in-out group-hover:grayscale">
                     <div class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition duration-300 ease-in-out">
                         <h2 class="text-white text-2xl font-bold">BENTO TIME</h2>
-                        <a href="products.php" class="mt-4 bg-white text-black py-2 px-6 rounded-full text-lg hover:bg-gray-200 transition">TAKE A LOOK</a>
+                        <a href="../views/products.php#bento-set" class="mt-4 bg-white text-black py-2 px-6 rounded-full text-lg hover:bg-gray-200 transition">TAKE A LOOK</a>
                     </div>
                 </div>
             </div>
@@ -199,7 +203,7 @@
                         class="w-full h-56 object-cover transition duration-300 ease-in-out group-hover:grayscale">
                     <div class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition duration-300 ease-in-out">
                         <h2 class="text-white text-2xl font-bold">TEA TIME</h2>
-                        <a href="../views/product-detail.php?id=4" class="mt-4 bg-white text-black py-2 px-6 rounded-full text-lg hover:bg-gray-200 transition">TAKE A LOOK</a>
+                        <a href="../views/products.php#tea-set" class="mt-4 bg-white text-black py-2 px-6 rounded-full text-lg hover:bg-gray-200 transition">TAKE A LOOK</a>
                     </div>
                 </div>
             </div>
@@ -211,7 +215,7 @@
                         class="w-full h-56 object-cover transition duration-300 ease-in-out group-hover:grayscale">
                     <div class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition duration-300 ease-in-out">
                         <h2 class="text-white text-2xl font-bold">WEAR YOU LIKE</h2>
-                        <a href="../views/product-detail.php?id=5" class="mt-4 bg-white text-black py-2 px-6 rounded-full text-lg hover:bg-gray-200 transition">TAKE A LOOK</a>
+                        <a href="../views/products.php#kimono" class="mt-4 bg-white text-black py-2 px-6 rounded-full text-lg hover:bg-gray-200 transition">TAKE A LOOK</a>
                     </div>
                 </div>
             </div>
@@ -729,6 +733,12 @@
                 }
             });
         });
+    });
+    
+    window.addEventListener('DOMContentLoaded', function() {
+        // Retrieve the cart quantity (set to 0 if not found)
+        var cartQuantity = localStorage.getItem("cartQuantity") || 0; // Use sessionStorage if you prefer session-based storage
+        document.getElementById("cart-quantity").innerText = cartQuantity;
     });
 </script>
 </html>
