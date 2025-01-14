@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
+    <title>Checkout</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* cannot add the ::placeholder selector directly in the inline CSS because inline styles only apply to elements directly and do not support pseudo-elements like ::placeholder, ::before, ::after, or any other pseudo-selectors. */
@@ -125,47 +125,72 @@
             </div>
     </header>
 
-    <!-- Sign-Up Section -->
-    <section class="py-16 bg-gray-50 relative">
-        <!-- Background Video with Blur Effect -->
-        <video autoplay loop muted class="absolute inset-0 w-full h-full object-cover z-0" style="filter: blur(2px);">
-            <source src="../images/bg1.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
+    <!-- Checkout Section -->
+    <section class="min-h-screen flex items-center justify-center py-10">
+        <div class="w-full max-w-2xl bg-white shadow-lg rounded-lg p-8">
 
-        <div class="container mx-auto px-6 relative z-10">
-            <div class="max-w-lg mx-auto bg-white shadow-lg shadow-pink-600 border-4 border-pink-200 rounded-lg p-8">
-                <h2 class="text-3xl font-semibold text-center text-gray-800 mb-6">Create Your Account</h2>
-                <form action="#" method="POST">
-                    <div class="mb-4">
-                        <label for="name" class="block text-gray-600 font-medium">Full Name</label>
-                        <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
+            <h2 class="text-3xl font-semibold text-center text-gray-800 mb-6">Checkout</h2>
+
+            <!-- Shipping Information Form -->
+            <form action="#" method="POST" class="space-y-6">
+                <div>
+                    <label for="full-name" class="block text-lg text-gray-700">Full Name</label>
+                    <input type="text" id="full-name" name="full-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                </div>
+
+                <div>
+                    <label for="address" class="block text-lg text-gray-700">Shipping Address</label>
+                    <input type="text" id="address" name="address" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                </div>
+
+                <div>
+                    <label for="city" class="block text-lg text-gray-700">City</label>
+                    <input type="text" id="city" name="city" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                </div>
+
+                <div class="flex space-x-4">
+                    <div class="w-1/2">
+                        <label for="postal-code" class="block text-lg text-gray-700">Postal Code</label>
+                        <input type="text" id="postal-code" name="postal-code" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
                     </div>
-
-                    <div class="mb-4">
-                        <label for="email" class="block text-gray-600 font-medium">Email Address</label>
-                        <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
+                    <div class="w-1/2">
+                        <label for="country" class="block text-lg text-gray-700">Country</label>
+                        <input type="text" id="country" name="country" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
                     </div>
+                </div>
 
-                    <div class="mb-4">
-                        <label for="password" class="block text-gray-600 font-medium">Password</label>
-                        <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
+                <div class="payment-methods">
+                    <label for="payment-method" class="block text-lg text-gray-700 mb-2">Payment Method</label>
+                    <div class="flex space-x-4">
+                        <!-- Credit Card -->
+                        <div class="payment-option cursor-pointer" data-method="credit-card">
+                            <img src="https://cdn0.iconfinder.com/data/icons/flat-design-business-set-3/24/payment-method-visa-512.png" alt="Credit Card" class="w-20 h-20 rounded-lg border-2 border-gray-300 hover:border-green-500">
+                            <p class="text-center text-gray-700 mt-2">Credit Card</p>
+                        </div>
+                        <!-- PayPal -->
+                        <div class="payment-option cursor-pointer" data-method="paypal">
+                            <img src="https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/250_Paypal_logo-512.png" alt="PayPal" class="w-20 h-20 rounded-lg border-2 border-gray-300 hover:border-green-500">
+                            <p class="text-center text-gray-700 mt-2">PayPal</p>
+                        </div>
+                        <!-- Bank Transfer -->
+                        <div class="payment-option cursor-pointer" data-method="bank-transfer">
+                            <img src="https://cdn-icons-png.flaticon.com/512/6404/6404655.png" alt="Bank Transfer" class="w-20 h-20 rounded-lg border-2 border-gray-300 hover:border-green-500">
+                            <p class="text-center text-gray-700 mt-2">Bank Transfer</p>
+                        </div>
+                        <!-- COD -->
+                        <div class="payment-option cursor-pointer" data-method="cash-on-delivery">
+                            <img src="https://cdn-icons-png.flaticon.com/512/10351/10351648.png" alt="Bank Transfer" class="w-20 h-20 rounded-lg border-2 border-gray-300 hover:border-green-500">
+                            <p class="text-center text-gray-700 mt-2">Cash On Delivery</p>
+                        </div>
                     </div>
+                </div>
 
-                    <div class="mb-6">
-                        <label for="confirm-password" class="block text-gray-600 font-medium">Confirm Password</label>
-                        <input type="password" id="confirm-password" name="confirm-password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
-                    </div>
-
-                    <button type="submit" class="w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 font-semibold">Sign Up</button>
-                </form>
-                <p class="text-center text-gray-600 mt-4">Already have an account? <a href="../views/login.php" class="text-pink-600 hover:text-pink-700">Log In</a></p>
-            </div>
+                <button type="submit" class="w-full bg-green-500 text-white py-3 rounded hover:bg-green-600 transition duration-300">Place Order</button>
+            </form>
         </div>
     </section>
-
-    <!-- Footer -->
-    <footer class="bg-gray-50 px-40 py-10 text-gray-700">
+<!-- Footer -->
+<footer class="bg-gray-50 px-40 py-10 text-gray-700">
         <div class="container mx-auto px-6">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 <!-- Here For You Section -->
@@ -325,6 +350,18 @@
             profileMenu.classList.add('transform');
             profileMenu.classList.add('-translate-y-2');
         }
+    });
+
+    // Get all payment option elements
+    const paymentOptions = document.querySelectorAll('.payment-option');
+
+    // Add click event listeners to each payment option
+    paymentOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            const selectedMethod = option.dataset.method;
+            alert(`You selected: ${selectedMethod}. Redirecting to payment details page...`);
+            window.location.href = `payment.php?method=${selectedMethod}`; // Redirect to payment.php with method parameter
+        });
     });
 </script>
 </html>

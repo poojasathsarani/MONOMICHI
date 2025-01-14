@@ -167,13 +167,13 @@
                 <h4 class="text-xl font-semibold">Tea Ceremony</h4>
                 <p class="mt-2 text-gray-600">The Japanese Tea Ceremony (Sadō) is a traditional ritual where powdered green tea (matcha) is prepared and served to guests in a calm, methodical way. Rooted in Zen Buddhism, it emphasizes harmony, respect, purity, and tranquility.
 
-Key elements include:
+                Key elements include:
 
-The Setting: A minimalistic tea room or garden, fostering a peaceful atmosphere.
-The Process: The host carefully prepares the tea, and guests drink it with respect and mindfulness.
-Utensils: Essential items like the tea bowl (chawan), whisk (chasen), and scoop (chashaku).
-Philosophy: Focuses on mindfulness, with each gesture reflecting Zen principles.
-It is a practice that fosters connections, mindfulness, and appreciation for simplicity.</p>
+                The Setting: A minimalistic tea room or garden, fostering a peaceful atmosphere.
+                The Process: The host carefully prepares the tea, and guests drink it with respect and mindfulness.
+                Utensils: Essential items like the tea bowl (chawan), whisk (chasen), and scoop (chashaku).
+                Philosophy: Focuses on mindfulness, with each gesture reflecting Zen principles.
+                It is a practice that fosters connections, mindfulness, and appreciation for simplicity.</p>
             </div>
         </div>
 

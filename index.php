@@ -108,19 +108,19 @@
             <!-- Right Side Icons -->
             <div class="flex items-center space-x-6 pr-4 ml-auto">
                 <!-- Wishlist Icon -->
-                <a href="../views/wishlist.php" class="relative">
+                <a href="products.php#wishlist-sidebar" class="relative">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8a4 4 0 016-3.92A4 4 0 0121 8c0 4-6 8-9 8s-9-4-9-8z" />
                     </svg>
-                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">5</span>
+                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"></span>
                 </a>
 
                 <!-- Shopping Cart Icon -->
-                <a href="../views/cart.php" class="relative">
+                <a href="products.php#cart-sidebar" class="relative">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.879 1.514M7 16a2 2 0 104 0M13 16a2 2 0 104 0M5.058 6H20.86l-2.35 7H7.609m2.788 5H6M21 21H6"></path>
                     </svg>
-                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"></span>
                 </a>
 
                 <!-- Profile Icon (Trigger) -->
@@ -210,7 +210,7 @@
                     <img src="https://zenbird.media/wp-content/uploads/2022/10/kimono_top.jpg" alt="Japanese Kimono" 
                         class="w-full h-56 object-cover transition duration-300 ease-in-out group-hover:grayscale">
                     <div class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition duration-300 ease-in-out">
-                        <h2 class="text-white text-2xl font-bold">JAPANESE KIMONO</h2>
+                        <h2 class="text-white text-2xl font-bold">WEAR YOU LIKE</h2>
                         <a href="../views/product-detail.php?id=5" class="mt-4 bg-white text-black py-2 px-6 rounded-full text-lg hover:bg-gray-200 transition">TAKE A LOOK</a>
                     </div>
                 </div>
@@ -220,7 +220,7 @@
 
     <!-- Arrow Key Bar to Redirect to New Arrival Page -->
     <div class="flex justify-center mt-8">
-        <a href="../views/newarrivals.php" class="flex items-center text-pink-600 font-semibold hover:text-pink-700 transition duration-300 transform hover:scale-110">
+        <a href="../views/products.php#new-arrivals-section" class="flex items-center text-pink-600 font-semibold hover:text-pink-700 transition duration-300 transform hover:scale-110">
             <span class="mr-2 text-5xl">See All New Arrivals</span>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transform transition-transform duration-300 hover:translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m0 0l-6-6m6 6l-6 6" />
@@ -232,7 +232,7 @@
     <section id="limited-time-offers" class="bg-red-600 text-white text-center py-8 relative overflow-visible">
         <h3 class="text-4xl font-semibold">Limited Time Offers</h3>
         <p class="mt-4 text-lg">Get up to 80% off on selected Japanese items. Don't miss out!</p>
-        <a href="../views/limitedtimeoffers.php" class="mt-6 inline-block bg-white text-red-600 py-3 px-8 rounded-full text-lg font-semibold">Shop Now</a>
+        <a href="../views/products.php#limited-time-offers-section" class="mt-6 inline-block bg-white text-red-600 py-3 px-8 rounded-full text-lg font-semibold">Shop Now</a>
     </section>
 
     <!-- Categories Section -->
@@ -264,7 +264,7 @@
                 <div class="absolute inset-0 bg-cover bg-center filter blur-sm" style="background-image: url('https://thumbs.dreamstime.com/b/zen-home-decor-japanese-pottery-displayed-bamboo-mat-sunlit-room-view-blooming-cherry-garden-348802394.jpg');"></div>
 
                 <!-- Content (Text and Icon) -->
-                <a href="culturalinsights.php" class="flex flex-col items-center text-gray-800 hover:text-white transition relative z-10">
+                <a href="../views/products.php" class="flex flex-col items-center text-gray-800 hover:text-white transition relative z-10">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
@@ -450,13 +450,6 @@
 
 </body>
 <script>
-    // Show the header after the page loads
-    document.addEventListener("DOMContentLoaded", () => {
-        const header = document.getElementById("header");
-        header.classList.remove("hidden");
-        header.classList.add("opacity-100");
-    });
-
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('toggle-sidebar');
     const expandIcon = document.getElementById('expand-icon');

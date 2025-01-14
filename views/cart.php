@@ -1,18 +1,60 @@
 <?php
-    session_start();
-    $userIsLoggedIn = isset($_SESSION['user']);
-    $userProfileImage = $userIsLoggedIn ? $_SESSION['user']['profile_image'] : null;
+session_start();
+
+// Initialize cart if not already set
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
+}
+
+// Add item to cart if "add_to_cart" parameter is set
+if (isset($_GET['add_to_cart'])) {
+    $product_id = $_GET['add_to_cart'];
+    $product_name = $_GET['product_name'];
+    $product_price = $_GET['product_price'];
+    $product_image = $_GET['product_image'];
+
+    // Check if the product is already in the cart
+    $found = false;
+    foreach ($_SESSION['cart'] as $index => $item) {
+        if ($item['product_id'] == $product_id) {
+            $_SESSION['cart'][$index]['quantity']++;
+            $found = true;
+            break;
+        }
+    }
+
+    // If product is not in the cart, add it
+    if (!$found) {
+        $_SESSION['cart'][] = [
+            'product_id' => $product_id,
+            'product_name' => $product_name,
+            'product_price' => $product_price,
+            'product_image' => $product_image,
+            'quantity' => 1
+        ];
+    }
+}
+
+// Calculate total cart items
+$cart_count = 0;
+if (isset($_SESSION['cart'])) {
+    foreach ($_SESSION['cart'] as $item) {
+        $cart_count += $item['quantity'];
+    }
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>MONOMICHI - CART</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        /* cannot add the ::placeholder selector directly in the inline CSS because inline styles only apply to elements directly and do not support pseudo-elements like ::placeholder, ::before, ::after, or any other pseudo-selectors. */
-        #search-bar::placeholder {
+                /* cannot add the ::placeholder selector directly in the inline CSS because inline styles only apply to elements directly and do not support pseudo-elements like ::placeholder, ::before, ::after, or any other pseudo-selectors. */
+                #search-bar::placeholder {
             color: #6B7280;
             font-weight: bold;
         }   
@@ -31,6 +73,16 @@
             50% { content: " "; }
             100% { opacity: 0; }
         }
+
+
+        body { font-family: Arial, sans-serif; }
+        .cart-icon { position: fixed; top: 10px; right: 20px; }
+        .cart-icon span { background: red; color: white; border-radius: 50%; padding: 5px 10px; font-size: 14px; }
+        table { width: 80%; margin: 20px auto; border-collapse: collapse; }
+        th, td { padding: 15px; text-align: left; border: 1px solid #ddd; }
+        img { width: 50px; height: 50px; }
+        a { text-decoration: none; color: #007BFF; }
+        a:hover { text-decoration: underline; }
     </style>
 </head>
 <body class="bg-pink-50 font-serif">
@@ -102,15 +154,38 @@
                 </nav>
             </aside>
 
+            <!-- Right Side Icons -->
+            <div class="flex items-center space-x-6 pr-4 ml-auto">
+                <!-- Wishlist Icon -->
+                <a href="../views/wishlist.php" class="relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8a4 4 0 016-3.92A4 4 0 0121 8c0 4-6 8-9 8s-9-4-9-8z" />
+                    </svg>
+                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">5</span>
+                </a>
+
+                <!-- Shopping Cart Icon -->
+                <a href="../views/cart.php" class="relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.879 1.514M7 16a2 2 0 104 0M13 16a2 2 0 104 0M5.058 6H20.86l-2.35 7H7.609m2.788 5H6M21 21H6"></path>
+                    </svg>
+                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">1</span>
+                </a>
+
                 <!-- Profile Icon (Trigger) -->
                 <button id="profile-button" class="flex items-center space-x-2 p-0 bg-gray-200 rounded-full hover:bg-gray-300 focus:outline-none">
                     <!-- Conditional Rendering of User Avatar or Profile Icon -->
-                    <img src="<?php echo $userIsLoggedIn ? $userProfileImage : 'https://w7.pngwing.com/pngs/423/634/png-transparent-find-user-profile-person-avatar-people-account-search-general-pack-icon.png'; ?>" alt="User Profile" class="w-14 h-14 rounded-full border border-gray-300 transition-transform transform hover:scale-110 hover:shadow-lg">
                 </button>
 
                 <!-- Dropdown Menu -->
                 <div id="profile-menu" class="absolute right-0 mt-80 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
                     <ul class="py-2 text-sm text-gray-700">
+                        <li>
+                            <a href="../views/signup.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Sign Up</a>
+                        </li>
+                        <li>
+                            <a href="../views/login.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Log In</a>
+                        </li>
                         <li>
                             <a href="../views/my-account.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
                         </li>
@@ -125,44 +200,64 @@
             </div>
     </header>
 
-    <!-- Sign-Up Section -->
-    <section class="py-16 bg-gray-50 relative">
-        <!-- Background Video with Blur Effect -->
-        <video autoplay loop muted class="absolute inset-0 w-full h-full object-cover z-0" style="filter: blur(2px);">
-            <source src="../images/bg1.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
+    <!-- Cart Icon -->
+    <div class="fixed top-4 right-4 bg-white shadow-lg rounded-full p-2 flex items-center justify-center">
+        <a href="cart.php" class="relative">
+            <img src="cart_icon.png" alt="Cart Icon" class="w-10 h-10">
+            <span class="absolute top-0 right-0 bg-red-500 text-white rounded-full text-xs px-2 py-1"> <?php echo $cart_count; ?> </span>
+        </a>
+    </div>
 
-        <div class="container mx-auto px-6 relative z-10">
-            <div class="max-w-lg mx-auto bg-white shadow-lg shadow-pink-600 border-4 border-pink-200 rounded-lg p-8">
-                <h2 class="text-3xl font-semibold text-center text-gray-800 mb-6">Create Your Account</h2>
-                <form action="#" method="POST">
-                    <div class="mb-4">
-                        <label for="name" class="block text-gray-600 font-medium">Full Name</label>
-                        <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
-                    </div>
+    <div class="container mx-auto py-10">
+        <h1 class="text-3xl font-bold mb-6 text-center">Your Cart</h1>
 
-                    <div class="mb-4">
-                        <label for="email" class="block text-gray-600 font-medium">Email Address</label>
-                        <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="password" class="block text-gray-600 font-medium">Password</label>
-                        <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
-                    </div>
-
-                    <div class="mb-6">
-                        <label for="confirm-password" class="block text-gray-600 font-medium">Confirm Password</label>
-                        <input type="password" id="confirm-password" name="confirm-password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
-                    </div>
-
-                    <button type="submit" class="w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 font-semibold">Sign Up</button>
-                </form>
-                <p class="text-center text-gray-600 mt-4">Already have an account? <a href="../views/login.php" class="text-pink-600 hover:text-pink-700">Log In</a></p>
-            </div>
+        <div class="overflow-x-auto">
+            <table class="table-auto w-full bg-white shadow-md rounded border border-gray-200">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="px-4 py-2">Image</th>
+                        <th class="px-4 py-2">Item Name</th>
+                        <th class="px-4 py-2">Price</th>
+                        <th class="px-4 py-2">Quantity</th>
+                        <th class="px-4 py-2">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    if (!empty($_SESSION['cart'])) {
+                        foreach ($_SESSION['cart'] as $item) {
+                            echo '<tr class="border-t">';
+                            echo '<td class="px-4 py-2"><img src="' . htmlspecialchars($item['product_image']) . '" alt="Product Image" class="w-16 h-16 rounded"></td>';
+                            echo '<td class="px-4 py-2">' . htmlspecialchars($item['product_name']) . '</td>';
+                            echo '<td class="px-4 py-2">$' . number_format($item['product_price'], 2) . '</td>';
+                            echo '<td class="px-4 py-2">' . $item['quantity'] . '</td>';
+                            echo '<td class="px-4 py-2">$' . number_format($item['product_price'] * $item['quantity'], 2) . '</td>';
+                            echo '</tr>';
+                        }
+                    } else {
+                        echo '<tr><td colspan="5" class="text-center px-4 py-4">Your cart is empty.</td></tr>';
+                    }
+                    ?>
+                </tbody>
+            </table>
         </div>
-    </section>
+
+        <div class="flex justify-between items-center mt-6">
+            <h3 class="text-xl font-semibold">Total: 
+                <?php 
+                $total = 0;
+                if (!empty($_SESSION['cart'])) {
+                    foreach ($_SESSION['cart'] as $item) {
+                        $total += $item['product_price'] * $item['quantity'];
+                    }
+                }
+                echo '$' . number_format($total, 2);
+                ?>
+            </h3>
+            <a href="checkout.php" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Proceed to Checkout</a>
+        </div>
+    </div>
+
 
     <!-- Footer -->
     <footer class="bg-gray-50 px-40 py-10 text-gray-700">
@@ -228,10 +323,9 @@
             </div>
         </div>
     </footer>
-
 </body>
 <script>
-    //Sidebar
+    //Side bar
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('toggle-sidebar');
     const expandIcon = document.getElementById('expand-icon');
@@ -268,7 +362,8 @@
         }
     });
 
-    //Profile
+
+    //Profile Button
     const profileButton = document.getElementById('profile-button');
     const profileMenu = document.getElementById('profile-menu');
 
@@ -279,6 +374,8 @@
         profileMenu.classList.toggle('-translate-y-2');
     });
 
+
+    //Search bar
     const placeholderTexts = [
         "Search products or categories...",
         "Discover the best of Japan!",
@@ -317,6 +414,9 @@
         typeText(); // Start typing when the page loads
     };
 
+
+
+    //Dropdown
     // Close dropdown when clicking outside
     document.addEventListener('click', (event) => {
         if (!profileButton.contains(event.target) && !profileMenu.contains(event.target)) {
@@ -325,6 +425,28 @@
             profileMenu.classList.add('transform');
             profileMenu.classList.add('-translate-y-2');
         }
+    });
+    
+    document.querySelectorAll('.category-card').forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            // Scale and rotate
+            card.style.transform = 'scale(1.05) rotate(2deg)';
+            card.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.2)';
+
+            // Activate overlay
+            const overlay = card.querySelector('.hover-overlay');
+            overlay.style.opacity = '0.4';
+        });
+
+        card.addEventListener('mouseleave', () => {
+            // Reset scale and rotation
+            card.style.transform = 'scale(1) rotate(0deg)';
+            card.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+
+            // Deactivate overlay
+            const overlay = card.querySelector('.hover-overlay');
+            overlay.style.opacity = '0';
+        });
     });
 </script>
 </html>
