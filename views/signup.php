@@ -1,8 +1,67 @@
 <?php
-    session_start();
-    $userIsLoggedIn = isset($_SESSION['user']);
-    $userProfileImage = $userIsLoggedIn ? $_SESSION['user']['profile_image'] : null;
+// Include database connection and validation logic
+include('db_connection.php');
+
+// Initialize error variables
+$nameErr = $emailErr = $passwordErr = $termsErr = "";
+$fullname = $email = $password = "";
+$success = false; // Variable to track success
+
+// Handle form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Validate name
+    if (empty($_POST["name"])) {
+        $nameErr = "Name is required";
+    } else {
+        $fullname = $_POST["name"];
+    }
+
+    // Validate email
+    if (empty($_POST["email"])) {
+        $emailErr = "Email is required";
+    } else {
+        $email = $_POST["email"];
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $emailErr = "Invalid email format";
+        }
+    }
+
+    // Validate password
+    if (empty($_POST["password"])) {
+        $passwordErr = "Password is required";
+    } else {
+        $password = $_POST["password"];
+    }
+
+    // Validate terms checkbox
+    if (empty($_POST["terms"])) {
+        $termsErr = "You must agree to the terms and conditions";
+    }
+
+    // If no errors, proceed with registration
+    if (empty($nameErr) && empty($emailErr) && empty($passwordErr) && empty($termsErr)) {
+        // Hash the password
+        $password = password_hash($password, PASSWORD_DEFAULT);
+
+        // Default role is "customer"
+        $role = 'customer';
+
+        // Insert the new user into the database
+        $sql = "INSERT INTO users (fullname, email, password, role) VALUES (?, ?, ?, ?)";
+        if ($stmt = $conn->prepare($sql)) {
+            $stmt->bind_param("ssss", $fullname, $email, $password, $role); // Include role in the query
+            if ($stmt->execute()) {
+                // Set the success variable to true to display the popup
+                $success = true;
+            } else {
+                echo "Error: Could not execute the query.";
+            }
+        }
+    }
+}
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -102,77 +161,107 @@
                 </nav>
             </aside>
 
-                <!-- Profile Icon (Trigger) -->
-                <button id="profile-button" class="flex items-center space-x-2 p-0 bg-gray-200 rounded-full hover:bg-gray-300 focus:outline-none">
-                    <!-- Conditional Rendering of User Avatar or Profile Icon -->
-                    <img src="<?php echo $userIsLoggedIn ? $userProfileImage : 'https://w7.pngwing.com/pngs/423/634/png-transparent-find-user-profile-person-avatar-people-account-search-general-pack-icon.png'; ?>" alt="User Profile" class="w-14 h-14 rounded-full border border-gray-300 transition-transform transform hover:scale-110 hover:shadow-lg">
-                </button>
-
-                <!-- Dropdown Menu -->
-                <div id="profile-menu" class="absolute right-0 mt-80 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
-                    <ul class="py-2 text-sm text-gray-700">
-                        <li>
-                            <a href="../views/my-account.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
-                        </li>
-                        <li>
-                            <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
-                        </li>
-                        <li>
-                            <a href="../views/settings.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Settings</a>
-                        </li>
-                    </ul>
-                </div>
+            <!-- Dropdown Menu -->
+            <div id="profile-menu" class="absolute right-0 mt-80 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
+                <ul class="py-2 text-sm text-gray-700">
+                    <li>
+                        <a href="../views/my-account.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
+                    </li>
+                    <li>
+                        <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
+                    </li>
+                    <li>
+                        <a href="../views/settings.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Settings</a>
+                    </li>
+                </ul>
             </div>
+        </div>
     </header>
 
     <!-- Sign-Up Section -->
-    <section class="py-16 bg-gray-50 relative">
-        <!-- Background Video with Blur Effect -->
+    <section class="min-h-screen flex items-center justify-center bg-gray-100 relative">
+        <!-- Background Video -->
         <video autoplay loop muted class="absolute inset-0 w-full h-full object-cover z-0" style="filter: blur(2px);">
-            <source src="../images/bg1.mp4" type="video/mp4">
+            <source src="../images/bg4.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
 
-        <div class="container mx-auto px-6 relative z-10">
-            <div class="max-w-lg mx-auto bg-white shadow-lg shadow-pink-600 border-4 border-pink-200 rounded-lg p-8">
-                <h2 class="text-3xl font-semibold text-center text-gray-800 mb-6">Create Your Account</h2>
-                <form action="#" method="POST">
-                    <div class="mb-4">
-                        <label for="name" class="block text-gray-600 font-medium">Full Name</label>
-                        <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
-                    </div>
+        <!-- Form Container -->
+        <div class="w-[500px] mx-auto bg-white shadow-lg shadow-pink-600 border-4 border-pink-200 rounded-lg p-8 z-10 relative">
+            <h2 class="text-3xl font-semibold text-center text-gray-800 mb-6">Sign Up</h2>
+            
+            <!-- Display error messages -->
+            <?php if ($nameErr || $emailErr || $passwordErr || $termsErr): ?>
+                <div class="text-red-600 text-center mb-4">
+                    <p><?php echo $nameErr; ?></p>
+                    <p><?php echo $emailErr; ?></p>
+                    <p><?php echo $passwordErr; ?></p>
+                    <p><?php echo $termsErr; ?></p>
+                </div>
+            <?php endif; ?>
+            
+            <form action="signup.php" method="POST">
+                <div class="mb-4">
+                    <label for="name" class="block text-lg text-gray-700">Full Name</label>
+                    <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
+                </div>
 
-                    <div class="mb-4">
-                        <label for="email" class="block text-gray-600 font-medium">Email Address</label>
-                        <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
-                    </div>
+                <div class="mb-4">
+                    <label for="email" class="block text-lg text-gray-700">Email</label>
+                    <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
+                </div>
 
-                    <div class="mb-4">
-                        <label for="password" class="block text-gray-600 font-medium">Password</label>
-                        <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
-                    </div>
+                <div class="mb-6">
+                    <label for="password" class="block text-lg text-gray-700">Password</label>
+                    <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
+                </div>
 
-                    <div class="mb-4">
-                        <label for="password_confirmation" class="block text-gray-600 font-medium">Confirm Password</label>
-                        <input type="password" id="password_confirmation" name="password_confirmation" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
-                    </div>
+                <div class="mb-6">
+                    <input type="checkbox" id="terms" name="terms" class="mr-2">
+                    <label for="terms" class="text-gray-700">I agree to the <a href="termsandcondition.php" class="text-pink-600 hover:text-pink-700">terms and conditions</a></label>
+                </div>
 
-                    <div class="mb-4">
-                        <label for="terms" class="flex items-center space-x-2">
-                            <input type="checkbox" id="terms" name="terms" class="h-5 w-5 text-pink-600" required>
-                            <span class="text-gray-600">I agree to the terms and conditions</span>
-                        </label>
-                    </div>
+                <button type="submit" class="w-full py-3 bg-pink-600 text-white font-semibold rounded-lg hover:bg-pink-700 transition duration-300 ease-in-out">Sign Up</button>
+            </form>
 
-                    <div class="mb-6">
-                        <button type="submit" class="w-full bg-pink-600 text-white py-2 px-4 rounded-lg hover:bg-pink-700 focus:outline-none">Sign Up</button>
-                    </div>
-
-                    <p class="text-center text-gray-600">Already have an account? <a href="login.php" class="text-pink-600 hover:underline">Log in</a></p>
-                </form>
+            <!-- Login link for already registered users -->
+            <div class="text-center mt-4">
+                <p class="text-gray-700">Already have an account? <a href="login.php" class="text-pink-600 hover:text-pink-700">Login</a></p>
             </div>
         </div>
+        
+        <!-- Success Popup Message -->
+        <?php if ($success): ?>
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                    <h3 class="text-xl font-bold text-pink-600 mb-2">Successfully Signed Up!</h3>
+                    <p class="text-gray-700 mb-4">You will be redirected to the login page shortly...</p>
+                </div>
+            </div>
+            <script>
+                // Redirect to the login page after 3 seconds
+                setTimeout(() => {
+                    window.location.href = 'login.php'; // Redirect to login page after successful signup
+                }, 3000);
+            </script>
+        <?php endif; ?>
     </section>
+
+    <!-- Popup Box -->
+    <?php if ($success): ?>
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                <h3 class="text-xl font-bold text-pink-600 mb-2">Successfully Registered!</h3>
+                <p class="text-gray-700 mb-4">You will be redirected to the login page shortly...</p>
+            </div>
+        </div>
+        <script>
+            // Redirect to login page after 3 seconds
+            setTimeout(() => {
+                window.location.href = 'login.php';
+            }, 3000);
+        </script>
+    <?php endif; ?>
 
     <!-- Footer -->
     <footer class="bg-gray-50 px-40 py-10 text-gray-700">
@@ -276,17 +365,6 @@
             collapseIcon.classList.add('hidden');
             expandIcon.classList.remove('hidden');
         }
-    });
-
-    //Profile
-    const profileButton = document.getElementById('profile-button');
-    const profileMenu = document.getElementById('profile-menu');
-
-    profileButton.addEventListener('click', () => {
-        profileMenu.classList.toggle('hidden');
-        profileMenu.classList.toggle('opacity-0');
-        profileMenu.classList.toggle('transform');
-        profileMenu.classList.toggle('-translate-y-2');
     });
 
     const placeholderTexts = [

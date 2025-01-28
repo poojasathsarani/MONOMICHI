@@ -1,28 +1,33 @@
 <?php
+// Include database connection
+include('db_connection.php');
+
+// Function to send verification email
+function sendVerificationEmail($email, $token) {
+    $verificationLink = "https://yourdomain.com/verify-email.php?token=$token";
+    $subject = "Email Verification for Password Reset";
+    $message = "Please click the link below to verify your email and reset your password:\n\n$verificationLink";
+    $headers = "From: no-reply@yourdomain.com";
+    
+    return mail($email, $subject, $message, $headers);
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
-    
-    // Validate if the email exists in the database (pseudo-code)
-    $user = getUserByEmail($email); // Retrieve user from the database
+
+    // Validate if the email exists in the database
+    $user = getUserByEmail($email); // Replace with your actual database query function
     
     if ($user) {
-        // Generate a unique token for password reset
+        // Generate a unique token for email verification
         $token = bin2hex(random_bytes(50));
         
         // Store the token in the database with an expiration time (e.g., 1 hour)
-        savePasswordResetToken($email, $token); 
+        savePasswordResetToken($email, $token); // Replace with your actual function to save the token
         
-        // Create reset link
-        $resetLink = "https://yourdomain.com/reset-password.php?token=$token";
-        
-        // Send the email
-        $subject = "Password Reset Request";
-        $message = "Click the link below to reset your password:\n\n$resetLink";
-        $headers = "From: no-reply@yourdomain.com";
-
-        // Use PHP's mail function or a library like PHPMailer to send the email
-        if (mail($email, $subject, $message, $headers)) {
-            echo "An email with a reset link has been sent to your email address.";
+        // Send email with verification link
+        if (sendVerificationEmail($email, $token)) {
+            echo "A verification email has been sent to your email address. Please check your inbox.";
         } else {
             echo "There was an error sending the email. Please try again.";
         }
@@ -45,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <section class="min-h-screen flex items-center justify-center bg-gray-100">
         <div class="max-w-lg mx-auto bg-white shadow-lg shadow-pink-600 border-4 border-pink-200 rounded-lg p-8">
             <h2 class="text-3xl font-semibold text-center text-gray-800 mb-6">Forgot Your Password?</h2>
-            <p class="text-center text-gray-600 mb-6">Enter your email address, and we will send you a link to reset your password.</p>
+            <p class="text-center text-gray-600 mb-6">Enter your email address, and we will send you a link to verify your email and reset your password.</p>
 
             <form action="#" method="POST">
                 <div class="mb-4">
@@ -53,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
                 </div>
 
-                <button type="submit" class="w-full py-3 bg-pink-600 text-white font-semibold rounded-lg hover:bg-pink-700 transition duration-300 ease-in-out">Send Reset Link</button>
+                <button type="submit" class="w-full py-3 bg-pink-600 text-white font-semibold rounded-lg hover:bg-pink-700 transition duration-300 ease-in-out">Send Verification Link</button>
             </form>
         </div>
     </section>

@@ -1,14 +1,70 @@
 <?php
-    session_start();
-    $userIsLoggedIn = isset($_SESSION['user']);
-    $userProfileImage = $userIsLoggedIn ? $_SESSION['user']['profile_image'] : null;
+session_start();
+
+include('db_connection.php');
+
+$errorMessage = "";
+$success = false;
+
+// Handle form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Sanitize and retrieve form data
+    $email = $_POST["email"];
+    $password = $_POST["password"];
+    
+    // Query to get user details based on the email
+    $sql = "SELECT id, email, password, role FROM users WHERE email = ?";
+    
+    if ($stmt = $conn->prepare($sql)) {
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $stmt->store_result();
+        
+        // Check if the user exists
+        if ($stmt->num_rows > 0) {
+            $stmt->bind_result($userId, $storedEmail, $storedPassword, $role);
+            $stmt->fetch();
+            
+            // Verify password
+            if (password_verify($password, $storedPassword)) {
+                // Password is correct, set session variables and redirect based on role
+                $_SESSION['user_id'] = $userId; // Store the user ID in the session
+                
+                // Set success flag for the popup
+                $success = true;
+                
+                // Inside the login handling logic
+                if ($role == 'customer') {
+                    // Redirect to the index.php inside the MONOMICHI folder
+                    header("Location: ../index.php");
+                    exit;
+                } elseif ($role == 'admin') {
+                    header("Location: ../views/admindashboard.php");
+                    exit;
+                } elseif ($role == 'manager') {
+                    header("Location: ../views/managerdashboard.php");
+                    exit;
+                }
+            } else {
+                $errorMessage = "Incorrect password!";
+            }
+        } else {
+            $errorMessage = "No user found with this email!";
+        }
+        
+        $stmt->close();
+    }
+}
+
+$conn->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
+    <title>Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* cannot add the ::placeholder selector directly in the inline CSS because inline styles only apply to elements directly and do not support pseudo-elements like ::placeholder, ::before, ::after, or any other pseudo-selectors. */
@@ -102,41 +158,43 @@
                 </nav>
             </aside>
 
-                <!-- Profile Icon (Trigger) -->
-                <button id="profile-button" class="flex items-center space-x-2 p-0 bg-gray-200 rounded-full hover:bg-gray-300 focus:outline-none">
-                    <!-- Conditional Rendering of User Avatar or Profile Icon -->
-                    <img src="<?php echo $userIsLoggedIn ? $userProfileImage : 'https://w7.pngwing.com/pngs/423/634/png-transparent-find-user-profile-person-avatar-people-account-search-general-pack-icon.png'; ?>" alt="User Profile" class="w-14 h-14 rounded-full border border-gray-300 transition-transform transform hover:scale-110 hover:shadow-lg">
-                </button>
-
-                <!-- Dropdown Menu -->
-                <div id="profile-menu" class="absolute right-0 mt-80 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
-                    <ul class="py-2 text-sm text-gray-700">
-                        <li>
-                            <a href="../views/my-account.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
-                        </li>
-                        <li>
-                            <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
-                        </li>
-                        <li>
-                            <a href="../views/settings.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Settings</a>
-                        </li>
-                    </ul>
-                </div>
+            <!-- Dropdown Menu -->
+            <div id="profile-menu" class="absolute right-0 mt-80 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
+                <ul class="py-2 text-sm text-gray-700">
+                    <li>
+                        <a href="../views/my-account.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
+                    </li>
+                    <li>
+                        <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
+                    </li>
+                    <li>
+                        <a href="../views/settings.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Settings</a>
+                    </li>
+                </ul>
             </div>
+        </div>
     </header>
 
-    <!-- Login Form Section -->
+    <!-- HTML Form and Popup (show the popup on success) -->
     <section class="min-h-screen flex items-center justify-center bg-gray-100 relative">
         <!-- Background Video -->
         <video autoplay loop muted class="absolute inset-0 w-full h-full object-cover z-0" style="filter: blur(2px);">
-            <source src="../images/bg1.mp4" type="video/mp4">
+            <source src="../images/bg4.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
 
         <!-- Form Container -->
         <div class="max-w-lg mx-auto bg-white shadow-lg shadow-pink-600 border-4 border-pink-200 rounded-lg p-8 z-10 relative">
             <h2 class="text-3xl font-semibold text-center text-gray-800 mb-6">Log In</h2>
-            <form action="#" method="POST" onsubmit="return saveCredentials()">
+            
+            <!-- Display error message -->
+            <?php if ($errorMessage): ?>
+                <div class="text-red-600 text-center mb-4">
+                    <p><?php echo $errorMessage; ?></p>
+                </div>
+            <?php endif; ?>
+            
+            <form action="login.php" method="POST">
                 <div class="mb-4">
                     <label for="email" class="block text-lg text-gray-700">Email</label>
                     <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
@@ -158,6 +216,22 @@
                 <button type="submit" class="w-full py-3 bg-pink-600 text-white font-semibold rounded-lg hover:bg-pink-700 transition duration-300 ease-in-out">Log In</button>
             </form>
         </div>
+        
+        <!-- Success Popup Message -->
+        <?php if ($success): ?>
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                    <h3 class="text-xl font-bold text-pink-600 mb-2">Successfully Logged In!</h3>
+                    <p class="text-gray-700 mb-4">You will be redirected to the appropriate dashboard shortly...</p>
+                </div>
+            </div>
+            <script>
+                // Redirect to the appropriate page after 3 seconds
+                setTimeout(() => {
+                    window.location.href = '<?php echo $role == "customer" ? "../index.php" : ($role == "admin" ? "../views/admindashboard.php" : "../views/managerdashboard.php"); ?>';
+                }, 3000);
+            </script>
+        <?php endif; ?>
     </section>
 
     <!-- Footer -->
@@ -264,17 +338,6 @@
         }
     });
 
-    //Profile
-    const profileButton = document.getElementById('profile-button');
-    const profileMenu = document.getElementById('profile-menu');
-
-    profileButton.addEventListener('click', () => {
-        profileMenu.classList.toggle('hidden');
-        profileMenu.classList.toggle('opacity-0');
-        profileMenu.classList.toggle('transform');
-        profileMenu.classList.toggle('-translate-y-2');
-    });
-
     const placeholderTexts = [
         "Search products or categories...",
         "Discover the best of Japan!",
@@ -322,32 +385,5 @@
             profileMenu.classList.add('-translate-y-2');
         }
     });
-
-    // Function to handle login based on hardcoded credentials
-    function saveCredentials() {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-
-        // Hardcoded credentials for different roles
-        const users = {
-            admin: { email: 'admin@monomichi.com', password: 'admin123', redirect: 'admindashboard.php' },
-            manager: { email: 'manager@monomichi.com', password: 'manager123', redirect: 'managerdashboard.php' },
-            customer: { email: 'janith@gmail.com', password: 'customer123', redirect: 'products.php' },
-            blogger: { email: 'janith2@gmail.com', password: 'blogger123', redirect: 'bloggerdashboard.php' }
-        };
-
-        // Check if the entered credentials match any of the hardcoded users
-        for (let role in users) {
-            if (email === users[role].email && password === users[role].password) {
-                alert(`Welcome, ${email}!`);
-                window.location.href = users[role].redirect; // Redirect to the corresponding dashboard
-                return false; // Prevent form submission
-            }
-        }
-
-        // If no match is found
-        alert('Invalid email or password.');
-        return false; // Block form submission
-    }
 </script>
 </html>
