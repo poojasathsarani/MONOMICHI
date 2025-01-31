@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Verify password
             if (password_verify($password, $storedPassword)) {
                 // Password is correct, set session variables and redirect based on role
-                $_SESSION['user_id'] = $userId; // Store the user ID in the session
+                $_SESSION['id'] = $userId;
                 
                 // Set success flag for the popup
                 $success = true;
@@ -92,19 +92,19 @@ $conn->close();
 <body class="bg-pink-50 font-serif">
     <!-- Navbar -->
     <header class="bg-red-100 shadow sticky top-0 z-50">
-        <div class="container mx-auto px-2 py-4 flex items-center justify-between">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
             <!-- Logo -->
             <div class="flex items-center">
-                    <img src="../images/logoo.png" alt="MONOMICHI Logo" class="h-16 w-24 mr-2 mx-44">
+                <img src="../images/logoo.png" alt="MONOMICHI Logo" class="h-16 w-24 mr-2 mx-44">
             </div>
 
             <!-- Search Bar -->
-            <div class="hidden lg:flex items-center justify-center w-full max-w-xl ml-52">
-                <form action="../views/searchresults.php" method="GET" class="w-full flex items-center bg-gray-200 rounded-full">
-                    <input type="text" name="query" placeholder="Search products or categories..." class="w-full px-4 py-2 bg-white-200 text-gray-800 rounded-l-full focus:outline-none placeholder-gray-500" id="search-bar"/>
+            <div class="flex-grow flex justify-center">
+                <form action="../views/searchresults.php" method="GET" class="w-full max-w-xl flex items-center bg-gray-200 rounded-full">
+                    <input type="text" name="query" placeholder="Search products or categories..." class="w-full px-4 py-2 bg-white text-gray-800 rounded-l-full focus:outline-none placeholder-gray-500" id="search-bar"/>
                     <button type="submit" class="px-4 py-2 bg-pink-600 text-white rounded-r-full hover:bg-pink-700">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l5 5m-5-5a7 7 0 10-7-7 7 7 0 007 7z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l5 5m-5-5a7 7 0 10-7-7 7 7z"/>
                         </svg>
                     </button>
                 </form>
@@ -186,23 +186,31 @@ $conn->close();
         <!-- Form Container -->
         <div class="max-w-lg mx-auto bg-white shadow-lg shadow-pink-600 border-4 border-pink-200 rounded-lg p-8 z-10 relative">
             <h2 class="text-3xl font-semibold text-center text-gray-800 mb-6">Log In</h2>
-            
+
             <!-- Display error message -->
             <?php if ($errorMessage): ?>
                 <div class="text-red-600 text-center mb-4">
                     <p><?php echo $errorMessage; ?></p>
                 </div>
             <?php endif; ?>
-            
+
             <form action="login.php" method="POST">
                 <div class="mb-4">
                     <label for="email" class="block text-lg text-gray-700">Email</label>
                     <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
                 </div>
 
-                <div class="mb-6">
+                <div class="mb-6 relative">
                     <label for="password" class="block text-lg text-gray-700">Password</label>
-                    <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
+                    <input type="password" id="password" name="password" class="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
+                    
+                    <!-- Eye Icon inside input field -->
+                    <span id="togglePassword" class="absolute top-1/2 right-4 transform -translate-y-1/2 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 mt-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12c0-3-2.5-5-5-5s-5 2-5 5s2.5 5 5 5s5-2 5-5z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.5 12C2.5 7 7 4 12 4s9.5 3 9.5 8s-4.5 8-9.5 8S2.5 17 2.5 12z" />
+                        </svg>
+                    </span>
                 </div>
 
                 <div class="flex justify-between items-center mb-6 space-x-20">
@@ -216,7 +224,7 @@ $conn->close();
                 <button type="submit" class="w-full py-3 bg-pink-600 text-white font-semibold rounded-lg hover:bg-pink-700 transition duration-300 ease-in-out">Log In</button>
             </form>
         </div>
-        
+
         <!-- Success Popup Message -->
         <?php if ($success): ?>
             <div class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
@@ -384,6 +392,21 @@ $conn->close();
             profileMenu.classList.add('transform');
             profileMenu.classList.add('-translate-y-2');
         }
+    });
+
+    // Toggle password visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+
+    togglePassword.addEventListener('click', function () {
+        // Toggle the type of the password input
+        const type = passwordInput.type === 'password' ? 'text' : 'password';
+        passwordInput.type = type;
+
+        // Change the eye icon based on the visibility state
+        this.innerHTML = type === 'password' ?
+            '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 mt-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12c0-3-2.5-5-5-5s-5 2-5 5s2.5 5 5 5s5-2 5-5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.5 12C2.5 7 7 4 12 4s9.5 3 9.5 8s-4.5 8-9.5 8S2.5 17 2.5 12z"/></svg>' :
+            '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 mt-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12c0 3-2.5 5-5 5s-5-2-5-5s2.5-5 5-5s5 2 5 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.5 12C2.5 7 7 4 12 4s9.5 3 9.5 8s-4.5 8-9.5 8S2.5 17 2.5 12z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1l22 22m-6-5a9 9 0 10-12 0"></path></svg>';
     });
 </script>
 </html>
