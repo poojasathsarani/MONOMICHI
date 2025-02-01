@@ -8,8 +8,9 @@ if (!isset($_SESSION['id'])) {
     exit;
 }
 
-// Fetch user details from the database
 $userId = $_SESSION['id'];
+
+// Fetch user details
 $sql = "SELECT email, fullname, role FROM users WHERE id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $userId);
@@ -19,32 +20,34 @@ $stmt->bind_result($email, $name, $role);
 $stmt->fetch();
 $stmt->close();
 
-// Handle the profile update form submission
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Get the updated values from the form
-    $name = htmlspecialchars($_POST['name']);
-    $email = htmlspecialchars($_POST['email']);
+    if (!empty($_POST['name']) && !empty($_POST['email'] && !empty($_POST['password']) && $_POST['password'] === $_POST['confirm_password'])) {
+        $newName = htmlspecialchars($_POST['name']);
+        $newEmail = htmlspecialchars($_POST['email']);
 
-    // Prepare the SQL query to update the user's details
-    $updateSql = "UPDATE users SET fullname = ?, email = ? WHERE id = ?";
-    $updateStmt = $conn->prepare($updateSql);
-    $updateStmt->bind_param("ssi", $name, $email, $userId);
+        // Update query
+        $updateSql = "UPDATE users SET fullname = ?, email = ? WHERE id = ?";
+        $updateStmt = $conn->prepare($updateSql);
+        $updateStmt->bind_param("ssi", $newName, $newEmail, $userId);
+        $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
-    // Execute the update query and check for success
-    if ($updateStmt->execute()) {
-        $updateMessage = "Profile updated successfully!";
-        $updateMessageType = "success"; // Success message
+        if ($updateStmt->execute()) {
+            // Update session variables to reflect new changes
+            $name = $newName;
+            $email = $newEmail;
+            $updateMessage = "Profile updated successfully!";
+            $updateMessageType = "success";
+        } else {
+            $updateMessage = "Error updating profile!";
+            $updateMessageType = "error";
+        }
+        $updateStmt->close();
     } else {
-        $updateMessage = "Error updating profile!";
-        $updateMessageType = "error"; // Error message
+        $updateMessage = "All fields are required!";
+        $updateMessageType = "error";
     }
-
-    // Close the statement
-    $updateStmt->close();
 }
-
-// Close the database connection
-$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -78,7 +81,7 @@ $conn->close();
         }
     </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 font-serif">
     <!-- Navbar -->
     <header class="bg-red-100 shadow sticky top-0 z-50">
         <div class="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -95,6 +98,20 @@ $conn->close();
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l5 5m-5-5a7 7 0 10-7-7 7 7z"/>
                         </svg>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Logout Button -->
+            <div class="ml-auto">
+                <form action="logout.php" method="POST">
+                    <button type="submit" class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-700 
+                        text-white font-semibold rounded-xl shadow-md hover:from-red-700 hover:to-red-800 
+                        transition-all duration-300 ease-in-out transform hover:scale-105">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3H6.75A2.25 2.25 0 004.5 5.25v13.5A2.25 2.25 0 006.75 21h6.75a2.25 2.25 0 002.25-2.25V15M18 12H9m9 0l-3 3m3-3l-3-3"/>
+                        </svg>
+                        Logout
                     </button>
                 </form>
             </div>
@@ -156,9 +173,6 @@ $conn->close();
                     <li>
                         <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
                     </li>
-                    <li>
-                        <a href="../views/settings.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Settings</a>
-                    </li>
                 </ul>
             </div>
         </div>
@@ -175,16 +189,51 @@ $conn->close();
         <!-- Update Profile Form -->
         <div class="bg-white shadow-lg rounded-lg p-8 mb-6 mr-20 ml-44">
             <h3 class="text-2xl font-semibold text-gray-800 mb-4">Update Profile</h3>
-            <form action="update-profile.php" method="POST">
+
+            <!-- Display update message -->
+            <?php if (isset($updateMessage)): ?>
+                <div class="p-4 mb-4 text-white <?php echo ($updateMessageType == 'success') ? 'bg-green-500' : 'bg-red-500'; ?> rounded">
+                    <?php echo $updateMessage; ?>
+                </div>
+            <?php endif; ?>
+
+            <form method="POST">
                 <div class="mb-4">
                     <label for="name" class="block text-lg text-gray-700">Full Name</label>
-                    <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" value="<?php echo htmlspecialchars($name); ?>" required>
+                    <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" 
+                        value="<?php echo htmlspecialchars($name); ?>" required>
                 </div>
+                
                 <div class="mb-4">
                     <label for="email" class="block text-lg text-gray-700">Email</label>
-                    <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" value="<?php echo htmlspecialchars($email); ?>" required>
+                    <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" 
+                        value="<?php echo htmlspecialchars($email); ?>" required>
                 </div>
-                <button type="submit" class="w-full py-3 bg-pink-600 text-white font-semibold rounded-lg hover:bg-pink-700 transition duration-300 ease-in-out">Update Profile</button>
+
+                <!-- Password Update Section -->
+                <div class="mb-4">
+                    <label for="password" class="block text-lg text-gray-700">New Password</label>
+                    <div class="relative">
+                        <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600 pr-10">
+                        <button type="button" onclick="togglePassword('password')" class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-pink-600">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="confirm_password" class="block text-lg text-gray-700">Confirm Password</label>
+                    <div class="relative">
+                        <input type="password" id="confirm_password" name="confirm_password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600 pr-10">
+                        <button type="button" onclick="togglePassword('confirm_password')" class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-pink-600">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-pink-600 text-white font-semibold rounded-lg hover:bg-pink-700 transition duration-300 ease-in-out">
+                    Update Profile
+                </button>
             </form>
         </div>
 
@@ -226,13 +275,6 @@ $conn->close();
                 </tbody>
             </table>
             <?php $orderStmt->close(); ?>
-        </div>
-
-        <!-- Logout Button -->
-        <div class="bg-white shadow-lg rounded-lg p-8 mb-6 mr-20 ml-44">
-            <form action="logout.php" method="POST">
-                <button type="submit" class="w-full py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-300 ease-in-out">Logout</button>
-            </form>
         </div>
     </div>
 
@@ -387,6 +429,15 @@ $conn->close();
             profileMenu.classList.add('-translate-y-2');
         }
     });
+
+    function togglePassword(id) {
+        var input = document.getElementById(id);
+        if (input.type === "password") {
+            input.type = "text";
+        } else {
+            input.type = "password";
+        }
+    }
 </script>
 </html>
 

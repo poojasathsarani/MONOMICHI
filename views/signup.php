@@ -3,83 +3,116 @@
 include('db_connection.php');
 
 // Initialize error variables
-$nameErr = $emailErr = $passwordErr = $termsErr = "";
-$fullname = $email = $password = "";
+$nameErr = $emailErr = $passwordErr = $confirmPasswordErr = $termsErr = "";
+$fullname = $email = $password = $confirmPassword = "";
 $success = false; // Variable to track success
+$formIsValid = true;
 
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validate name
     if (empty($_POST["name"])) {
         $nameErr = "Name is required";
+        $formIsValid = false;
     } else {
-        $fullname = $_POST["name"];
-        
-        // Check if name contains only letters, spaces, and apostrophes
+        $fullname = test_input($_POST["name"]);
         if (!preg_match("/^[a-zA-Z-' ]*$/", $fullname)) {
-            $nameErr = "Only letters, apostrophes, and spaces are allowed";
+            $nameErr = "Only letters and spaces are allowed";
+            $formIsValid = false;
         }
     }
 
     // Validate email
     if (empty($_POST["email"])) {
         $emailErr = "Email is required";
+        $formIsValid = false;
     } else {
-        $email = $_POST["email"];
-        
-        // Check if the email address is in a valid format
+        $email = test_input($_POST["email"]);
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $emailErr = "Invalid email format";
+            $formIsValid = false;
+        } else {
+            // Check if email already exists
+            $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $stmt->store_result();
+
+            if ($stmt->num_rows > 0) {
+                $emailErr = "Email already exists. Please use a different one.";
+                $formIsValid = false;
+            }
+            $stmt->close();
         }
     }
 
     // Validate password
     if (empty($_POST["password"])) {
         $passwordErr = "Password is required";
+        $formIsValid = false;
     } else {
-        $password = $_POST["password"];
-        
-        // Check password length (minimum 8 characters)
-        if (strlen($password) < 8) $passwordErr = "Password must be at least 8 characters long";
+        $password = test_input($_POST["password"]);
+        if (strlen($password) < 8) {
+            $passwordErr = "Password must be at least 8 characters long";
+            $formIsValid = false;
+        } elseif (!preg_match("/[A-Z]/", $password)) {
+            $passwordErr = "Password must contain at least one uppercase letter";
+            $formIsValid = false;
+        } elseif (!preg_match("/[a-z]/", $password)) {
+            $passwordErr = "Password must contain at least one lowercase letter";
+            $formIsValid = false;
+        } elseif (!preg_match("/[0-9]/", $password)) {
+            $passwordErr = "Password must contain at least one number";
+            $formIsValid = false;
+        } elseif (!preg_match("/[\W_]/", $password)) {
+            $passwordErr = "Password must contain at least one special character";
+            $formIsValid = false;
+        }
+    }
 
-        // Check if password contains at least one uppercase letter
-        if (!preg_match("/[A-Z]/", $password)) $passwordErr = "Password must contain at least one uppercase letter";
-
-        // Check if password contains at least one lowercase letter
-        if (!preg_match("/[a-z]/", $password)) $passwordErr = "Password must contain at least one lowercase letter";
-
-        // Check if password contains at least one number
-        if (!preg_match("/[0-9]/", $password)) $passwordErr = "Password must contain at least one number";
-
-        // Check if password contains at least one special character
-        if (!preg_match("/[\W_]/", $password)) $passwordErr = "Password must contain at least one special character";
+    // Validate confirm password
+    if (empty($_POST["confirm_password"])) {
+        $confirmPasswordErr = "Confirm password is required";
+        $formIsValid = false;
+    } else {
+        $confirmPassword = test_input($_POST["confirm_password"]);
+        if ($password !== $confirmPassword) {
+            $confirmPasswordErr = "Passwords do not match";
+            $formIsValid = false;
+        }
     }
 
     // Validate terms checkbox
     if (empty($_POST["terms"])) {
         $termsErr = "You must agree to the terms and conditions";
+        $formIsValid = false;
     }
 
-    // If no errors, proceed with registration
-    if (empty($nameErr) && empty($emailErr) && empty($passwordErr) && empty($termsErr)) {
+    // If form is valid, proceed with registration
+    if ($formIsValid) {
         // Hash the password
-        $password = password_hash($password, PASSWORD_DEFAULT);
-
-        // Default role is "customer"
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         $role = 'customer';
 
         // Insert the new user into the database
         $sql = "INSERT INTO users (fullname, email, password, role) VALUES (?, ?, ?, ?)";
         if ($stmt = $conn->prepare($sql)) {
-            $stmt->bind_param("ssss", $fullname, $email, $password, $role); // Include role in the query
+            $stmt->bind_param("ssss", $fullname, $email, $hashedPassword, $role);
             if ($stmt->execute()) {
-                // Set the success variable to true to display the popup
                 $success = true;
             } else {
                 echo "Error: Could not execute the query.";
             }
         }
     }
+}
+
+// Sanitize the inputs
+function test_input($data) {
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    return $data;
 }
 ?>
 
@@ -222,7 +255,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
             <?php endif; ?>
             
-            <form action="signup.php" method="POST">
+            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST">
                 <div class="mb-4">
                     <label for="name" class="block text-lg text-gray-700">Full Name</label>
                     <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
@@ -233,17 +266,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
                 </div>
 
-                <div class="mb-6 relative">
+                <div class="mb-4 relative">
                     <label for="password" class="block text-lg text-gray-700">Password</label>
-                    <input type="password" id="password" name="password" class="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
-                    
-                    <!-- Eye Icon inside input field -->
-                    <span id="togglePassword" class="absolute top-1/2 right-4 transform -translate-y-1/2 cursor-pointer">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 mt-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12c0-3-2.5-5-5-5s-5 2-5 5s2.5 5 5 5s5-2 5-5z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.5 12C2.5 7 7 4 12 4s9.5 3 9.5 8s-4.5 8-9.5 8S2.5 17 2.5 12z" />
-                        </svg>
-                    </span>
+                    <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600 pr-10" required>
+                    <button type="button" onclick="togglePassword('password')" class="absolute inset-y-0 right-3 mt-8 flex items-center text-gray-500 hover:text-pink-600">
+                        👁️
+                    </button>
+                </div>
+
+                <div class="mb-4 relative">
+                    <label for="confirm_password" class="block text-lg text-gray-700">Confirm Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600 pr-10" required>
+                    <button type="button" onclick="togglePassword('password')" class="absolute inset-y-0 right-3 mt-8 flex items-center text-gray-500 hover:text-pink-600">
+                        👁️
+                    </button>
                 </div>
 
                 <div class="mb-6">
@@ -445,19 +481,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     });
 
-    // Toggle password visibility
-    const togglePassword = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password');
-
-    togglePassword.addEventListener('click', function () {
-        // Toggle the type of the password input
-        const type = passwordInput.type === 'password' ? 'text' : 'password';
-        passwordInput.type = type;
-
-        // Change the eye icon based on the visibility state
-        this.innerHTML = type === 'password' ?
-            '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 mt-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12c0-3-2.5-5-5-5s-5 2-5 5s2.5 5 5 5s5-2 5-5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.5 12C2.5 7 7 4 12 4s9.5 3 9.5 8s-4.5 8-9.5 8S2.5 17 2.5 12z"/></svg>' :
-            '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 mt-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12c0 3-2.5 5-5 5s-5-2-5-5s2.5-5 5-5s5 2 5 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.5 12C2.5 7 7 4 12 4s9.5 3 9.5 8s-4.5 8-9.5 8S2.5 17 2.5 12z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1l22 22m-6-5a9 9 0 10-12 0"></path></svg>';
-    });
+    function togglePassword(id) {
+        var input = document.getElementById(id);
+        if (input.type === "password") {
+            input.type = "text";
+        } else {
+            input.type = "password";
+        }
+    }
 </script>
 </html>

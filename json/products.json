@@ -1,0 +1,44 @@
+[
+    {
+        "id": "bento-set",
+        "name": "Bento Set",
+        "description": "A beautifully crafted wooden bento box with compartments for serving a variety of traditional Japanese dishes. Ideal for picnics, lunchboxes, or elegant meal presentations at home.",
+        "price": 3500,
+        "image": "https://www.tourism.gov.my/images/uploads/6ab177ab-2125-438e-b49a-c9ca387ba497.jpg"
+    },
+    {
+        "id": "tea-set",
+        "name": "Tea Set",
+        "description": "A traditional Japanese ceramic tea set featuring elegant designs, perfect for serving matcha or other teas during a cozy tea ceremony or casual gatherings.",
+        "price": 2800,
+        "image": "https://img.kwcdn.com/product/Fancyalgo/VirtualModelMatting/26e81e2f015876039e8164230450273b.jpg"
+    },
+    {
+        "id": "kimono",
+        "name": "Kimono",
+        "description": "A stunning traditional Japanese kimono made with high-quality fabric, featuring intricate patterns and vibrant colors for any special occasion.",
+        "price": 7000,
+        "image": "https://m.media-amazon.com/images/I/81hhMuhQJdL._AC_SX679_.jpg"
+    },
+    {
+        "id": "japanese-lantern",
+        "name": "Japanese Lantern",
+        "description": "A delicate paper lantern inspired by Japanese festivals. This lantern adds a touch of traditional ambiance to any room or garden decor.",
+        "price": 1500,
+        "image": "https://cdn.shopify.com/s/files/1/0275/5133/4459/files/japanese_paper_lanterns_obon_festival_480x480.png?v=1675471664"
+    },
+    {
+        "id": "folding-fan",
+        "name": "Folding Fan",
+        "description": "A traditional Japanese folding fan with beautiful artistic prints, perfect as a gift or for keeping cool in style.",
+        "price": 900,
+        "image": "https://en.thebecos.com/cdn/shop/articles/japanese-folding-fans-Title_image-2.jpg?v=1655965295"
+    },
+    {
+        "id": "calligraphy-set",
+        "name": "Calligraphy Set",
+        "description": "An exquisite Japanese calligraphy set complete with brushes, ink, and paper, perfect for beginners and enthusiasts to practice traditional writing art.",
+        "price": 4200,
+        "image": "https://m.media-amazon.com/images/I/91+2ll0UuQL.jpg"
+    }
+]

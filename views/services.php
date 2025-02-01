@@ -164,9 +164,6 @@
                     
                     <!-- Accordion -->
                     <div class="accordion mt-4">
-                        <button class="w-full text-left px-4 py-2 bg-gray-100 text-gray-800 rounded-md focus:outline-none hover:bg-gray-200" onclick="toggleAccordion(this)">
-                            Learn More
-                        </button>
                         <div class="accordion-content px-4 py-2 text-gray-600">
                             <p>Our customization services include embroidery, engraving, and color choices. Whether you're looking for a personalized gift or unique decoration for your home, we ensure each product reflects your personality and style.</p>
                         </div>
@@ -181,9 +178,6 @@
                     
                     <!-- Accordion -->
                     <div class="accordion mt-4">
-                        <button class="w-full text-left px-4 py-2 bg-gray-100 text-gray-800 rounded-md focus:outline-none hover:bg-gray-200" onclick="toggleAccordion(this)">
-                            Learn More
-                        </button>
                         <div class="accordion-content px-4 py-2 text-gray-600">
                             <p>Our premium wrapping service includes unique designs, ribbons, and cards for different occasions like birthdays, holidays, and celebrations.</p>
                         </div>
@@ -198,29 +192,10 @@
                     
                     <!-- Accordion -->
                     <div class="accordion mt-4">
-                        <button class="w-full text-left px-4 py-2 bg-gray-100 text-gray-800 rounded-md focus:outline-none hover:bg-gray-200" onclick="toggleAccordion(this)">
-                            Learn More
-                        </button>
                         <div class="accordion-content px-4 py-2 text-gray-600">
                             <p>Our guidance services are available for individuals or groups, including tailored experiences based on your interests, such as tea ceremonies, traditional arts, or exploring historical sites.</p>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Service Rating -->
-    <section id="rating" class="py-16 px-40">
-        <div class="container mx-auto px-6 text-center">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">Rate our Service</h2>
-            <div class="flex justify-center items-center space-x-1">
-                <div id="service-rating" class="flex">
-                    <span class="text-gray-400 cursor-pointer" onclick="rateService(1)">★</span>
-                    <span class="text-gray-400 cursor-pointer" onclick="rateService(2)">★</span>
-                    <span class="text-gray-400 cursor-pointer" onclick="rateService(3)">★</span>
-                    <span class="text-gray-400 cursor-pointer" onclick="rateService(4)">★</span>
-                    <span class="text-gray-400 cursor-pointer" onclick="rateService(5)">★</span>
                 </div>
             </div>
         </div>
@@ -250,6 +225,50 @@
                         <div>
                             <p class="font-semibold text-gray-800">Asuka Indo</p>
                             <p class="text-sm text-gray-500">Kadawatha, Sri Lanka</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Testimonial 3 -->
+                <div class="bg-white rounded-lg shadow-md p-6 w-80">
+                    <p class="text-gray-600">"I love the range of traditional Japanese items. The quality is top-notch, and the delivery was super fast!"</p>
+                    <div class="mt-4 flex items-center">
+                        <img src="https://randomuser.me/api/portraits/men/3.jpg" alt="Customer 3" class="h-12 w-12 rounded-full mr-4">
+                        <div>
+                            <p class="font-semibold text-gray-800">Taro Tanaka</p>
+                            <p class="text-sm text-gray-500">Kandy, Sri Lanka</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Testimonial 4 -->
+                <div class="bg-white rounded-lg shadow-md p-6 w-80">
+                    <p class="text-gray-600">"The tea set I bought is absolutely beautiful. It's perfect for our tea ceremonies, and the craftsmanship is exquisite!"</p>
+                    <div class="mt-4 flex items-center">
+                        <img src="https://randomuser.me/api/portraits/women/3.jpg" alt="Customer 4" class="h-12 w-12 rounded-full mr-4">
+                        <div>
+                            <p class="font-semibold text-gray-800">Aya Sato</p>
+                            <p class="text-sm text-gray-500">Galle, Sri Lanka</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Testimonial 5 -->
+                <div class="bg-white rounded-lg shadow-md p-6 w-80">
+                    <p class="text-gray-600">"I ordered the stationery for my office, and they add such a beautiful Japanese touch to the space. Absolutely love them!"</p>
+                    <div class="mt-4 flex items-center">
+                        <img src="https://randomuser.me/api/portraits/men/4.jpg" alt="Customer 5" class="h-12 w-12 rounded-full mr-4">
+                        <div>
+                            <p class="font-semibold text-gray-800">Hiroshi Takeda</p>
+                            <p class="text-sm text-gray-500">Negombo, Sri Lanka</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Testimonial 6 -->
+                <div class="bg-white rounded-lg shadow-md p-6 w-80">
+                    <p class="text-gray-600">"The exclusive collectible I bought was stunning, and it arrived in perfect condition. So happy with my purchase!"</p>
+                    <div class="mt-4 flex items-center">
+                        <img src="https://randomuser.me/api/portraits/women/4.jpg" alt="Customer 6" class="h-12 w-12 rounded-full mr-4">
+                        <div>
+                            <p class="font-semibold text-gray-800">Keiko Fujimoto</p>
+                            <p class="text-sm text-gray-500">Nuwara Eliya, Sri Lanka</p>
                         </div>
                     </div>
                 </div>

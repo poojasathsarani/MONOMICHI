@@ -1,51 +1,60 @@
 <?php
 session_start();
-
-// Include database connection
 include('db_connection.php');
 
-// Initialize success variable
-$success = false;
-
-// Check if the form was submitted
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $message = isset($_POST['message']) ? trim($_POST['message']) : '';
-    $name = isset($_POST['name']) ? trim($_POST['name']) : '';
-    $email = isset($_POST['email']) ? trim($_POST['email']) : '';
-    
-    if (!empty($message)) {
-        $message = mysqli_real_escape_string($conn, $message);
-        $name = mysqli_real_escape_string($conn, $name);
-        $email = mysqli_real_escape_string($conn, $email);
-        
-        if (isset($_SESSION['id'])) {
-            // User is logged in, store id
-            $user_id = $_SESSION['id'];
-            $sql = "INSERT INTO customers (user_id, name, email, message) VALUES ('$user_id', '$name', '$email', '$message')";
-        } else {
-            // User is not logged in, store name and email
-            if (!empty($name) && !empty($email)) {
-                $sql = "INSERT INTO customers (name, email, message) VALUES ('$name', '$email', '$message')";
-            } else {
-                echo "<script>alert('Name and email are required for non-logged-in users'); window.history.back();</script>";
-                exit;
-            }
-        }
-        
-        if ($conn->query($sql) === TRUE) {
-            // Set success flag for popup
-            $success = true;
-            // Redirect the user to another page (can also handle role-based redirection here if needed)
-        } else {
-            echo "<script>alert('Error: " . $conn->error . "'); window.history.back();</script>";
-        }
-    } else {
-        echo "<script>alert('Message is required'); window.history.back();</script>";
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Check if user is logged in
+    if (!isset($_SESSION['id'])) {
+        header("Location: login.php");
+        exit;
     }
-    
-    $conn->close();
+
+    // Get form data
+    $userId = $_SESSION['id'];
+    $title = $_POST['title'];
+    $content = $_POST['content'];
+
+    // Handle image upload
+    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+        $imageTmpName = $_FILES['image']['tmp_name'];
+        $imageData = file_get_contents($imageTmpName); // Read the image content
+
+        // The image will be inserted as a BLOB
+        $imagePath = $imageData; // Store as raw binary data
+    } else {
+        $imagePath = null;  // No image uploaded
+    }
+
+    // SQL query to insert the post into the database
+    $sql = "INSERT INTO posts (user_id, title, content, image_url, created_at) VALUES (?, ?, ?, ?, NOW())";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("isss", $userId, $title, $content, $imagePath);
+
+    // Execute the query
+    if ($stmt->execute()) {
+        header('Location: blogdashboard.php'); // Redirect back to dashboard on success
+    } else {
+        echo "Error: " . $stmt->error;
+    }
+}
+
+
+//Retrieve the image and display
+$sql = "SELECT image_url FROM posts WHERE id = ?"; // Modify this query based on your needs
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $postId); // Assuming $postId is the ID of the post you want to fetch
+$stmt->execute();
+$stmt->bind_result($imageData);
+$stmt->fetch();
+
+// Output image if it exists
+if ($imageData) {
+    echo '<img src="data:image/jpeg;base64,' . base64_encode($imageData) . '" alt="Post Image" class="w-full h-auto rounded-lg shadow-lg">';
+} else {
+    echo '<p>No image uploaded for this post.</p>';
 }
 ?>
+
 
 
 
@@ -54,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us</title>
+    <title>Blogger Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* cannot add the ::placeholder selector directly in the inline CSS because inline styles only apply to elements directly and do not support pseudo-elements like ::placeholder, ::before, ::after, or any other pseudo-selectors. */
@@ -79,9 +88,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     </style>
 </head>
-<body class="bg-pink-50 font-serif">
-    <!-- Navbar -->
-    <header class="bg-red-100 shadow sticky top-0 z-50">
+<body class="bg-pink-50 font-serif m-0 p-0 transition-all duration-300">
+<!-- Navbar -->
+<header class="bg-red-100 shadow sticky top-0 z-50">
         <div class="container mx-auto px-2 py-4 flex items-center justify-between">
             <!-- Logo -->
             <div class="flex items-center">
@@ -89,7 +98,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
 
             <!-- Search Bar -->
-            <div class="hidden lg:flex items-center justify-center w-full max-w-xl ml-52">
+            <div class="hidden lg:flex items-center justify-center w-full max-w-xl ml-84">
                 <form action="../views/searchresults.php" method="GET" class="w-full flex items-center bg-gray-200 rounded-full">
                     <input type="text" name="query" placeholder="Search products or categories..." class="w-full px-4 py-2 bg-white-200 text-gray-800 rounded-l-full focus:outline-none placeholder-gray-500" id="search-bar"/>
                     <button type="submit" class="px-4 py-2 bg-pink-600 text-white rounded-r-full hover:bg-pink-700">
@@ -148,33 +157,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </nav>
             </aside>
 
-            <!-- Right Side Icons -->
-            <div class="flex items-center space-x-6 pr-4 ml-auto">
-                <!-- Wishlist Icon -->
-                <a href="../views/wishlist.php" class="relative">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8a4 4 0 016-3.92A4 4 0 0121 8c0 4-6 8-9 8s-9-4-9-8z" />
-                    </svg>
-                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"></span>
-                </a>
-
-                <!-- Shopping Cart Icon -->
-                <a href="../views/cart.php" class="relative">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.879 1.514M7 16a2 2 0 104 0M13 16a2 2 0 104 0M5.058 6H20.86l-2.35 7H7.609m2.788 5H6M21 21H6"></path>
-                    </svg>
-                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"></span>
-                </a>
-
                 <!-- Dropdown Menu -->
                 <div id="profile-menu" class="absolute right-0 mt-80 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
                     <ul class="py-2 text-sm text-gray-700">
-                        <li>
-                            <a href="../views/signup.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Sign Up</a>
-                        </li>
-                        <li>
-                            <a href="../views/login.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Log In</a>
-                        </li>
                         <li>
                             <a href="../views/my-account.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
                         </li>
@@ -189,79 +174,65 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
     </header>
 
-    <!-- Contact Section -->
-    <section class="container mx-auto py-16 px-44">
-        <h2 class="text-4xl font-bold text-center text-gray-800">Contact Us</h2>
-        <p class="text-lg text-center text-gray-600 mt-4 max-w-3xl mx-auto">
-            We'd love to hear from you! Whether you have a question about our products, services, or anything else, feel free to reach out.
-        </p>
+    <!-- Parallax Scrolling Banner -->
+    <div class="parallax bg-cover bg-center bg-fixed h-96 transition-all duration-300 ease-out" style="background-image: url('https://via.placeholder.com/1920x600');">
 
-        <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-12">
-            <!-- Contact Form -->
-            <div class="bg-white p-8 rounded-lg shadow-xl">
-                <h3 class="text-2xl font-semibold text-gray-800">Send Us a Message</h3>
-                <form action="contactus.php" method="POST" class="mt-6">
+    <!-- Main Content Section -->
+    <div class="max-w-7xl mx-auto p-8 grid grid-cols-3 gap-8 fade-in px-40">
+        <!-- Sidebar (Profile & Navigation) -->
+        <div class="col-span-1 bg-white p-6 rounded-xl shadow-xl sticky top-20">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Latest Upload</h3>
+
+            <?php
+            // Fetch the latest post and image
+            $sql = "SELECT image_url FROM posts WHERE user_id = ? ORDER BY created_at DESC LIMIT 1";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+            $stmt->bind_result($imagePath);
+            $stmt->fetch();
+            
+            if ($imagePath) {
+                echo "<img src='$imagePath' alt='Uploaded Image' class='w-full h-auto rounded-lg shadow-lg'>";
+            } else {
+                echo "<p>No image uploaded yet.</p>";
+            }
+            ?>
+        </div>
+
+        <!-- Blog Posts -->
+        <div class="col-span-2 space-y-12">
+            <!-- New Post Section -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Share Your Thoughts 📝</h2>
+                <form action="blogdashboard.php" method="POST" enctype="multipart/form-data">
                     <div class="mb-4">
-                        <label for="name" class="block text-gray-700">Your Name</label>
-                        <input type="text" id="name" name="name" class="w-full p-3 mt-2 border border-gray-300 rounded-lg" placeholder="Enter your name here" required>
+                        <label for="title" class="block text-gray-700 font-medium">Title</label>
+                        <input type="text" id="title" name="title" class="w-full p-2 border border-gray-300 rounded-lg mt-2" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="content" class="block text-gray-700 font-medium">Content</label>
+                        <textarea id="content" name="content" rows="5" class="w-full p-2 border border-gray-300 rounded-lg mt-2" required></textarea>
                     </div>
 
+                    <!-- Image Upload Section -->
                     <div class="mb-4">
-                        <label for="email" class="block text-gray-700">Your Email</label>
-                        <input type="email" id="email" name="email" class="w-full p-3 mt-2 border border-gray-300 rounded-lg" placeholder="Enter your email here" required>
+                        <label for="image" class="block text-gray-700 font-medium">Upload Image</label>
+                        <input type="file" id="image" name="image" accept="image/*" class="w-full p-2 border border-gray-300 rounded-lg mt-2">
                     </div>
 
-                    <!-- Message Form -->
-                    <form id="messageForm" action="contactus.php" method="POST" onsubmit="return handleSubmit(event)">
-                        <textarea id="message" name="message" class="w-full p-4 border border-gray-300 rounded-lg mb-4" placeholder="Your message..." required></textarea>
-                        <button type="submit" class="bg-pink-600 text-white py-2 px-6 rounded-full hover:bg-pink-700 transition duration-300">
-                            Send Message
-                        </button>
-                    </form>
-
-                    <!-- Success Popup Message -->
-                    <?php if ($success): ?>
-                        <div id="success-popup" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-                            <div class="bg-white rounded-lg shadow-lg p-6 text-center">
-                                <h3 class="text-xl font-bold text-pink-600 mb-2">Your message has been sent successfully!</h3>
-                            </div>
-                        </div>
-                        <script>
-                            // Hide the popup after 3 seconds
-                            setTimeout(() => {
-                                const popup = document.getElementById('success-popup');
-                                if (popup) {
-                                    popup.style.display = 'none';
-                                }
-                            }, 3000);
-                        </script>
-                    <?php endif; ?>
+                    <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition duration-200">Publish</button>
                 </form>
             </div>
 
-            <!-- Contact Information -->
-            <div class="bg-white p-8 rounded-lg shadow-xl">
-                <h3 class="text-2xl font-semibold text-gray-800">Our Contact Information</h3>
-                <p class="text-gray-600 mt-4">
-                    If you'd like to get in touch with us, here are some ways you can contact our team.
-                </p>
-
-                <div class="mt-6">
-                    <p class="text-gray-700"><strong>Address:</strong>Colombo, Sri Lanka</p>
-                    <p class="text-gray-700 mt-4"><strong>Email:</strong> <a href="mailto:contact@monomichi.com" class="text-pink-600 hover:underline">contact@monomichi.com</a></p>
-                    <p class="text-gray-700 mt-4"><strong>Phone:</strong> +94 764 730521</p>
-                </div>
+            <!-- Displaying Published Posts -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <!-- Display user's previously published posts here -->
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- Map Section (Optional) -->
-    <section class="container mx-auto py-16 px-6">
-        <h3 class="text-3xl font-semibold text-center text-gray-800">Our Location</h3>
-        <div class="mt-8">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d12812.276726140686!2d79.961047!3d6.927078!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae2591b65c5b22f%3A0x5c55de24ab71220b!2sJapanese%20Items%20Shop%20Sri%20Lanka!5e0!3m2!1sen!2slk!4v1674635123456!5m2!1sen!2slk" width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-        </div>
-    </section>
+
 
     <!-- Footer -->
     <footer class="bg-gray-50 px-40 py-10 text-gray-700">
@@ -327,7 +298,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
     </footer>
-
 </body>
 <script>
     //Sidebar
@@ -365,17 +335,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             collapseIcon.classList.add('hidden');
             expandIcon.classList.remove('hidden');
         }
-    });
-
-    //Profile
-    const profileButton = document.getElementById('profile-button');
-    const profileMenu = document.getElementById('profile-menu');
-
-    profileButton.addEventListener('click', () => {
-        profileMenu.classList.toggle('hidden');
-        profileMenu.classList.toggle('opacity-0');
-        profileMenu.classList.toggle('transform');
-        profileMenu.classList.toggle('-translate-y-2');
     });
 
     const placeholderTexts = [
@@ -426,35 +385,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     });
 
-    function handleSubmit(event) {
-        event.preventDefault(); // Prevent form submission
+    // Dark Mode Toggle
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    darkModeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+    });
 
-        // Assuming the form submission is successful
-        showPopup();
+    // Carousel Controls
+    const carousel = document.querySelector('.carousel-images');
+    const prevButton = document.querySelector('.carousel-button.prev');
+    const nextButton = document.querySelector('.carousel-button.next');
+    let currentIndex = 0;
 
-        // Use AJAX to submit the form data to the backend without reloading the page
-        const formData = new FormData(event.target);
-        fetch('submit_message.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                console.log('Message saved successfully!');
-            } else {
-                alert('Failed to send message!');
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
+    const updateCarousel = () => {
+        carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
+    };
 
-    function showPopup() {
-        document.getElementById('successPopup').classList.remove('hidden');
-    }
+    prevButton.addEventListener('click', () => {
+        currentIndex = (currentIndex > 0) ? currentIndex - 1 : 0;
+        updateCarousel();
+    });
 
-    function closePopup() {
-        document.getElementById('successPopup').classList.add('hidden');
-    }
+    nextButton.addEventListener('click', () => {
+        currentIndex = (currentIndex < carousel.children.length - 1) ? currentIndex + 1 : carousel.children.length - 1;
+        updateCarousel();
+    });
 </script>
 </html>

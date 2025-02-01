@@ -13,6 +13,7 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="../json/products.js"></script>
     <style>
         /* cannot add the ::placeholder selector directly in the inline CSS because inline styles only apply to elements directly and do not support pseudo-elements like ::placeholder, ::before, ::after, or any other pseudo-selectors. */
         #search-bar::placeholder {
@@ -365,164 +366,12 @@
 
             <!-- Product Card -->
             <!-- New Arrivals -->
-            <div class="category-section mt-8" id="new-arrivals-section">
-                <h2 class="text-xl font-semibold mb-4">New Arrivals</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <!-- Bento Set -->
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform" id="bento-set">
-                        <img src="https://www.tourism.gov.my/images/uploads/6ab177ab-2125-438e-b49a-c9ca387ba497.jpg" alt="Bento Set" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Bento Set</h3>
-                            <p class="text-gray-600 mt-2">A beautifully crafted wooden bento box with compartments for serving a variety of traditional Japanese dishes. Ideal for picnics, lunchboxes, or elegant meal presentations at home.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 3,500</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Bento Set" data-price="3500" data-img="https://www.tourism.gov.my/images/uploads/6ab177ab-2125-438e-b49a-c9ca387ba497.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Bento Set" data-price="3500" data-img="https://www.tourism.gov.my/images/uploads/6ab177ab-2125-438e-b49a-c9ca387ba497.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <!-- Tea Set -->
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform" id="tea-set">
-                        <img src="https://img.kwcdn.com/product/Fancyalgo/VirtualModelMatting/26e81e2f015876039e8164230450273b.jpg" alt="Tea Set" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Tea Set</h3>
-                            <p class="text-gray-600 mt-2">A traditional Japanese ceramic tea set featuring elegant designs, perfect for serving matcha or other teas during a cozy tea ceremony or casual gatherings.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 2,800</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Tea Set" data-price="2800" data-img="https://img.kwcdn.com/product/Fancyalgo/VirtualModelMatting/26e81e2f015876039e8164230450273b.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Tea Set" data-price="2800" data-img="https://img.kwcdn.com/product/Fancyalgo/VirtualModelMatting/26e81e2f015876039e8164230450273b.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <!-- Kimono -->
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform" id="kimono">
-                        <img src="https://m.media-amazon.com/images/I/81hhMuhQJdL._AC_SX679_.jpg" alt="Kimono" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Kimono</h3>
-                            <p class="text-gray-600 mt-2">A stunning traditional Japanese kimono made with high-quality fabric, featuring intricate patterns and vibrant colors for any special occasion.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 7,000</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Kimono" data-price="7000" data-img="https://m.media-amazon.com/images/I/81hhMuhQJdL._AC_SX679_.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Kimono" data-price="7000" data-img="https://m.media-amazon.com/images/I/81hhMuhQJdL._AC_SX679_.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <!-- Japanese Lantern -->
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://cdn.shopify.com/s/files/1/0275/5133/4459/files/japanese_paper_lanterns_obon_festival_480x480.png?v=1675471664" alt="Japanese Lantern" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Japanese Lantern</h3>
-                            <p class="text-gray-600 mt-2">A delicate paper lantern inspired by Japanese festivals. This lantern adds a touch of traditional ambiance to any room or garden decor.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1,500</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Japanese Lantern" data-price="1500" data-img="https://cdn.shopify.com/s/files/1/0275/5133/4459/files/japanese_paper_lanterns_obon_festival_480x480.png?v=1675471664">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Japanese Lantern" data-price="1500" data-img="https://cdn.shopify.com/s/files/1/0275/5133/4459/files/japanese_paper_lanterns_obon_festival_480x480.png?v=1675471664">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <!-- Folding Fan -->
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://en.thebecos.com/cdn/shop/articles/japanese-folding-fans-Title_image-2.jpg?v=1655965295" alt="Folding Fan" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Folding Fan</h3>
-                            <p class="text-gray-600 mt-2">A traditional Japanese folding fan with beautiful artistic prints, perfect as a gift or for keeping cool in style.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 900</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Folding Fan" data-price="900" data-img="https://en.thebecos.com/cdn/shop/articles/japanese-folding-fans-Title_image-2.jpg?v=1655965295">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Folding Fan" data-price="900" data-img="https://en.thebecos.com/cdn/shop/articles/japanese-folding-fans-Title_image-2.jpg?v=1655965295">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <!-- Calligraphy Set -->
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/91+2ll0UuQL.jpg" alt="Calligraphy Set" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Calligraphy Set</h3>
-                            <p class="text-gray-600 mt-2">An exquisite Japanese calligraphy set complete with brushes, ink, and paper, perfect for beginners and enthusiasts to practice traditional writing art.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 4,200</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Calligraphy Set" data-price="4200" data-img="https://m.media-amazon.com/images/I/91+2ll0UuQL.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Calligraphy Set" data-price="4200" data-img="https://m.media-amazon.com/images/I/91+2ll0UuQL.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
+            <section id="new-arrivals-section">
+                <h2 class="text-2xl font-bold text-center mb-6">New Arrivals</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Products will be dynamically loaded here -->
                 </div>
-            </div>
-
-            <br><br><br><br><br>
-
-            <!-- Limited Time Offers -->
-            <div class="category-section mt-8" id="limited-time-offers-section">
-                <h2 class="text-xl font-semibold mb-4">Limited Time Summer Offers</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://www.eurooptica.com/cdn/shop/articles/matsuda-sunglass-2809h-v2-bg-dem-hero-v1618352057841-1682543583848.jpg?v=1682544755" alt="Summer Sunglasses" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Stylish Summer Sunglasses</h3>
-                            <p class="text-gray-600 mt-2">Protect your eyes from the sun in style with these lightweight and durable sunglasses, perfect for all outdoor activities.</p>
-                            <div class="mt-2">
-                                <p class="text-gray-600 inline-block line-through">Rs. 2,000</p>
-                                <p class="text-red-600 inline-block font-semibold ml-2">Rs. 1,500</p>
-                            </div>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Stylish Summer Sunglasses" data-price="1500" data-img="https://www.eurooptica.com/cdn/shop/articles/matsuda-sunglass-2809h-v2-bg-dem-hero-v1618352057841-1682543583848.jpg?v=1682544755">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Stylish Summer Sunglasses" data-price="1500" data-img="https://www.eurooptica.com/cdn/shop/articles/matsuda-sunglass-2809h-v2-bg-dem-hero-v1618352057841-1682543583848.jpg?v=1682544755">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://japaneseonimasks.com/cdn/shop/products/S215a579443f7424c9eb9150cea372312h.jpg?v=1672387128&width=533" alt="Summer Hats" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Cool Summer Hats</h3>
-                            <p class="text-gray-600 mt-2">Stay cool and stylish with this breathable summer hat, offering excellent sun protection for all-day wear.</p>
-                            <div class="mt-2">
-                                <p class="text-gray-600 inline-block line-through">Rs. 1,500</p>
-                                <p class="text-red-600 inline-block font-semibold ml-2">Rs. 1,000</p>
-                            </div>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Cool Summer Hats" data-price="1000" data-img="https://japaneseonimasks.com/cdn/shop/products/S215a579443f7424c9eb9150cea372312h.jpg?v=1672387128&width=533">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Cool Summer Hats" data-price="1000" data-img="https://japaneseonimasks.com/cdn/shop/products/S215a579443f7424c9eb9150cea372312h.jpg?v=1672387128&width=533">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/71TexojLP4L._AC_UY1000_.jpg" alt="Beach Bag" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Spacious Beach Bag</h3>
-                            <p class="text-gray-600 mt-2">Carry all your essentials in this spacious and stylish beach bag, designed for functionality and comfort.</p>
-                            <div class="mt-2">
-                                <p class="text-gray-600 inline-block line-through">Rs. 2,500</p>
-                                <p class="text-red-600 inline-block font-semibold ml-2">Rs. 2,000</p>
-                            </div>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Spacious Beach Bag" data-price="2000" data-img="https://m.media-amazon.com/images/I/71TexojLP4L._AC_UY1000_.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Spacious Beach Bag" data-price="2000" data-img="https://m.media-amazon.com/images/I/71TexojLP4L._AC_UY1000_.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://i.pinimg.com/736x/6b/80/90/6b8090d90a2bce64d26f4deb912853e4.jpg" alt="Swimwear" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Trendy Swimwear</h3>
-                            <p class="text-gray-600 mt-2">Dive into summer with this trendy and comfortable swimwear, perfect for the beach or pool.</p>
-                            <div class="mt-2">
-                                <p class="text-gray-600 inline-block line-through">Rs. 2,500</p>
-                                <p class="text-red-600 inline-block font-semibold ml-2">Rs. 2,000</p>
-                            </div>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Trendy Swimwear" data-price="2500" data-img="https://i.pinimg.com/736x/6b/80/90/6b8090d90a2bce64d26f4deb912853e4.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Trendy Swimwear" data-price="2500" data-img="https://i.pinimg.com/736x/6b/80/90/6b8090d90a2bce64d26f4deb912853e4.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://learnjapanese123.com/wp-content/uploads/2017/07/getayukata.jpg" alt="Flip Flops" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Comfy Flip Flops</h3>
-                            <p class="text-gray-600 mt-2">Step into comfort with these lightweight and durable flip-flops, ideal for summer strolls.</p>
-                            <div class="mt-2">
-                                <p class="text-gray-600 inline-block line-through">Rs. 900</p>
-                                <p class="text-red-600 inline-block font-semibold ml-2">Rs. 400</p>
-                            </div>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Comfy Flip Flops" data-price="900" data-img="https://learnjapanese123.com/wp-content/uploads/2017/07/getayukata.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Comfy Flip Flops" data-price="900" data-img="https://learnjapanese123.com/wp-content/uploads/2017/07/getayukata.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://i.pinimg.com/736x/ee/a7/e8/eea7e841d32544e006d6a76ebd022c40.jpg" alt="Summer Dress" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Light Summer Dress</h3>
-                            <p class="text-gray-600 mt-2">Stay cool and stylish in this lightweight and breezy summer dress, perfect for sunny days.</p>
-                            <div class="mt-2">
-                                <p class="text-gray-600 inline-block line-through">Rs. 1,700</p>
-                                <p class="text-red-600 inline-block font-semibold ml-2">Rs. 1,000</p>
-                            </div>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Light Summer Dress" data-price="1700" data-img="https://i.pinimg.com/736x/ee/a7/e8/eea7e841d32544e006d6a76ebd022c40.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Light Summer Dress" data-price="1700" data-img="https://i.pinimg.com/736x/ee/a7/e8/eea7e841d32544e006d6a76ebd022c40.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </section>
 
             <br><br><br><br><br>
             
@@ -1612,6 +1461,39 @@
                 productsContainer.style.marginTop = originalMarginTop;
             }
         }
+    });
+
+
+    //Retrieve from json and Display the Products
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch("../json/products.json") // Load the JSON data
+            .then(response => response.json())
+            .then(products => {
+                const container = document.getElementById("new-arrivals-section").querySelector(".grid");
+
+                products.forEach(product => {
+                    const productHTML = `
+                        <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform" id="${product.id}">
+                            <img src="${product.image}" alt="${product.name}" class="w-full h-64 object-cover">
+                            <div class="p-4 text-center">
+                                <h3 class="text-lg font-medium">${product.name}</h3>
+                                <p class="text-gray-600 mt-2">${product.description}</p>
+                                <p class="text-gray-600 mt-2">Price: Rs. ${product.price}</p>
+                                <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" 
+                                    data-name="${product.name}" data-price="${product.price}" data-img="${product.image}">
+                                    Add to Cart
+                                </button>
+                                <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" 
+                                    data-name="${product.name}" data-price="${product.price}" data-img="${product.image}">
+                                    Add to Wishlist
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += productHTML;
+                });
+            })
+            .catch(error => console.error("Error loading products:", error));
     });
 
 

@@ -179,9 +179,12 @@
     <!-- About Us Section -->
     <section id="about" class="py-20 px-6 bg-gradient-to-br from-yellow-50 to-red-100">
         <div class="container mx-auto text-center">
-            <h2 class="text-5xl font-extrabold text-gray-800 calligraphy">About Us</h2>
+            <h2 class="text-5xl font-extrabold text-gray-800">About Us</h2>
             <p class="text-lg text-gray-600 mt-6 max-w-4xl mx-auto">
-                At <span class="font-semibold text-teal-600">MONOMICHI</span>, we bring Japan to your doorstep, celebrating its culture, creativity, and craftsmanship. From traditional items to modern pop culture, our carefully curated collections connect you to the spirit of Japan.
+                At <span class="font-semibold text-teal-600">MONOMICHI</span>, we bring Japan to your doorstep, celebrating its culture, creativity, and craftsmanship. From traditional items to modern pop culture, our carefully curated collections connect you to the spirit of Japan. We aim to foster a deeper understanding of Japanese traditions and provide high-quality products to those who appreciate the culture.
+            </p>
+            <p class="text-lg text-gray-600 mt-6 max-w-4xl mx-auto">
+                Whether you are a lover of Japanese tea ceremonies, anime culture, or traditional arts, MONOMICHI offers something unique for everyone. Our passion is rooted in a deep respect for Japan's rich heritage and a desire to share its beauty with the world.
             </p>
         </div>
     </section>
@@ -189,7 +192,7 @@
     <!-- Timeline Section -->
     <section class="py-16 px-8 bg-white">
         <div class="container mx-auto text-center">
-            <h3 class="text-4xl font-semibold text-gray-800 calligraphy">Our Journey</h3>
+            <h3 class="text-4xl font-semibold text-gray-800">Our Journey</h3>
             <div class="mt-8 space-y-12">
                 <!-- Timeline Events -->
                 <div class="flex justify-center items-center space-x-6">
@@ -210,13 +213,50 @@
                     </div>
                     <p class="text-lg text-gray-600 max-w-2xl">Expanded our offerings to include unique artisanal items from across Japan, fostering a deeper connection with Japan's diverse craftsmanship.</p>
                 </div>
+                <div class="flex justify-center items-center space-x-6">
+                    <div class="w-16 h-16 bg-teal-500 text-white rounded-full flex items-center justify-center text-xl font-semibold">
+                        2025
+                    </div>
+                    <p class="text-lg text-gray-600 max-w-2xl">Launched an e-commerce platform to provide a more convenient way for global customers to explore and purchase Japanese cultural treasures, embracing the digital age while preserving tradition.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Vision Section -->
+    <section class="py-16 px-6 bg-gradient-to-r from-blue-50 to-teal-100">
+        <div class="container mx-auto text-center">
+            <h3 class="text-4xl font-semibold text-gray-800">Our Vision</h3>
+            <p class="text-lg text-gray-600 mt-6 max-w-4xl mx-auto">
+                Our vision at MONOMICHI is to create a global community of people who celebrate and appreciate Japanese culture. We aspire to be the bridge that connects individuals around the world with Japan’s timeless traditions, modern innovations, and distinctive craftsmanship. Through our curated collections, we aim to inspire a deeper connection to Japanese heritage, and help our customers feel like they are part of this vibrant culture.
+            </p>
+        </div>
+    </section>
+
+    <!-- Our Values Section -->
+    <section class="py-16 px-32 bg-white">
+        <div class="container mx-auto text-center">
+            <h3 class="text-4xl font-semibold text-gray-800">Our Core Values</h3>
+            <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-12">
+                <div class="bg-teal-500 text-white p-8 rounded-lg shadow-lg">
+                    <h4 class="text-xl font-semibold">Quality</h4>
+                    <p class="text-lg text-gray-100 mt-4">We ensure that every product we offer is crafted with care and meets the highest standards of quality and authenticity.</p>
+                </div>
+                <div class="bg-teal-500 text-white p-8 rounded-lg shadow-lg">
+                    <h4 class="text-xl font-semibold">Tradition</h4>
+                    <p class="text-lg text-gray-100 mt-4">We respect and honor Japan’s cultural traditions, ensuring that our offerings reflect its heritage and timeless beauty.</p>
+                </div>
+                <div class="bg-teal-500 text-white p-8 rounded-lg shadow-lg">
+                    <h4 class="text-xl font-semibold">Innovation</h4>
+                    <p class="text-lg text-gray-100 mt-4">We embrace innovation by merging traditional Japanese artistry with modern design and technology to create new experiences.</p>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Team Section -->
     <section id="team" class="container mx-auto py-20 px-40 bg-gray-50">
-        <h2 class="text-4xl font-semibold text-center text-gray-800 calligraphy">Meet Our Team</h2>
+        <h2 class="text-4xl font-semibold text-center text-gray-800">Meet Our Team</h2>
         <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
             <!-- Team Member 1 -->
             <div class="text-center bg-white p-8 rounded-lg shadow-lg hover:shadow-2xl transition-transform transform hover:scale-105">
@@ -225,6 +265,7 @@
                 </div>
                 <h4 class="mt-6 font-semibold text-gray-800">Chandima Kusumthilaka</h4>
                 <p class="text-gray-600">Founder & CEO</p>
+                <p class="text-gray-600 mt-2">Chandima is the visionary behind MONOMICHI, committed to sharing the beauty of Japanese culture globally.</p>
             </div>
             <!-- Team Member 2 -->
             <div class="text-center bg-white p-8 rounded-lg shadow-lg hover:shadow-2xl transition-transform transform hover:scale-105">
@@ -233,6 +274,7 @@
                 </div>
                 <h4 class="mt-6 font-semibold text-gray-800">Pooja Sathsarani</h4>
                 <p class="text-gray-600">Creative Director</p>
+                <p class="text-gray-600 mt-2">Pooja brings a unique touch to the aesthetic design and user experience of our platform, blending modernity with tradition.</p>
             </div>
             <!-- Team Member 3 -->
             <div class="text-center bg-white p-8 rounded-lg shadow-lg hover:shadow-2xl transition-transform transform hover:scale-105">
@@ -241,6 +283,7 @@
                 </div>
                 <h4 class="mt-6 font-semibold text-gray-800">Thanuja Maduwanthi</h4>
                 <p class="text-gray-600">Product Manager</p>
+                <p class="text-gray-600 mt-2">Thanuja is dedicated to curating our product collections, ensuring that they reflect Japan’s diverse craftsmanship and innovation.</p>
             </div>
         </div>
     </section>

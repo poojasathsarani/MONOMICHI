@@ -1,3 +1,42 @@
+<?php
+include('db_connection.php');
+
+// Fetch users from database
+$users = [];
+$result = $conn->query("SELECT * FROM users");
+
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $users[] = $row;
+    }
+}
+
+
+// Flag for success message
+$deleted = false;
+
+// Check if ID is provided in the URL
+if (isset($_GET['id'])) {
+    $userId = $_GET['id'];
+
+    // Prepare and execute SQL query to delete user
+    $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
+    $stmt->bind_param("i", $userId);
+
+    // Execute the query and check if it was successful
+    if ($stmt->execute()) {
+        $deleted = true;  // Set the flag for success
+    } else {
+        echo "Error deleting user: " . $stmt->error;
+    }
+
+    // Close the statement and connection
+    $stmt->close();
+    $conn->close();
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -69,11 +108,11 @@
             </div>
 
             <!-- User Management -->
-            <div id="user-management" class="bg-white p-6 rounded-lg shadow-lg mb-8">
+            <div id="user-management" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300">
                 <h3 id="user-management-heading" class="text-xl font-semibold text-gray-800 mb-4 cursor-pointer">User Management</h3>
-                <p>Manage users, add/edit/delete user accounts, and configure user privileges.</p>
+                <p>Manage users, edit/delete user accounts, and configure user privileges.</p>
                 
-                <!-- User Options Section -->
+                <!-- User Options Section (Initially Hidden) -->
                 <div id="user-options" class="hidden mt-4">
                     <!-- View Users Section -->
                     <div id="view-users" class="mb-6">
@@ -89,77 +128,71 @@
                                 </tr>
                             </thead>
                             <tbody id="user-table" class="divide-y divide-gray-200">
-                                <!-- Dynamic user rows will be added here -->
+                                <?php foreach ($users as $user): ?>
+                                <tr>
+                                    <td class="px-4 py-2"><?php echo htmlspecialchars($user['id']); ?></td>
+                                    <td class="px-4 py-2"><?php echo htmlspecialchars($user['fullname']); ?></td>
+                                    <td class="px-4 py-2"><?php echo htmlspecialchars($user['email']); ?></td>
+                                    <td class="px-4 py-2"><?php echo htmlspecialchars($user['role']); ?></td>
+                                    <td class="px-4 py-2">
+                                        <button onclick="editUser('<?php echo $user['id']; ?>', '<?php echo $user['fullname']; ?>', '<?php echo $user['email']; ?>', '<?php echo $user['role']; ?>')" class="bg-blue-500 text-white px-2 py-1 rounded">Edit User</button>
+                                        <button onclick="deleteUser('<?php echo $user['id']; ?>')" class="bg-red-500 text-white px-2 py-1 rounded">Delete User</button>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
                             </tbody>
                         </table>
                     </div>
 
-                    <!-- Add New User -->
-                    <div id="add-user" class="mb-6">
-                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Add New User</h4>
-                        <form id="add-user-form" class="space-y-4">
-                            <div>
-                                <label for="add-name" class="block text-gray-700">Name:</label>
-                                <input type="text" id="add-name" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter name" required>
+                    <!-- Confirmation Popup -->
+                    <div id="confirmationPopup" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+                        <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                            <h3 class="text-xl font-bold text-pink-600 mb-2">Are you sure you want to delete this user?</h3>
+                            <p class="text-gray-700 mb-4">This action cannot be undone.</p>
+                            <div class="flex justify-around">
+                                <button id="confirmDelete" class="bg-red-500 text-white px-4 py-2 rounded">Yes, Delete</button>
+                                <button id="cancelDelete" class="bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
                             </div>
-                            <div>
-                                <label for="add-email" class="block text-gray-700">Email:</label>
-                                <input type="email" id="add-email" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter email" required>
-                            </div>
-                            <div>
-                                <label for="add-role" class="block text-gray-700">Role:</label>
-                                <select id="add-role" class="w-full border border-gray-300 p-2 rounded" required>
-                                    <option value="Admin">Admin</option>
-                                    <option value="User">User</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Add User</button>
-                        </form>
+                        </div>
+                    </div>
+
+                    <!-- Success Popup Message -->
+                    <div id="successPopup" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+                        <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                            <h3 class="text-xl font-bold text-pink-600 mb-2">User Deleted Successfully!</h3>
+                            <p class="text-gray-700 mb-4">You will be redirected shortly...</p>
+                        </div>
                     </div>
 
                     <!-- Edit User -->
                     <div id="edit-user" class="mb-6">
                         <h4 class="text-lg font-semibold text-gray-700 mb-2">Edit User</h4>
-                        <form id="edit-user-form" class="space-y-4">
-                            <div>
-                                <label for="edit-user-id" class="block text-gray-700">User ID:</label>
-                                <input type="text" id="edit-user-id" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter User ID" required>
-                            </div>
+                        <form id="edit-user-form" method="POST" action="edit_user.php" class="space-y-4">
+                            <input type="hidden" id="edit-user-id" name="id">
                             <div>
                                 <label for="edit-name" class="block text-gray-700">Name:</label>
-                                <input type="text" id="edit-name" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter name" required>
+                                <input type="text" id="edit-name" name="fullname" class="w-full border border-gray-300 p-2 rounded" required>
                             </div>
                             <div>
                                 <label for="edit-email" class="block text-gray-700">Email:</label>
-                                <input type="email" id="edit-email" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter email" required>
+                                <input type="email" id="edit-email" name="email" class="w-full border border-gray-300 p-2 rounded" required>
                             </div>
                             <div>
                                 <label for="edit-role" class="block text-gray-700">Role:</label>
-                                <select id="edit-role" class="w-full border border-gray-300 p-2 rounded" required>
+                                <select id="edit-role" name="role" class="w-full border border-gray-300 p-2 rounded" required>
                                     <option value="Admin">Admin</option>
+                                    <option value="Manager">Manager</option>
                                     <option value="User">User</option>
                                 </select>
                             </div>
-                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update User</button>
-                        </form>
-                    </div>
-
-                    <!-- Delete User -->
-                    <div id="delete-user" class="mb-6">
-                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Delete User</h4>
-                        <form id="delete-user-form" class="space-y-4">
-                            <div>
-                                <label for="delete-user-id" class="block text-gray-700">User ID:</label>
-                                <input type="text" id="delete-user-id" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter User ID" required>
-                            </div>
-                            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Delete User</button>
+                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Update User</button>
                         </form>
                     </div>
                 </div>
             </div>
 
             <!-- Blog Management -->
-            <div id="blog-management" class="bg-white p-6 rounded-lg shadow-lg mb-8">
+            <div id="blog-management" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300">
                 <h3 id="blog-management-heading" class="text-xl font-semibold text-gray-800 mb-4 cursor-pointer">Blog Management</h3>
                 <p>Manage blogs, edit/delete blog posts, and configure blog settings.</p>
                 
@@ -282,10 +315,73 @@
                 </div>
             </div>
 
-            <!-- Product Inventory -->
-            <div id="product-management" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">Product Inventory</h3>
-                <p>Add, edit, or delete products in the inventory.</p>
+            <!-- Product Inventory Management -->
+            <div id="product-inventory-management" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300">
+                <h3 id="product-inventory-heading" class="text-xl font-semibold text-gray-800 mb-4 cursor-pointer">Product Inventory Management</h3>
+                <p>Manage product inventory, edit/delete products, and configure product settings.</p>
+                
+                <!-- Product Options Section (Initially hidden) -->
+                <div id="product-options" class="hidden mt-4">
+                    <!-- View Products -->
+                    <div id="view-products" class="mt-6">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-2">View Products</h4>
+                        <table id="products-table" class="w-full table-auto border-collapse">
+                            <thead>
+                                <tr>
+                                    <th class="border px-4 py-2">ID</th>
+                                    <th class="border px-4 py-2">Name</th>
+                                    <th class="border px-4 py-2">Category</th>
+                                    <th class="border px-4 py-2">Price</th>
+                                    <th class="border px-4 py-2">Stock</th>
+                                    <th class="border px-4 py-2">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Product rows will be dynamically added here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Edit Product -->
+                    <div id="edit-product" class="mb-6">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Edit Product</h4>
+                        <form id="edit-product-form" class="space-y-4">
+                            <div>
+                                <label for="edit-product-id" class="block text-gray-700">Product ID:</label>
+                                <input type="text" id="edit-product-id" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter Product ID" required>
+                            </div>
+                            <div>
+                                <label for="edit-product-name" class="block text-gray-700">Product Name:</label>
+                                <input type="text" id="edit-product-name" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter product name" required>
+                            </div>
+                            <div>
+                                <label for="edit-product-category" class="block text-gray-700">Category:</label>
+                                <input type="text" id="edit-product-category" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter category" required>
+                            </div>
+                            <div>
+                                <label for="edit-product-price" class="block text-gray-700">Price:</label>
+                                <input type="number" id="edit-product-price" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter price" required>
+                            </div>
+                            <div>
+                                <label for="edit-product-stock" class="block text-gray-700">Stock:</label>
+                                <input type="number" id="edit-product-stock" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter stock quantity" required>
+                            </div>
+                            <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Update Product</button>
+                        </form>
+                    </div>
+
+                    <!-- Delete Product -->
+                    <div id="delete-product" class="mb-6">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Delete Product</h4>
+                        <form id="delete-product-form" class="space-y-4">
+                            <div>
+                                <label for="delete-product-id" class="block text-gray-700">Product ID:</label>
+                                <input type="text" id="delete-product-id" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter Product ID" required>
+                            </div>
+                            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Delete Product</button>
+                        </form>
+                    </div>
+                </div>
             </div>
 
             <!-- Holiday Drops -->
@@ -313,204 +409,50 @@
 </body>
 <script>
     // User Management
-    // Function to load users from localStorage
-    function loadUsers() {
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-        const table = document.getElementById('user-table');
-        table.innerHTML = ''; // Clear the existing table content before adding new rows
-        users.forEach(user => {
-            const row = table.insertRow();
-            row.insertCell(0).textContent = user.id;
-            row.insertCell(1).textContent = user.name;
-            row.insertCell(2).textContent = user.email;
-            row.insertCell(3).textContent = user.role;
-            row.insertCell(4).innerHTML = `
-                <button class="edit-btn bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Edit</button>
-                <button class="delete-btn bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Delete</button>
-            `;
-        });
-        addEventListenersToNewButtons();
+    document.getElementById('user-management-heading').addEventListener('click', function() {
+        let userOptions = document.getElementById('user-options');
+        
+        if (userOptions.classList.contains('hidden')) {
+            userOptions.classList.remove('hidden');
+            userOptions.style.maxHeight = userOptions.scrollHeight + "px";
+        } else {
+            userOptions.style.maxHeight = "0";
+            setTimeout(() => userOptions.classList.add('hidden'), 300);
+        }
+    });
+
+    function editUser(id, name, email, role) {
+            document.getElementById("edit-user-id").value = id;
+            document.getElementById("edit-name").value = name;
+            document.getElementById("edit-email").value = email;
+            document.getElementById("edit-role").value = role;
     }
 
-    // Load users on page load
-    window.onload = loadUsers;
+    function deleteUser(userId) {
+        // Show confirmation popup
+        document.getElementById("confirmationPopup").classList.remove("hidden");
 
-    // Function to add a new user
-    document.getElementById('add-user-form').addEventListener('submit', function (event) {
-        event.preventDefault(); // Prevent form from submitting normally
-        
-        // Get the form data
-        const name = document.getElementById('add-name').value;
-        const email = document.getElementById('add-email').value;
-        const role = document.getElementById('add-role').value;
-
-        // Create new user object
-        const newUser = {
-            id: Date.now(), // Use timestamp as a unique ID
-            name: name,
-            email: email,
-            role: role
+        // Handle confirmation
+        document.getElementById("confirmDelete").onclick = function () {
+            // Redirect to delete_user.php with user ID
+            window.location.href = "admindashboard.php?id=" + userId;
         };
 
-        // Retrieve existing users from localStorage
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-        users.push(newUser);
-
-        // Save the updated users list back to localStorage
-        localStorage.setItem('users', JSON.stringify(users));
-
-        // Add the new user to the table dynamically
-        const table = document.getElementById('user-table');
-        const row = table.insertRow();
-        row.insertCell(0).textContent = newUser.id;
-        row.insertCell(1).textContent = newUser.name;
-        row.insertCell(2).textContent = newUser.email;
-        row.insertCell(3).textContent = newUser.role;
-        row.insertCell(4).innerHTML = `
-            <button class="edit-btn bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Edit</button>
-            <button class="delete-btn bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Delete</button>
-        `;
-
-        // Reset the form
-        document.getElementById('add-name').value = '';
-        document.getElementById('add-email').value = '';
-        document.getElementById('add-role').value = 'User'; // Reset role to 'User'
-
-        // Reattach event listeners to the new buttons
-        addEventListenersToNewButtons();
-    });
-
-    // toggle the user management section
-    document.getElementById('user-management-heading').addEventListener('click', function () {
-        const userOptions = document.getElementById('user-options');
-        userOptions.classList.toggle('hidden');
-    });
-
-    // Function to edit user
-    document.getElementById('edit-user-form').addEventListener('submit', function (event) {
-        event.preventDefault(); // Prevent form from submitting normally
-
-        const userId = document.getElementById('edit-user-id').value;
-        const updatedName = document.getElementById('edit-name').value;
-        const updatedEmail = document.getElementById('edit-email').value;
-        const updatedRole = document.getElementById('edit-role').value;
-
-        // Retrieve existing users from localStorage
-        let users = JSON.parse(localStorage.getItem('users')) || [];
-        
-        // Find the user by ID and update their data
-        users = users.map(user => {
-            if (user.id == userId) {
-                user.name = updatedName;
-                user.email = updatedEmail;
-                user.role = updatedRole;
-            }
-            return user;
-        });
-
-        // Save the updated users list back to localStorage
-        localStorage.setItem('users', JSON.stringify(users));
-
-        // Reload the users table to reflect the changes
-        loadUsers();
-
-        // Reset the form
-        document.getElementById('edit-user-form').reset();
-    });
-
-    // Function to add event listeners for Edit and Delete buttons
-    function addEventListenersToNewButtons() {
-        // Edit button functionality
-        document.querySelectorAll('.edit-btn').forEach(button => {
-            button.addEventListener('click', function () {
-                const row = button.closest('tr');
-                const userId = row.cells[0].textContent;
-                const name = row.cells[1].textContent;
-                const email = row.cells[2].textContent;
-                const role = row.cells[3].textContent;
-
-                document.getElementById('edit-user-id').value = userId;
-                document.getElementById('edit-name').value = name;
-                document.getElementById('edit-email').value = email;
-                document.getElementById('edit-role').value = role;
-
-                document.getElementById('edit-user').scrollIntoView({ behavior: 'smooth' });
-            });
-        });
-
-        // Delete button functionality
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function () {
-                const confirmDelete = confirm("Are you sure you want to delete this user?");
-                if (confirmDelete) {
-                    const row = button.closest('tr');
-                    const userId = row.cells[0].textContent;
-
-                    // Retrieve existing users from localStorage
-                    let users = JSON.parse(localStorage.getItem('users')) || [];
-
-                    // Remove the user by filtering out the selected user
-                    users = users.filter(user => user.id != userId);
-
-                    // Save the updated users list back to localStorage
-                    localStorage.setItem('users', JSON.stringify(users));
-
-                    // Reload the users table to reflect the changes
-                    loadUsers();
-                }
-            });
-        });
+        // Handle cancellation
+        document.getElementById("cancelDelete").onclick = function () {
+            // Close the confirmation popup
+            document.getElementById("confirmationPopup").classList.add("hidden");
+        };
     }
 
-    // Function to delete user by ID
-    document.getElementById('delete-user-form').addEventListener('submit', function (event) {
-        event.preventDefault(); // Prevent form from submitting normally
+    // Show success popup after user is deleted
+    function showSuccessPopup() {
+        document.getElementById("successPopup").classList.remove("hidden");
 
-        const userIdToDelete = document.getElementById('delete-user-id').value;
-
-        // Retrieve existing users from localStorage
-        let users = JSON.parse(localStorage.getItem('users')) || [];
-
-        // Filter out the user with the matching ID
-        users = users.filter(user => user.id != userIdToDelete);
-
-        // Save the updated users list back to localStorage
-        localStorage.setItem('users', JSON.stringify(users));
-
-        // Reload the users table to reflect the changes
-        loadUsers();
-
-        // Reset the form
-        document.getElementById('delete-user-id').value = '';
-    });
-
-    // Function to add event listeners for Edit and Delete buttons
-    function addEventListenersToNewButtons() {
-        // Delete button functionality
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function () {
-                // Show confirmation dialog
-                const confirmDelete = confirm("Are you sure you want to delete this user?");
-                
-                if (confirmDelete) {
-                    // Get the row of the clicked delete button
-                    const row = button.closest('tr');
-                    const userId = row.cells[0].textContent;
-
-                    // Retrieve existing users from localStorage
-                    let users = JSON.parse(localStorage.getItem('users')) || [];
-
-                    // Remove the user by filtering out the selected user
-                    users = users.filter(user => user.id != userId);
-
-                    // Save the updated users list back to localStorage
-                    localStorage.setItem('users', JSON.stringify(users));
-
-                    // Reload the users table to reflect the changes
-                    loadUsers();
-                }
-            });
-        });
+        // Redirect after 3 seconds
+        setTimeout(() => {
+            window.location.href = 'admindashboard.php'; // Or any other redirect
+        }, 3000);
     }
 
 
@@ -620,19 +562,116 @@
 
 
 
+    
 
-    //Order Management
-    // JavaScript to toggle the visibility of the Order Options Section when clicking the Order Management heading
-    document.getElementById('order-management-heading').addEventListener('click', function() {
-        var orderOptions = document.getElementById('order-options');
+    // Product Inventory Management
+
+    // Toggle the Product Options section when the heading is clicked
+    document.getElementById('product-inventory-heading').addEventListener('click', function() {
+        const productOptions = document.getElementById('product-options');
+        productOptions.classList.toggle('hidden');
+    });
+
+    // Load all products from localStorage and display them in the table
+    function loadProducts() {
+        const productsTable = document.getElementById('products-table').getElementsByTagName('tbody')[0];
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+        productsTable.innerHTML = ''; // Clear the table before rendering
+
+        products.forEach(product => {
+            const row = productsTable.insertRow();
+            row.insertCell(0).textContent = product.id;
+            row.insertCell(1).textContent = product.name;
+            row.insertCell(2).textContent = product.category;
+            row.insertCell(3).textContent = product.price;
+            row.insertCell(4).textContent = product.stock;
+
+            // Create Action buttons
+            const actionsCell = row.insertCell(5);
+            const editButton = document.createElement('button');
+            editButton.textContent = 'Edit';
+            editButton.classList.add('bg-blue-500', 'text-white', 'px-2', 'py-1', 'rounded', 'hover:bg-blue-600');
+            editButton.onclick = () => populateEditForm(product.id);
+            
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.classList.add('bg-red-500', 'text-white', 'px-2', 'py-1', 'rounded', 'hover:bg-red-600');
+            deleteButton.onclick = () => deleteProduct(product.id);
+            
+            actionsCell.appendChild(editButton);
+            actionsCell.appendChild(deleteButton);
+        });
+    }
+
+    // Add new product
+    document.getElementById('add-product-form').addEventListener('submit', function (event) {
+        event.preventDefault();
         
-        // Toggle visibility
-        if (orderOptions.classList.contains('hidden')) {
-            orderOptions.classList.remove('hidden');
-        } else {
-            orderOptions.classList.add('hidden');
+        const newProduct = {
+            id: Date.now(), // Unique ID based on timestamp
+            name: document.getElementById('add-product-name').value,
+            category: document.getElementById('add-product-category').value,
+            price: document.getElementById('add-product-price').value,
+            stock: document.getElementById('add-product-stock').value
+        };
+
+        // Get existing products from localStorage
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+        products.push(newProduct);
+        
+        // Save the updated products array
+        localStorage.setItem('products', JSON.stringify(products));
+
+        // Clear form and reload products
+        document.getElementById('add-product-form').reset();
+        loadProducts();
+    });
+
+    // Populate the Edit form with data
+    function populateEditForm(productId) {
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+        const productToEdit = products.find(product => product.id === productId);
+
+        if (productToEdit) {
+            document.getElementById('edit-product-id').value = productToEdit.id;
+            document.getElementById('edit-product-name').value = productToEdit.name;
+            document.getElementById('edit-product-category').value = productToEdit.category;
+            document.getElementById('edit-product-price').value = productToEdit.price;
+            document.getElementById('edit-product-stock').value = productToEdit.stock;
+        }
+    }
+
+    // Edit product
+    document.getElementById('edit-product-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+        
+        const productId = parseInt(document.getElementById('edit-product-id').value);
+        const updatedName = document.getElementById('edit-product-name').value;
+        const updatedCategory = document.getElementById('edit-product-category').value;
+        const updatedPrice = document.getElementById('edit-product-price').value;
+        const updatedStock = document.getElementById('edit-product-stock').value;
+        
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+        const productIndex = products.findIndex(product => product.id === productId);
+        
+        if (productIndex !== -1) {
+            products[productIndex] = { id: productId, name: updatedName, category: updatedCategory, price: updatedPrice, stock: updatedStock };
+            localStorage.setItem('products', JSON.stringify(products));
+            loadProducts(); // Reload product data to reflect changes
         }
     });
 
+    // Delete product
+    function deleteProduct(productId) {
+        const confirmDelete = confirm("Are you sure you want to delete this product?");
+        
+        if (confirmDelete) {
+            const products = JSON.parse(localStorage.getItem('products')) || [];
+            const updatedProducts = products.filter(product => product.id !== productId);
+            
+            localStorage.setItem('products', JSON.stringify(updatedProducts));
+            loadProducts(); // Reload the product list after deletion
+        }
+    }
 </script>
 </html>

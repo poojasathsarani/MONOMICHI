@@ -114,7 +114,6 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8a4 4 0 016-3.92A4 4 0 0121 8c0 4-6 8-9 8s-9-4-9-8z" />
                         </svg>
                         <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                            5
                         </span>
                     </a>
                 <?php endif; ?>
@@ -126,7 +125,6 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.879 1.514M7 16a2 2 0 104 0M13 16a2 2 0 104 0M5.058 6H20.86l-2.35 7H7.609m2.788 5H6M21 21H6"></path>
                         </svg>
                         <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                            5
                         </span>
                     </a>
                 <?php endif; ?>
@@ -138,7 +136,7 @@
                 </button>
 
                 <!-- Dropdown Menu -->
-                <div id="profile-menu" class="absolute right-0 mt-60 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
+                <div id="profile-menu" class="absolute right-0 mt-40 w-40 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
                     <ul class="py-2 text-sm text-gray-700">
                         <?php if (isset($_SESSION['id'])): ?>
                             <!-- User is logged in -->
@@ -157,9 +155,6 @@
                                 <a href="../views/login.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Log In</a>
                             </li>
                         <?php endif; ?>
-                        <li>
-                            <a href="../views/settings.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Settings</a>
-                        </li>
                     </ul>
                 </div>
             </div>
@@ -287,46 +282,6 @@
         </div>
     </section>
 
-    <!-- Featured Products Section -->
-    <!-- <section id="featured-products" class="container mx-auto px-40 py-16">
-        <h3 class="text-3xl font-semibold text-center text-gray-800">Featured Products</h3>
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-            Product 1
-            <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 ease-in-out">
-                <img src="https://m.media-amazon.com/images/I/81J4pyKvIaL._AC_UL480_FMwebp_QL65_.jpg" alt="Product 1" class="w-full h-48 object-cover">
-                <div class="p-4">
-                    <h4 class="text-xl font-semibold">Japanese Tea Set</h4>
-                    <p class="mt-2 text-gray-600">Experience traditional Japanese tea ceremonies with this beautiful tea set.</p>
-                    <p class="mt-2 text-lg font-semibold text-pink-600">Rs. 11 999.99</p>
-                </div>
-            </div>
-
-            Product 2 (Popular One)
-            <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 ease-in-out">
-                <img src="https://lh5.googleusercontent.com/proxy/9HZjyXtQYIRMv7cWRSWA3PQf-25MKF0kLOelp8OlkS2liexKIb0fpxAwsVYm4C8VSaWOHcNFO8E5YVQPyuGgsPXm07RmRecRzWdGe4Pig8OfjJ7q" alt="Product 2" class="w-full h-48 object-cover">
-                <div class="p-4">
-                    <h4 class="text-xl font-semibold">Japanese Calligraphy Set</h4>
-                    <p class="mt-2 text-gray-600">Perfect for artists and enthusiasts to explore the art of Japanese calligraphy.</p>
-                    <p class="mt-2 text-lg font-semibold text-pink-600">Rs. 8 999.99</p>
-                    <span class="text-sm text-red-500 bg-gray-100 px-2 py-1 rounded-full">Popular</span>
-                </div>
-            </div>
-
-            View All Products Button
-            <div class="bg-white shadow-lg rounded-lg overflow-hidden flex items-center justify-center bg-gray-100 transform hover:scale-105 transition duration-300 ease-in-out relative">
-                <div class="absolute inset-0 bg-cover bg-center filter blur-sm" style="background-image: url('https://cdn.shopify.com/s/files/1/0068/0394/7579/files/4535051_s_600x600.jpg?v=1650545998');"></div>
-
-                Content (Text and Icon)
-                <a href="culturalinsights.php" class="flex flex-col items-center text-white hover:text-black transition relative z-10">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                    <span class="mt-2 text-lg font-medium">View All Products</span>
-                </a>
-            </div>
-        </div>
-    </section> -->
-
     <!-- Cultural Insights Section -->
     <section id="cultural-insights" class="container mx-auto px-40 py-16">
         <h3 class="text-3xl font-semibold text-center text-gray-800">Learn About Japanese Culture</h3>
@@ -363,6 +318,15 @@
                     <span class="mt-2 text-lg font-medium">Explore More Insights</span>
                 </a>
             </div>
+        </div>
+    </section>
+
+    <!-- Blog Sharing Section (New part added) -->
+    <section>
+        <div class="mt-16 text-center">
+            <h3 class="text-3xl font-semibold text-gray-800">Want to Share Your Japanese Experience?</h3>
+            <p class="mt-4 text-gray-600">If you are a customer and want to share your blogs or experiences with others, click the button below to access your Blogger Dashboard.</p>
+            <a href="../views/blogdashboard.php" class="mt-8 inline-block bg-pink-600 text-white py-3 px-8 rounded-full text-lg">Go to Blogger Dashboard</a>
         </div>
     </section>
 
