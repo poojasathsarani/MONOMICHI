@@ -2,6 +2,8 @@
 session_start();
 include('db_connection.php');
 
+$success = false; // Initialize success flag
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Check if user is logged in
     if (!isset($_SESSION['id'])) {
@@ -12,46 +14,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get form data
     $userId = $_SESSION['id'];
     $title = $_POST['title'];
-    $content = $_POST['content'];
+    $content = nl2br($_POST['content']); // Convert newlines to <br> tags
 
     // Handle image upload
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
         $imageTmpName = $_FILES['image']['tmp_name'];
-        $imageData = file_get_contents($imageTmpName); // Read the image content
+        $imageName = basename($_FILES['image']['name']);
+        $uploadDir = '../uploads/'; // Path to the uploads directory
+        $imagePath = $uploadDir . $imageName;
 
-        // The image will be inserted as a BLOB
-        $imagePath = $imageData; // Store as raw binary data
+        if (move_uploaded_file($imageTmpName, $imagePath)) {
+            // Image successfully uploaded
+        } else {
+            echo "Error uploading image.";
+        }
     } else {
         $imagePath = null;  // No image uploaded
     }
 
-    // SQL query to insert the post into the database
-    $sql = "INSERT INTO posts (user_id, title, content, image_url, created_at) VALUES (?, ?, ?, ?, NOW())";
+    // SQL query to insert the post into the database with "Pending" status
+    $sql = "INSERT INTO posts (user_id, title, content, image_url, created_at, status) VALUES (?, ?, ?, ?, NOW(), 'Pending')";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("isss", $userId, $title, $content, $imagePath);
 
     // Execute the query
     if ($stmt->execute()) {
-        header('Location: blogdashboard.php'); // Redirect back to dashboard on success
+        $success = true;
     } else {
         echo "Error: " . $stmt->error;
     }
-}
-
-
-//Retrieve the image and display
-$sql = "SELECT image_url FROM posts WHERE id = ?"; // Modify this query based on your needs
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $postId); // Assuming $postId is the ID of the post you want to fetch
-$stmt->execute();
-$stmt->bind_result($imageData);
-$stmt->fetch();
-
-// Output image if it exists
-if ($imageData) {
-    echo '<img src="data:image/jpeg;base64,' . base64_encode($imageData) . '" alt="Post Image" class="w-full h-auto rounded-lg shadow-lg">';
-} else {
-    echo '<p>No image uploaded for this post.</p>';
 }
 ?>
 
@@ -65,6 +56,7 @@ if ($imageData) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blogger Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
         /* cannot add the ::placeholder selector directly in the inline CSS because inline styles only apply to elements directly and do not support pseudo-elements like ::placeholder, ::before, ::after, or any other pseudo-selectors. */
         #search-bar::placeholder {
@@ -174,34 +166,52 @@ if ($imageData) {
             </div>
     </header>
 
-    <!-- Parallax Scrolling Banner -->
-    <div class="parallax bg-cover bg-center bg-fixed h-96 transition-all duration-300 ease-out" style="background-image: url('https://via.placeholder.com/1920x600');">
-
     <!-- Main Content Section -->
-    <div class="max-w-7xl mx-auto p-8 grid grid-cols-3 gap-8 fade-in px-40">
+    <div class="max-w-9xl mx-auto p-8 grid grid-cols-6 gap-4 fade-in px-30">
         <!-- Sidebar (Profile & Navigation) -->
-        <div class="col-span-1 bg-white p-6 rounded-xl shadow-xl sticky top-20">
+        <div class="col-span-3 bg-pink-100 p-8 rounded-xl shadow-xl sticky top-20 ml-40">
             <h3 class="text-xl font-semibold text-gray-800 mb-4">Latest Upload</h3>
 
+            <!-- Display Image Preview -->
+            <img id="imagePreview" src="" alt="Selected Image" class="w-full h-auto rounded-lg shadow-lg" style="display:none;">
+
             <?php
-            // Fetch the latest post and image
-            $sql = "SELECT image_url FROM posts WHERE user_id = ? ORDER BY created_at DESC LIMIT 1";
+            // Fetch approved posts
+            $sql = "SELECT id, title, content, image_url FROM posts WHERE status = 'Approved' ORDER BY created_at DESC LIMIT 5";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("i", $userId);
             $stmt->execute();
-            $stmt->bind_result($imagePath);
-            $stmt->fetch();
-            
-            if ($imagePath) {
-                echo "<img src='$imagePath' alt='Uploaded Image' class='w-full h-auto rounded-lg shadow-lg'>";
-            } else {
-                echo "<p>No image uploaded yet.</p>";
+            $stmt->bind_result($postId, $title, $content, $imagePath);
+
+            // Display posts
+            while ($stmt->fetch()) {
+                // Remove <br> tags from content
+                $cleanContent = str_replace(["<br>", "<br/>", "<br />"], "", $content);
+                
+                echo "<div class='mb-4'>";
+                echo "<h4 class='text-lg font-semibold text-gray-800'>$title</h4>";
+                echo "<p class='text-gray-600 text-sm'>" . nl2br(htmlspecialchars($cleanContent)) . "</p>"; // Prevent XSS and format newlines
+
+                // Display image if available
+                if ($imagePath) {
+                    echo "<img src='$imagePath' alt='Post Image' class='w-full h-auto rounded-lg shadow-lg mt-4'>";
+                }
+
+                // Like and Comment buttons
+                echo "<div class='mt-4 flex justify-between items-center'>";
+                echo "<button class='like-btn bg-pink-500 text-white px-4 py-2 rounded-lg flex items-center' data-postid='$postId'><i class='fas fa-heart mr-2'></i>Like</button>";
+                echo "<button class='comment-btn bg-green-500 text-white px-4 py-2 rounded-lg flex items-center' data-postid='$postId'><i class='fas fa-comment mr-2'></i>Comment</button>";
+                echo "<div class='comment-section' id='comment-section-$postId' style='display: none;'>
+                        <textarea class='comment-text' data-postid='$postId' placeholder='Write a comment...' class='w-full p-2 border rounded-lg'></textarea>
+                        <button class='submit-comment bg-blue-500 text-white px-4 py-2 rounded-lg mt-2' data-postid='$postId'>Submit</button>
+                    </div>";
+                echo "</div>";
+                echo "</div>";
             }
             ?>
         </div>
 
         <!-- Blog Posts -->
-        <div class="col-span-2 space-y-12">
+        <div class="col-span-3 space-y-12">
             <!-- New Post Section -->
             <div class="bg-white p-6 rounded-lg shadow-lg">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Share Your Thoughts 📝</h2>
@@ -221,13 +231,72 @@ if ($imageData) {
                         <input type="file" id="image" name="image" accept="image/*" class="w-full p-2 border border-gray-300 rounded-lg mt-2">
                     </div>
 
-                    <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition duration-200">Publish</button>
+                    <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition duration-200">Submit</button>
                 </form>
             </div>
 
-            <!-- Displaying Published Posts -->
-            <div class="bg-white p-6 rounded-lg shadow-lg">
-                <!-- Display user's previously published posts here -->
+            <!-- Popup Box -->
+            <?php if ($success): ?>
+                <div class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                        <h3 class="text-xl font-bold text-pink-600 mb-2">Post Submitted!</h3>
+                        <p class="text-gray-700 mb-4">Your post is pending approval by the admin. Please wait for approval.</p>
+                    </div>
+                </div>
+                <script>
+                    // Optionally, redirect to dashboard or remain on the same page after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = 'blogdashboard.php'; // Redirect to dashboard after 3 seconds
+                    }, 3000);
+                </script>
+            <?php endif; ?>
+
+            <!-- Displaying Pending Posts --> 
+            <div class="bg-pink-200 p-6 rounded-lg shadow-lg">
+            <?php
+            // Fetch the logged-in user's posts with "Pending" status
+            $sql = "SELECT title, content, image_url, status FROM posts WHERE user_id = ? AND status = 'Pending' ORDER BY created_at DESC";
+            $stmt = $conn->prepare($sql);
+
+            // Ensure that the session id is being set correctly
+            if (!isset($_SESSION['id'])) {
+                echo "<p class='text-gray-600'>You are not logged in. Please log in to see your posts.</p>";
+                exit;
+            }
+
+            $userId = $_SESSION['id']; // Get the logged-in user's ID
+            $stmt->bind_param("i", $userId);  // Bind the logged-in user ID
+            $stmt->execute();
+            $stmt->bind_result($title, $content, $imagePath, $status);
+
+            // Check if there are any pending posts
+            $hasPendingPosts = false;
+
+            while ($stmt->fetch()) {
+                $hasPendingPosts = true;
+
+                // Remove <br> tags from content
+                $cleanContent = str_replace(["<br>", "<br/>", "<br />"], "", $content);
+
+                echo "<div class='mb-4'>";
+                echo "<h4 class='text-lg font-semibold text-gray-800'>$title</h4>";
+                echo "<p class='text-gray-600 text-sm'>" . nl2br(htmlspecialchars($cleanContent)) . "</p>"; // Display text safely and keep line breaks
+
+                // Display image if present
+                if ($imagePath) {
+                    echo "<img src='" . htmlspecialchars($imagePath) . "' alt='Post Image' class='w-full h-auto rounded-lg shadow-lg mt-4'>";
+                }
+
+                // Display status
+                echo "<p class='text-sm text-gray-500 mt-2'>Status: <span class='font-semibold text-yellow-600'>$status</span></p>";
+                echo "</div>";
+            }
+
+            // If no pending posts are found
+            if (!$hasPendingPosts) {
+                echo "<p class='text-gray-600'>You have no pending posts. Please check back later.</p>";
+            }
+            ?>
             </div>
         </div>
     </div>
@@ -409,6 +478,81 @@ if ($imageData) {
     nextButton.addEventListener('click', () => {
         currentIndex = (currentIndex < carousel.children.length - 1) ? currentIndex + 1 : carousel.children.length - 1;
         updateCarousel();
+    });
+
+
+    //JavaScript for Image Preview
+    document.getElementById('image').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('imagePreview').src = e.target.result;
+                document.getElementById('imagePreview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // Like Button Click Event
+        document.querySelectorAll(".like-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                let postId = this.getAttribute("data-postid");
+
+                fetch("like_post.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: `post_id=${postId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.innerHTML = '<i class="fas fa-heart mr-2"></i> Liked';
+                        this.classList.add("bg-red-500");
+                    } else {
+                        this.innerHTML = '<i class="fas fa-heart mr-2"></i> Like';
+                        this.classList.remove("bg-red-500");
+                    }
+                });
+            });
+        });
+
+        // Comment Button Click Event
+        document.querySelectorAll(".comment-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                let postId = this.getAttribute("data-postid");
+                let commentSection = document.getElementById(`comment-section-${postId}`);
+                commentSection.style.display = commentSection.style.display === "none" ? "block" : "none";
+            });
+        });
+
+        // Submit Comment Button Event
+        document.querySelectorAll(".submit-comment").forEach(button => {
+            button.addEventListener("click", function () {
+                let postId = this.getAttribute("data-postid");
+                let commentInput = document.querySelector(`.comment-text[data-postid='${postId}']`);
+                let commentText = commentInput.value.trim();
+
+                if (commentText === "") return;
+
+                fetch("add_comment.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: `post_id=${postId}&comment=${encodeURIComponent(commentText)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        let commentDiv = document.createElement("div");
+                        commentDiv.classList.add("bg-gray-100", "p-2", "rounded-lg", "mt-2");
+                        commentDiv.innerText = data.comment;
+                        document.getElementById(`comment-section-${postId}`).appendChild(commentDiv);
+                        commentInput.value = "";
+                    }
+                });
+            });
+        });
     });
 </script>
 </html>

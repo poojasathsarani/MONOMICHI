@@ -4,6 +4,14 @@ session_start();
 // Include database connection
 include('db_connection.php');
 
+$userIsLoggedIn = isset($_SESSION['user']);
+$role = isset($_SESSION['role']) ? $_SESSION['role'] : null;
+
+// Ensure profile image is always a valid string
+$userProfileImage = isset($_SESSION['profile_image']) && $_SESSION['profile_image'] !== null 
+    ? $_SESSION['profile_image'] 
+    : 'https://w7.pngwing.com/pngs/423/634/png-transparent-find-user-profile-person-avatar-people-account-search-general-pack-icon.png';
+
 // Initialize success variable
 $success = false;
 
@@ -100,13 +108,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </form>
             </div>
 
-            <!-- Hamburger Menu Button -->
-            <button id="menu-btn" class="lg:hidden block text-gray-800 focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
-            </button>
-
             <!-- Sidebar -->
             <aside id="sidebar" class="fixed top-0 left-0 h-full bg-gray-50 shadow-lg flex flex-col items-center py-6 px-2 transition-all duration-300 w-16 hover:w-48 overflow-hidden">
                 <!-- Expand/Collapse Button -->
@@ -150,40 +151,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <!-- Right Side Icons -->
             <div class="flex items-center space-x-6 pr-4 ml-auto">
-                <!-- Wishlist Icon -->
-                <a href="../views/wishlist.php" class="relative">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8a4 4 0 016-3.92A4 4 0 0121 8c0 4-6 8-9 8s-9-4-9-8z" />
-                    </svg>
-                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"></span>
-                </a>
-
-                <!-- Shopping Cart Icon -->
-                <a href="../views/cart.php" class="relative">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.879 1.514M7 16a2 2 0 104 0M13 16a2 2 0 104 0M5.058 6H20.86l-2.35 7H7.609m2.788 5H6M21 21H6"></path>
-                    </svg>
-                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"></span>
-                </a>
+                <!-- Profile Icon (Trigger) -->
+                <button id="profile-button" class="flex items-center space-x-2 p-0 bg-gray-200 rounded-full hover:bg-gray-300 focus:outline-none">
+                <img src="<?php echo htmlspecialchars($userProfileImage, ENT_QUOTES, 'UTF-8'); ?>" alt="User Profile" class="w-14 h-14 rounded-full border border-gray-300 transition-transform transform hover:scale-110 hover:shadow-lg">
+                </button>
 
                 <!-- Dropdown Menu -->
-                <div id="profile-menu" class="absolute right-0 mt-80 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
+                <div id="profile-menu" class="absolute right-0 mt-40 w-40 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
                     <ul class="py-2 text-sm text-gray-700">
-                        <li>
-                            <a href="../views/signup.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Sign Up</a>
-                        </li>
-                        <li>
-                            <a href="../views/login.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Log In</a>
-                        </li>
-                        <li>
-                            <a href="../views/my-account.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
-                        </li>
-                        <li>
-                            <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
-                        </li>
-                        <li>
-                            <a href="../views/settings.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Settings</a>
-                        </li>
+                        <?php if (isset($_SESSION['id'])): ?>
+                            <li>
+                                <a href="../views/myaccount.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
+                            </li>
+
+                            <!-- Hide Order History for Admins & Managers -->
+                            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'customer'): ?>
+                                <li>
+                                    <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
+                                </li>
+                            <?php endif; ?>
+
+                            <li>
+                                <a href="../views/logout.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Logout</a>
+                            </li>
+                        <?php else: ?>
+                            <li>
+                                <a href="../views/signup.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Sign Up</a>
+                            </li>
+                            <li>
+                                <a href="../views/login.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Log In</a>
+                            </li>
+                        <?php endif; ?>
                     </ul>
                 </div>
             </div>

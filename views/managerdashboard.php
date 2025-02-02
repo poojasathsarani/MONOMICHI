@@ -154,3 +154,142 @@
 
 </body>
 </html>
+<!-- Order Management -->
+<div id="order-management" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300">
+                <h3 id="order-management-heading" class="text-xl font-semibold text-gray-800 mb-4 cursor-pointer">Order Management</h3>
+                <p>View and manage orders, update their status, and handle customer queries.</p>
+
+                <!-- Order Options Section (Initially hidden) -->
+                <div id="order-options" class="hidden mt-4">
+                    <!-- View Orders -->
+                    <div id="view-orders" class="mt-6">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-2">View Orders</h4>
+                        <table id="orders-table" class="w-full table-auto border-collapse">
+                            <thead>
+                                <tr>
+                                    <th class="border px-4 py-2">Order ID</th>
+                                    <th class="border px-4 py-2">Customer Name</th>
+                                    <th class="border px-4 py-2">Order Date</th>
+                                    <th class="border px-4 py-2">Status</th>
+                                    <th class="border px-4 py-2">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Order rows will be dynamically added here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Update Order Status -->
+                    <div id="update-order-status" class="mb-6">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Update Order Status</h4>
+                        <form id="update-order-status-form" class="space-y-4">
+                            <div>
+                                <label for="update-order-id" class="block text-gray-700">Order ID:</label>
+                                <input type="text" id="update-order-id" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter Order ID" required>
+                            </div>
+                            <div>
+                                <label for="update-order-status" class="block text-gray-700">Status:</label>
+                                <select id="update-order-status" class="w-full border border-gray-300 p-2 rounded" required>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Shipped">Shipped</option>
+                                    <option value="Delivered">Delivered</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Update Status</button>
+                        </form>
+                    </div>
+
+                    <!-- Handle Customer Queries -->
+                    <div id="handle-queries" class="mb-6">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Handle Customer Queries</h4>
+                        <form id="customer-query-form" class="space-y-4">
+                            <div>
+                                <label for="query-order-id" class="block text-gray-700">Order ID:</label>
+                                <input type="text" id="query-order-id" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter Order ID" required>
+                            </div>
+                            <div>
+                                <label for="query-response" class="block text-gray-700">Response:</label>
+                                <textarea id="query-response" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter your response" required></textarea>
+                            </div>
+                            <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Submit Response</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Inventory Management -->
+            <div id="product-inventory-management" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300">
+                <h3 id="product-inventory-heading" class="text-xl font-semibold text-gray-800 mb-4 cursor-pointer">Product Inventory Management</h3>
+                <p>Manage product inventory, edit/delete products, and configure product settings.</p>
+                
+                <!-- Product Options Section (Initially hidden) -->
+                <div id="product-options" class="hidden mt-4">
+                    <!-- View Products -->
+                    <div id="view-products" class="mt-6">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-2">View Products</h4>
+                        <table id="products-table" class="w-full table-auto border-collapse">
+                            <thead>
+                                <tr>
+                                    <th class="border px-4 py-2">ID</th>
+                                    <th class="border px-4 py-2">Name</th>
+                                    <th class="border px-4 py-2">Category</th>
+                                    <th class="border px-4 py-2">Price</th>
+                                    <th class="border px-4 py-2">Stock</th>
+                                    <th class="border px-4 py-2">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Product rows will be dynamically added here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Edit Product -->
+                    <div id="edit-product" class="mb-6">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Edit Product</h4>
+                        <form id="edit-product-form" class="space-y-4">
+                            <div>
+                                <label for="edit-product-id" class="block text-gray-700">Product ID:</label>
+                                <input type="text" id="edit-product-id" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter Product ID" required>
+                            </div>
+                            <div>
+                                <label for="edit-product-name" class="block text-gray-700">Product Name:</label>
+                                <input type="text" id="edit-product-name" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter product name" required>
+                            </div>
+                            <div>
+                                <label for="edit-product-category" class="block text-gray-700">Category:</label>
+                                <input type="text" id="edit-product-category" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter category" required>
+                            </div>
+                            <div>
+                                <label for="edit-product-price" class="block text-gray-700">Price:</label>
+                                <input type="number" id="edit-product-price" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter price" required>
+                            </div>
+                            <div>
+                                <label for="edit-product-stock" class="block text-gray-700">Stock:</label>
+                                <input type="number" id="edit-product-stock" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter stock quantity" required>
+                            </div>
+                            <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Update Product</button>
+                        </form>
+                    </div>
+
+                    <!-- Delete Product -->
+                    <div id="delete-product" class="mb-6">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Delete Product</h4>
+                        <form id="delete-product-form" class="space-y-4">
+                            <div>
+                                <label for="delete-product-id" class="block text-gray-700">Product ID:</label>
+                                <input type="text" id="delete-product-id" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter Product ID" required>
+                            </div>
+                            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Delete Product</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Holiday Drops -->
+            <div id="holiday-drops" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Limited-Time Holiday Drops</h3>
+                <p>Manage special product drops for Japanese holidays and events.</p>
+            </div>

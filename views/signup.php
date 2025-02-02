@@ -215,21 +215,6 @@ function test_input($data) {
                     </a>
                 </nav>
             </aside>
-
-            <!-- Dropdown Menu -->
-            <div id="profile-menu" class="absolute right-0 mt-80 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
-                <ul class="py-2 text-sm text-gray-700">
-                    <li>
-                        <a href="../views/my-account.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
-                    </li>
-                    <li>
-                        <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
-                    </li>
-                    <li>
-                        <a href="../views/settings.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Settings</a>
-                    </li>
-                </ul>
-            </div>
         </div>
     </header>
 

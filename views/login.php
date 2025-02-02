@@ -157,21 +157,6 @@ $conn->close();
                     </a>
                 </nav>
             </aside>
-
-            <!-- Dropdown Menu -->
-            <div id="profile-menu" class="absolute right-0 mt-80 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
-                <ul class="py-2 text-sm text-gray-700">
-                    <li>
-                        <a href="../views/my-account.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
-                    </li>
-                    <li>
-                        <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
-                    </li>
-                    <li>
-                        <a href="../views/settings.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Settings</a>
-                    </li>
-                </ul>
-            </div>
         </div>
     </header>
 
@@ -204,13 +189,9 @@ $conn->close();
                     <label for="password" class="block text-lg text-gray-700">Password</label>
                     <input type="password" id="password" name="password" class="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
                     
-                    <!-- Eye Icon inside input field -->
-                    <span id="togglePassword" class="absolute top-1/2 right-4 transform -translate-y-1/2 cursor-pointer">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 mt-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12c0-3-2.5-5-5-5s-5 2-5 5s2.5 5 5 5s5-2 5-5z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.5 12C2.5 7 7 4 12 4s9.5 3 9.5 8s-4.5 8-9.5 8S2.5 17 2.5 12z" />
-                        </svg>
-                    </span>
+                    <button type="button" onclick="togglePassword('password')" class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-pink-600 mt-6">
+                        👁️
+                    </button>
                 </div>
 
                 <div class="flex justify-between items-center mb-6 space-x-20">
@@ -395,18 +376,13 @@ $conn->close();
     });
 
     // Toggle password visibility
-    const togglePassword = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password');
-
-    togglePassword.addEventListener('click', function () {
-        // Toggle the type of the password input
-        const type = passwordInput.type === 'password' ? 'text' : 'password';
-        passwordInput.type = type;
-
-        // Change the eye icon based on the visibility state
-        this.innerHTML = type === 'password' ?
-            '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 mt-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12c0-3-2.5-5-5-5s-5 2-5 5s2.5 5 5 5s5-2 5-5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.5 12C2.5 7 7 4 12 4s9.5 3 9.5 8s-4.5 8-9.5 8S2.5 17 2.5 12z"/></svg>' :
-            '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 mt-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12c0 3-2.5 5-5 5s-5-2-5-5s2.5-5 5-5s5 2 5 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.5 12C2.5 7 7 4 12 4s9.5 3 9.5 8s-4.5 8-9.5 8S2.5 17 2.5 12z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1l22 22m-6-5a9 9 0 10-12 0"></path></svg>';
-    });
+    function togglePassword(id) {
+        var input = document.getElementById(id);
+        if (input.type === "password") {
+            input.type = "text";
+        } else {
+            input.type = "password";
+        }
+    }
 </script>
 </html>

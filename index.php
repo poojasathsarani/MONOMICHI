@@ -1,7 +1,17 @@
 <?php
-    session_start();
-    $userIsLoggedIn = isset($_SESSION['user']);
-    $userProfileImage = $userIsLoggedIn ? $_SESSION['user']['profile_image'] : null;
+session_start();
+$role = isset($_SESSION['role']) ? $_SESSION['role'] : null;
+
+// Check if the user is logged in
+if (isset($_SESSION['id'])) {
+    // Set a session variable to show the popup message only once
+    $_SESSION['popup_shown'] = true;
+}
+
+// Ensure profile image is always a valid string
+$userProfileImage = isset($_SESSION['profile_image']) && $_SESSION['profile_image'] !== null 
+    ? $_SESSION['profile_image'] 
+    : 'https://w7.pngwing.com/pngs/423/634/png-transparent-find-user-profile-person-avatar-people-account-search-general-pack-icon.png';
 ?>
 
 <!DOCTYPE html>
@@ -57,13 +67,6 @@
                 </form>
             </div>
 
-            <!-- Hamburger Menu Button -->
-            <button id="menu-btn" class="lg:hidden block text-gray-800 focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
-            </button>
-
             <!-- Sidebar -->
             <aside id="sidebar" class="fixed top-0 left-0 h-full bg-gray-50 shadow-lg flex flex-col items-center py-6 px-2 transition-all duration-300 w-16 hover:w-48 overflow-hidden">
                 <!-- Expand/Collapse Button -->
@@ -107,47 +110,48 @@
 
             <!-- Right Side Icons -->
             <div class="flex items-center space-x-6 pr-4 ml-auto">
-                <!-- Wishlist Icon -->
                 <?php if (isset($_SESSION['id'])): ?>
-                    <a href="../views/products.php#wishlist-sidebar" class="relative">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8a4 4 0 016-3.92A4 4 0 0121 8c0 4-6 8-9 8s-9-4-9-8z" />
-                        </svg>
-                        <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                        </span>
-                    </a>
-                <?php endif; ?>
+                    <?php if (isset($_SESSION['id']) && $role === 'customer'): ?>
+                        <!-- Wishlist Icon -->
+                        <a href="../views/products.php#wishlist-sidebar" class="relative">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8a4 4 0 016-3.92A4 4 0 021 8c0 4-6 8-9 8s-9-4-9-8z" />
+                            </svg>
+                        </a>
 
-                <!-- Shopping Cart Icon -->
-                <?php if (isset($_SESSION['id'])): ?>
-                    <a href="../views/products.php#cart-sidebar" class="relative">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.879 1.514M7 16a2 2 0 104 0M13 16a2 2 0 104 0M5.058 6H20.86l-2.35 7H7.609m2.788 5H6M21 21H6"></path>
-                        </svg>
-                        <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                        </span>
-                    </a>
+                        <!-- Shopping Cart Icon -->
+                        <a href="../views/products.php#cart-sidebar" class="relative">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.879 1.514M7 16a2 2 0 104 0M13 16a2 2 0 104 0M5.058 6H20.86l-2.35 7H7.609m2.788 5H6M21 21H6"></path>
+                            </svg>
+                        </a>
+                    <?php endif; ?>
                 <?php endif; ?>
 
                 <!-- Profile Icon (Trigger) -->
                 <button id="profile-button" class="flex items-center space-x-2 p-0 bg-gray-200 rounded-full hover:bg-gray-300 focus:outline-none">
-                    <!-- Conditional Rendering of User Avatar or Profile Icon -->
-                    <img src="<?php echo $userIsLoggedIn ? $userProfileImage : 'https://w7.pngwing.com/pngs/423/634/png-transparent-find-user-profile-person-avatar-people-account-search-general-pack-icon.png'; ?>" alt="User Profile" class="w-14 h-14 rounded-full border border-gray-300 transition-transform transform hover:scale-110 hover:shadow-lg">
+                <img src="<?php echo htmlspecialchars($userProfileImage, ENT_QUOTES, 'UTF-8'); ?>" alt="User Profile" class="w-14 h-14 rounded-full border border-gray-300 transition-transform transform hover:scale-110 hover:shadow-lg">
                 </button>
 
                 <!-- Dropdown Menu -->
                 <div id="profile-menu" class="absolute right-0 mt-40 w-40 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
                     <ul class="py-2 text-sm text-gray-700">
                         <?php if (isset($_SESSION['id'])): ?>
-                            <!-- User is logged in -->
                             <li>
                                 <a href="../views/myaccount.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
                             </li>
+
+                            <!-- Hide Order History for Admins & Managers -->
+                            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'customer'): ?>
+                                <li>
+                                    <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
+                                </li>
+                            <?php endif; ?>
+
                             <li>
                                 <a href="../views/logout.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Logout</a>
                             </li>
                         <?php else: ?>
-                            <!-- User is not logged in -->
                             <li>
                                 <a href="../views/signup.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Sign Up</a>
                             </li>
@@ -185,9 +189,9 @@
     </section>
 
     <!-- New Arrivals Section -->
-    <section id="new-arrivals" class="container mx-auto px-44 py-16">
+    <section id="new-arrivals" class="container mx-auto px-40 py-16">
         <h3 class="text-3xl font-semibold text-center text-gray-800">New Arrivals</h3>
-        <div class="mt-8 flex space-x-8">
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <!-- Product 1 -->
             <div class="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition duration-300 ease-in-out">
                 <div class="relative group">
@@ -321,14 +325,34 @@
         </div>
     </section>
 
-    <!-- Blog Sharing Section (New part added) -->
-    <section>
-        <div class="mt-16 text-center">
-            <h3 class="text-3xl font-semibold text-gray-800">Want to Share Your Japanese Experience?</h3>
-            <p class="mt-4 text-gray-600">If you are a customer and want to share your blogs or experiences with others, click the button below to access your Blogger Dashboard.</p>
-            <a href="../views/blogdashboard.php" class="mt-8 inline-block bg-pink-600 text-white py-3 px-8 rounded-full text-lg">Go to Blogger Dashboard</a>
-        </div>
+    <!-- Blog Sharing Section -->
+    <section class="mt-16 text-center">
+        <h3 class="text-3xl font-semibold text-gray-900">Share Your Japanese Experience!</h3>
+        <p class="mt-4 text-gray-700 ml-20">
+            Are you passionate about Japanese culture? Whether it’s travel, food, or traditions, 
+            share your experiences with our community! Click below to access your Blogger Account.
+        </p>
+        <a href="../views/blogdashboard.php" 
+        class="mt-6 inline-block bg-pink-600 hover:bg-pink-700 text-white py-3 px-8 rounded-full text-lg shadow-md transition">
+            Start Blogging
+        </a>
     </section>
+
+    <!-- Popup Message -->
+    <div id="popupMessage" class="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50" style="display: none;">
+        <div class="bg-white p-8 rounded-lg shadow-lg text-center relative">
+            <!-- Close Button -->
+            <button id="closePopup" class="absolute top-4 right-4 text-gray-600 text-2xl font-semibold">✕</button>
+
+            <h2 class="text-xl font-semibold text-gray-900">Welcome Back! 🌸</h2>
+            <p class="mt-4 text-gray-700">We’re excited to see you! Share your experiences with the world on our Blog. 
+            Click below to start your journey!</p>
+            <a href="../views/blogdashboard.php" 
+            class="mt-6 inline-block bg-pink-600 hover:bg-pink-700 text-white py-3 px-8 rounded-full text-lg shadow-md transition">
+                Start Blogging
+            </a>
+        </div>
+    </div>
 
     <!-- Newsletter Call to Action in Hero Section -->
     <div class="mt-12 bg-gray-100 py-8 rounded-lg shadow-md">
@@ -663,55 +687,17 @@
         });
     };
 
-    // Get all the star rating elements
-    const ratings = document.querySelectorAll('.star');
+    // Check if the popup has already been shown for this session
+    <?php if (isset($_SESSION['popup_shown']) && $_SESSION['popup_shown'] === true) { ?>
+        // Display the popup message
+        document.getElementById('popupMessage').style.display = 'flex';
+        // Reset the session variable after displaying the popup
+        <?php unset($_SESSION['popup_shown']); ?>
+    <?php } ?>
 
-    ratings.forEach(star => {
-        // Hover effect
-        star.addEventListener('mouseenter', function () {
-            const index = parseInt(this.getAttribute('data-index'));
-            const stars = this.parentElement.querySelectorAll('.star');
-            stars.forEach((s, i) => {
-                if (i < index) {
-                    s.classList.add('text-yellow-500');
-                    s.classList.remove('text-gray-300');
-                } else {
-                    s.classList.remove('text-yellow-500');
-                    s.classList.add('text-gray-300');
-                }
-            });
-            this.style.cursor = "pointer"; // Change the cursor to pointer on hover
-        });
-
-        // Reset the color on mouse leave
-        star.addEventListener('mouseleave', function () {
-            const stars = this.parentElement.querySelectorAll('.star');
-            stars.forEach(s => {
-                s.classList.remove('text-yellow-500');
-                s.classList.add('text-gray-300');
-            });
-        });
-
-        // Click event to select the rating
-        star.addEventListener('click', function () {
-            const index = parseInt(this.getAttribute('data-index'));
-            const stars = this.parentElement.querySelectorAll('.star');
-            stars.forEach((s, i) => {
-                if (i <= index) {  // Color all stars to the left of and including the clicked star yellow
-                    s.classList.add('text-yellow-500');
-                    s.classList.remove('text-gray-300');
-                } else {
-                    s.classList.remove('text-yellow-500');
-                    s.classList.add('text-gray-300');
-                }
-            });
-        });
-    });
-    
-    window.addEventListener('DOMContentLoaded', function() {
-        // Retrieve the cart quantity (set to 0 if not found)
-        var cartQuantity = localStorage.getItem("cartQuantity") || 0; // Use sessionStorage if you prefer session-based storage
-        document.getElementById("cart-quantity").innerText = cartQuantity;
+    // Close popup when the "X" button is clicked
+    document.getElementById('closePopup').addEventListener('click', function() {
+        document.getElementById('popupMessage').style.display = 'none';
     });
 </script>
 </html>

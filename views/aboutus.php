@@ -1,7 +1,11 @@
 <?php
-    session_start();
-    $userIsLoggedIn = isset($_SESSION['user']);
-    $userProfileImage = $userIsLoggedIn ? $_SESSION['user']['profile_image'] : null;
+session_start();
+$role = isset($_SESSION['role']) ? $_SESSION['role'] : null;
+
+// Ensure profile image is always a valid string
+$userProfileImage = isset($_SESSION['profile_image']) && $_SESSION['profile_image'] !== null 
+    ? $_SESSION['profile_image'] 
+    : 'https://w7.pngwing.com/pngs/423/634/png-transparent-find-user-profile-person-avatar-people-account-search-general-pack-icon.png';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -131,46 +135,37 @@
 
             <!-- Right Side Icons -->
             <div class="flex items-center space-x-6 pr-4 ml-auto">
-                <!-- Wishlist Icon -->
-                <a href="../views/wishlist.php" class="relative">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8a4 4 0 016-3.92A4 4 0 0121 8c0 4-6 8-9 8s-9-4-9-8z" />
-                    </svg>
-                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"></span>
-                </a>
-
-                <!-- Shopping Cart Icon -->
-                <a href="../views/cart.php" class="relative">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.879 1.514M7 16a2 2 0 104 0M13 16a2 2 0 104 0M5.058 6H20.86l-2.35 7H7.609m2.788 5H6M21 21H6"></path>
-                    </svg>
-                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"></span>
-                </a>
-
                 <!-- Profile Icon (Trigger) -->
                 <button id="profile-button" class="flex items-center space-x-2 p-0 bg-gray-200 rounded-full hover:bg-gray-300 focus:outline-none">
-                    <!-- Conditional Rendering of User Avatar or Profile Icon -->
-                    <img src="<?php echo $userIsLoggedIn ? $userProfileImage : 'https://w7.pngwing.com/pngs/423/634/png-transparent-find-user-profile-person-avatar-people-account-search-general-pack-icon.png'; ?>" alt="User Profile" class="w-14 h-14 rounded-full border border-gray-300 transition-transform transform hover:scale-110 hover:shadow-lg">
+                <img src="<?php echo htmlspecialchars($userProfileImage, ENT_QUOTES, 'UTF-8'); ?>" alt="User Profile" class="w-14 h-14 rounded-full border border-gray-300 transition-transform transform hover:scale-110 hover:shadow-lg">
                 </button>
 
                 <!-- Dropdown Menu -->
-                <div id="profile-menu" class="absolute right-0 mt-80 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
+                <div id="profile-menu" class="absolute right-0 mt-40 w-40 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
                     <ul class="py-2 text-sm text-gray-700">
-                        <li>
-                            <a href="../views/signup.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Sign Up</a>
-                        </li>
-                        <li>
-                            <a href="../views/login.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Log In</a>
-                        </li>
-                        <li>
-                            <a href="../views/my-account.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
-                        </li>
-                        <li>
-                            <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
-                        </li>
-                        <li>
-                            <a href="../views/settings.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Settings</a>
-                        </li>
+                        <?php if (isset($_SESSION['id'])): ?>
+                            <li>
+                                <a href="../views/myaccount.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
+                            </li>
+
+                            <!-- Hide Order History for Admins & Managers -->
+                            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'customer'): ?>
+                                <li>
+                                    <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
+                                </li>
+                            <?php endif; ?>
+
+                            <li>
+                                <a href="../views/logout.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Logout</a>
+                            </li>
+                        <?php else: ?>
+                            <li>
+                                <a href="../views/signup.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Sign Up</a>
+                            </li>
+                            <li>
+                                <a href="../views/login.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Log In</a>
+                            </li>
+                        <?php endif; ?>
                     </ul>
                 </div>
             </div>
@@ -196,25 +191,25 @@
             <div class="mt-8 space-y-12">
                 <!-- Timeline Events -->
                 <div class="flex justify-center items-center space-x-6">
-                    <div class="w-16 h-16 bg-teal-500 text-white rounded-full flex items-center justify-center text-xl font-semibold">
+                    <div class="w-16 h-16 bg-pink-500 text-white rounded-full flex items-center justify-center text-xl font-semibold">
                         2022
                     </div>
                     <p class="text-lg text-gray-600 max-w-2xl">Founded MONOMICHI to share Japanese traditions worldwide, offering a variety of cultural items that reflect Japan's rich heritage.</p>
                 </div>
                 <div class="flex justify-center items-center space-x-6">
-                    <div class="w-16 h-16 bg-teal-500 text-white rounded-full flex items-center justify-center text-xl font-semibold">
+                    <div class="w-16 h-16 bg-pink-500 text-white rounded-full flex items-center justify-center text-xl font-semibold">
                         2023
                     </div>
                     <p class="text-lg text-gray-600 max-w-2xl">Launched our first exclusive collection for cherry blossom season, bringing the essence of Japan's beloved sakura to our customers.</p>
                 </div>
                 <div class="flex justify-center items-center space-x-6">
-                    <div class="w-16 h-16 bg-teal-500 text-white rounded-full flex items-center justify-center text-xl font-semibold">
+                    <div class="w-16 h-16 bg-pink-500 text-white rounded-full flex items-center justify-center text-xl font-semibold">
                         2024
                     </div>
                     <p class="text-lg text-gray-600 max-w-2xl">Expanded our offerings to include unique artisanal items from across Japan, fostering a deeper connection with Japan's diverse craftsmanship.</p>
                 </div>
                 <div class="flex justify-center items-center space-x-6">
-                    <div class="w-16 h-16 bg-teal-500 text-white rounded-full flex items-center justify-center text-xl font-semibold">
+                    <div class="w-16 h-16 bg-pink-500 text-white rounded-full flex items-center justify-center text-xl font-semibold">
                         2025
                     </div>
                     <p class="text-lg text-gray-600 max-w-2xl">Launched an e-commerce platform to provide a more convenient way for global customers to explore and purchase Japanese cultural treasures, embracing the digital age while preserving tradition.</p>
@@ -224,7 +219,7 @@
     </section>
 
     <!-- Our Vision Section -->
-    <section class="py-16 px-6 bg-gradient-to-r from-blue-50 to-teal-100">
+    <section class="py-16 px-6 bg-gradient-to-r from-pink-100 to-white-100">
         <div class="container mx-auto text-center">
             <h3 class="text-4xl font-semibold text-gray-800">Our Vision</h3>
             <p class="text-lg text-gray-600 mt-6 max-w-4xl mx-auto">
@@ -238,15 +233,15 @@
         <div class="container mx-auto text-center">
             <h3 class="text-4xl font-semibold text-gray-800">Our Core Values</h3>
             <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-12">
-                <div class="bg-teal-500 text-white p-8 rounded-lg shadow-lg">
+                <div class="bg-pink-500 text-white p-8 rounded-lg shadow-lg">
                     <h4 class="text-xl font-semibold">Quality</h4>
                     <p class="text-lg text-gray-100 mt-4">We ensure that every product we offer is crafted with care and meets the highest standards of quality and authenticity.</p>
                 </div>
-                <div class="bg-teal-500 text-white p-8 rounded-lg shadow-lg">
+                <div class="bg-pink-500 text-white p-8 rounded-lg shadow-lg">
                     <h4 class="text-xl font-semibold">Tradition</h4>
                     <p class="text-lg text-gray-100 mt-4">We respect and honor Japan’s cultural traditions, ensuring that our offerings reflect its heritage and timeless beauty.</p>
                 </div>
-                <div class="bg-teal-500 text-white p-8 rounded-lg shadow-lg">
+                <div class="bg-pink-500 text-white p-8 rounded-lg shadow-lg">
                     <h4 class="text-xl font-semibold">Innovation</h4>
                     <p class="text-lg text-gray-100 mt-4">We embrace innovation by merging traditional Japanese artistry with modern design and technology to create new experiences.</p>
                 </div>
@@ -255,7 +250,7 @@
     </section>
 
     <!-- Team Section -->
-    <section id="team" class="container mx-auto py-20 px-40 bg-gray-50">
+    <section id="team" class="container mx-auto py-20 px-4 sm:px-8 md:px-16 lg:px-40 bg-gray-50">
         <h2 class="text-4xl font-semibold text-center text-gray-800">Meet Our Team</h2>
         <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
             <!-- Team Member 1 -->

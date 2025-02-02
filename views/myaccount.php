@@ -20,17 +20,17 @@ $stmt->bind_result($email, $name, $role);
 $stmt->fetch();
 $stmt->close();
 
-// Handle form submission
+// Handle form submission for profile update
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (!empty($_POST['name']) && !empty($_POST['email'] && !empty($_POST['password']) && $_POST['password'] === $_POST['confirm_password'])) {
+    if (!empty($_POST['name']) && !empty($_POST['email']) && !empty($_POST['password']) && $_POST['password'] === $_POST['confirm_password']) {
         $newName = htmlspecialchars($_POST['name']);
         $newEmail = htmlspecialchars($_POST['email']);
+        $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
         // Update query
-        $updateSql = "UPDATE users SET fullname = ?, email = ? WHERE id = ?";
+        $updateSql = "UPDATE users SET fullname = ?, email = ?, password = ? WHERE id = ?";
         $updateStmt = $conn->prepare($updateSql);
-        $updateStmt->bind_param("ssi", $newName, $newEmail, $userId);
-        $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+        $updateStmt->bind_param("sssi", $newName, $newEmail, $hashed_password, $userId);
 
         if ($updateStmt->execute()) {
             // Update session variables to reflect new changes
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         $updateStmt->close();
     } else {
-        $updateMessage = "All fields are required!";
+        $updateMessage = "All fields are required and passwords must match!";
         $updateMessageType = "error";
     }
 }
@@ -237,45 +237,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </form>
         </div>
 
-        <!-- Order History Section -->
-        <div class="bg-white shadow-lg rounded-lg p-8 mb-6 mr-20 ml-44">
-            <h3 class="text-2xl font-semibold text-gray-800 mb-4">Order History</h3>
-            <?php
-            // Fetch order history for the user (example query)
-            $orderSql = "SELECT id, order_date, status FROM orders WHERE user_id = ?";
-            $orderStmt = $conn->prepare($orderSql);
-            $orderStmt->bind_param("i", $userId);
-            $orderStmt->execute();
-            $orderStmt->store_result();
-            $orderStmt->bind_result($orderId, $orderDate, $orderStatus);
-            ?>
+        <?php if ($role === 'customer'): ?>
+            <!-- Order History Section -->
+            <div class="bg-white shadow-lg rounded-lg p-8 mb-6">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4">Order History</h3>
+                <?php
+                // Fetch order history for the user
+                $orderSql = "SELECT id, order_date, status FROM orders WHERE user_id = ?";
+                $orderStmt = $conn->prepare($orderSql);
+                $orderStmt->bind_param("i", $userId);
+                $orderStmt->execute();
+                $orderStmt->store_result();
+                $orderStmt->bind_result($orderId, $orderDate, $orderStatus);
+                ?>
 
-            <table class="table-auto w-full mt-4 border-collapse border border-gray-300 ">
-                <thead>
-                    <tr>
-                        <th class="px-4 py-2 border border-gray-300">Order ID</th>
-                        <th class="px-4 py-2 border border-gray-300">Order Date</th>
-                        <th class="px-4 py-2 border border-gray-300">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    if ($orderStmt->num_rows > 0) {
-                        while ($orderStmt->fetch()) {
-                            echo "<tr>
-                                    <td class='px-4 py-2 border border-gray-300'>{$orderId}</td>
-                                    <td class='px-4 py-2 border border-gray-300'>{$orderDate}</td>
-                                    <td class='px-4 py-2 border border-gray-300'>{$orderStatus}</td>
-                                  </tr>";
+                <table class="table-auto w-full mt-4 border-collapse border border-gray-300">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-2 border border-gray-300">Order ID</th>
+                            <th class="px-4 py-2 border border-gray-300">Order Date</th>
+                            <th class="px-4 py-2 border border-gray-300">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        if ($orderStmt->num_rows > 0) {
+                            while ($orderStmt->fetch()) {
+                                echo "<tr>
+                                        <td class='px-4 py-2 border border-gray-300'>{$orderId}</td>
+                                        <td class='px-4 py-2 border border-gray-300'>{$orderDate}</td>
+                                        <td class='px-4 py-2 border border-gray-300'>{$orderStatus}</td>
+                                    </tr>";
+                            }
+                        } else {
+                            echo "<tr><td colspan='3' class='px-4 py-2 border border-gray-300 text-center'>No orders found</td></tr>";
                         }
-                    } else {
-                        echo "<tr><td colspan='3' class='px-4 py-2 border border-gray-300 text-center'>No orders found</td></tr>";
-                    }
-                    ?>
-                </tbody>
-            </table>
-            <?php $orderStmt->close(); ?>
-        </div>
+                        ?>
+                    </tbody>
+                </table>
+                <?php $orderStmt->close(); ?>
+            </div>
+        <?php endif; ?>
     </div>
 
     <!-- Footer -->

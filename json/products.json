@@ -40,5 +40,295 @@
         "description": "An exquisite Japanese calligraphy set complete with brushes, ink, and paper, perfect for beginners and enthusiasts to practice traditional writing art.",
         "price": 4200,
         "image": "https://m.media-amazon.com/images/I/91+2ll0UuQL.jpg"
-    }
+    },
+    {
+        "id": "Premium-Pen",
+        "name": "Premium Pen",
+        "category": "Stationeries",
+        "price": 250,
+        "image": "https://thejapaneseshop.co.uk/cdn/shop/files/premium-oak-wood-black-japanese-ballpoint-pen-3_a48407f6-9e68-457e-afde-984bd8b04405.jpg?v=1715416660&width=1946",
+        "description": "A sleek, high-quality ballpoint pen made from premium oak wood for a luxurious writing experience.",
+        "stock": 100,
+        "status": "available"
+      },
+      {
+        "id": "Luxury-Blue-Pen",
+        "name": "Luxury Blue Pen",
+        "category": "Stationeries",
+        "price": 350,
+        "image": "https://pitchmanpens.com/cdn/shop/products/RainmakerBlueFountainPen1.jpg?v=1651008338",
+        "description": "A luxurious ballpoint pen in blue, crafted from high-quality materials for smooth writing.",
+        "stock": 80,
+        "status": "available"
+      },
+      {
+        "id": "Black-Pen",
+        "name": "Black Pen",
+        "category": "Stationeries",
+        "price": 200,
+        "image": "https://m.media-amazon.com/images/I/71hmC6Y2s5L._AC_SL1194_.jpg",
+        "description": "A smooth-writing ballpoint pen in sleek black, made with fine craftsmanship for professionals.",
+        "stock": 150,
+        "status": "available"
+      },
+      {
+        "id": "Classic-Notebook",
+        "name": "Classic Notebook",
+        "category": "Stationeries",
+        "price": 600,
+        "image": "https://www.themakerhobart.com.au/cdn/shop/files/vintage_notebook_1.jpg?v=1715317519&width=1200",
+        "description": "A vintage-style notebook perfect for journaling, sketching, or taking notes in style.",
+        "stock": 50,
+        "status": "available"
+      },
+      {
+        "id": "Linen-Notebook",
+        "name": "Linen Notebook",
+        "category": "Stationeries",
+        "price": 750,
+        "image": "https://images.squarespace-cdn.com/content/v1/5eaaf226e41012207079f359/1707219268877-WZGIOQLAGE8SB4EK5KYH/UNADJUSTEDNONRAW_thumb_1cf4.jpg?format=1000w",
+        "description": "An elegant linen-bound notebook with a soft cover, perfect for note-taking and sketching.",
+        "stock": 60,
+        "status": "available"
+      },
+      {
+        "id": "Spiral-Notebook",
+        "name": "Spiral Notebook",
+        "category": "Stationeries",
+        "price": 450,
+        "image": "https://images-cdn.ubuy.co.in/65048d58f13be73f071646d7-yansanido-spiral-notebook-4-pcs-4-color.jpg",
+        "description": "A practical spiral-bound notebook, perfect for students and professionals alike.",
+        "stock": 50,
+        "status": "available"
+      },
+      {
+        "id": "Permanent-Marker",
+        "name": "Permanent Marker",
+        "category": "Stationeries",
+        "price": 150,
+        "image": "https://www.fadebomb.com/cdn/shop/products/sld700_e7000bba-23da-4a02-85cc-48c8990b08eb_1200x1200.jpg?v=1545137126",
+        "description": "A durable, multi-purpose permanent marker that writes smoothly on most surfaces.",
+        "stock": 120,
+        "status": "available"
+      },
+      {
+        "id": "Chisel-Tip-Marker",
+        "name": "Chisel Tip Marker",
+        "category": "Stationeries",
+        "price": 200,
+        "image": "https://marchante.mx/cdn/shop/files/D_NQ_NP_2X_752204-MLM48121786399_112021-F_1024x.webp?v=1706646142",
+        "description": "A versatile chisel-tip marker designed for bold, expressive strokes on a variety of surfaces.",
+        "stock": 80,
+        "status": "available"
+      },
+      {
+        "id": "Fine-Tip-Marker",
+        "name": "Fine Tip Marker",
+        "category": "Stationeries",
+        "price": 180,
+        "image": "https://img.uline.com/is/image/uline/S-19421BL?$Mobile_SI$",
+        "description": "A fine-tip marker for precise, detailed writing and artwork on most surfaces.",
+        "stock": 100,
+        "status": "available"
+      },
+      {
+        "id": "White-Eraser",
+        "name": "White Eraser",
+        "category": "Stationeries",
+        "price": 50,
+        "image": "https://www.suratsuperstore.in/cdn/shop/files/apsara-non-dust-eraser.jpg?v=1690742785",
+        "description": "A soft and effective eraser that removes pencil marks cleanly without damaging paper.",
+        "stock": 200,
+        "status": "available"
+      },
+      {
+        "id": "Pink-Eraser",
+        "name": "Pink Eraser",
+        "category": "Stationeries",
+        "price": 70,
+        "image": "https://www.donbookstore.com/donbook/outerweb/product_images/10106037l.png",
+        "description": "A smooth and gentle eraser that provides precise erasing without leaving marks or tearing paper.",
+        "stock": 150,
+        "status": "available"
+      },
+      {
+        "id": "Miri-Eraser",
+        "name": "Miri Eraser",
+        "category": "Stationeries",
+        "price": 80,
+        "image": "https://down-my.img.susercontent.com/file/my-11134208-7r98u-lyq2myf9iesgf3",
+        "description": "A high-quality, dust-free eraser that erases cleanly without leaving residue or smudges.",
+        "stock": 100,
+        "status": "available"
+      },
+      {
+        "id": "Neon-Highlighter",
+        "name": "Neon Highlighter",
+        "category": "Stationeries",
+        "price": 120,
+        "image": "https://cutethingsfromjapan.com/cdn/shop/products/100000001004262242_10209_a08e8dc9-0327-4b35-8ecd-0dd710e9f590.jpg?v=1617801303&width=720",
+        "description": "Bright and vibrant neon highlighters to make your notes stand out.",
+        "stock": 150,
+        "status": "available"
+      },
+      {
+        "id": "Pastel-Highlighter",
+        "name": "Pastel Highlighter",
+        "category": "Stationeries",
+        "price": 150,
+        "image": "https://img.drz.lazcdn.com/static/lk/p/6ef712cbbdefeacd5254785f3a887288.jpg_720x720q80.jpg",
+        "description": "Subtle pastel shades for a softer, more refined highlight on your notes.",
+        "stock": 120,
+        "status": "available"
+      },
+      {
+        "id": "Fluorescent-Highlighter",
+        "name": "Fluorescent Highlighter",
+        "category": "Stationeries",
+        "price": 130,
+        "image": "https://img.drz.lazcdn.com/static/lk/p/d49798a634e891e2458e2ef36d58c800.jpg_720x720q80.jpg",
+        "description": "Intense fluorescent colors that will make any text pop for easy visibility.",
+        "stock": 100,
+        "status": "available"
+      },
+      {
+        "id": "Colorful-Sticky-Notes",
+        "name": "Colorful Sticky Notes",
+        "category": "Stationeries",
+        "price": 200,
+        "image": "https://down-sg.img.susercontent.com/file/sg-11134201-7rdyg-m0en0kbb6q4p29",
+        "description": "A set of colorful sticky notes perfect for organizing your tasks and reminders.",
+        "stock": 50,
+        "status": "available"
+      },
+      {
+        "id": "Pastel-Sticky-Notes",
+        "name": "Pastel Sticky Notes",
+        "category": "Stationeries",
+        "price": 180,
+        "image": "https://images-cdn.ubuy.co.in/6353e4437e944b52c93d044e-early-buy-6-pads-lined-sticky-notes-with.jpg",
+        "description": "A set of pastel-colored sticky notes, perfect for a soft and elegant organization.",
+        "stock": 55,
+        "status": "available"
+      },
+      {
+        "id": "Square-Sticky-Notes",
+        "name": "Square Sticky Notes",
+        "category": "Stationeries",
+        "price": 250,
+        "image": "https://m.media-amazon.com/images/I/71mUHGatCzL.jpg",
+        "description": "A set of square sticky notes, perfect for writing larger notes and reminders.",
+        "stock": 40,
+        "status": "available"
+      },
+      {
+        "id": "Transparent-Tape",
+        "name": "Transparent Tape",
+        "category": "Stationeries",
+        "price": 80,
+        "image": "https://c.superdelivery.com/ip/n/sa/1200/630/www.superdelivery.com/product_image/012/253/855/12253855_s_1001.jpg",
+        "description": "Durable and clear tape, ideal for wrapping, crafting, and general use.",
+        "stock": 100,
+        "status": "available"
+      },
+      {
+        "id": "Clear-Packing-Tape",
+        "name": "Clear Packing Tape",
+        "category": "Stationeries",
+        "price": 120,
+        "image": "https://m.media-amazon.com/images/I/51dywgoD9zL._SL1500_.jpg",
+        "description": "Strong and adhesive packing tape for secure packaging and sealing.",
+        "stock": 90,
+        "status": "available"
+      },
+      {
+        "id": "stationery-item-9",
+        "name": "Office Transparent Tape",
+        "category": "Stationeries",
+        "price": 90,
+        "image": "https://img.drz.lazcdn.com/static/lk/p/6ed9f69fded6dddbecee8fd4d6cc28ec.jpg_720x720q80.jpg",
+        "description": "Versatile office tape for general use, ideal for documents and office projects.",
+        "stock": 100,
+        "status": "available"
+      },
+      {
+        "id": "stationery-item-8",
+        "name": "Metal Ruler",
+        "category": "Stationeries",
+        "price": 300,
+        "image": "https://www.tyzacktools.com/images/thumbs/0003207_shinwa-japanese-150mm-stainless-steel-rule-13005_625.jpeg",
+        "description": "Premium stainless steel ruler for precise measurements and durability.",
+        "stock": 50,
+        "status": "available"
+      },
+      {
+        "id": "stationery-item-9",
+        "name": "Japanese Samurai Action Figure",
+        "category": "Stationeries",
+        "price": 4500,
+        "image": "https://i.ebayimg.com/images/g/~y0AAOSwtT5hXaEV/s-l500.webp",
+        "description": "Intricately designed action figure capturing the elegance of samurai culture.",
+        "stock": 30,
+        "status": "available"
+      },
+      {
+        "id": "Genki-I",
+        "name": "Genki I: An Integrated Course in Elementary Japanese",
+        "category": "Japanese Language Learning Books",
+        "price": 1200,
+        "image": "https://m.media-amazon.com/images/I/61I7nyAHeLL.jpg",
+        "description": "A comprehensive textbook for beginners, this book covers essential grammar, vocabulary, and kanji for elementary-level learners of Japanese.",
+        "stock": 50,
+        "status": "available"
+      },
+      {
+        "id": "Minna-no-Nihongo-I",
+        "name": "Minna no Nihongo I",
+        "category": "Japanese Language Learning Books",
+        "price": 1500,
+        "image": "https://m.media-amazon.com/images/I/51R397uXFwL._SL1002_.jpg",
+        "description": "An easy-to-follow textbook designed for beginners, featuring a mix of grammar and conversation practice with extensive exercises.",
+        "stock": 45,
+        "status": "available"
+      },
+      {
+        "id": "Japanese-for-Busy-People-I",
+        "name": "Japanese for Busy People I",
+        "category": "Japanese Language Learning Books",
+        "price": 1300,
+        "image": "https://m.media-amazon.com/images/I/61qOcx0TkCL._AC_UF1000,1000_QL80_.jpg",
+        "description": "A practical guide designed for busy learners, this book teaches essential Japanese grammar and phrases with easy-to-understand lessons.",
+        "stock": 40,
+        "status": "available"
+      },
+      {
+        "id": "Remembering-the-Kanji-I",
+        "name": "Remembering the Kanji I",
+        "category": "Japanese Language Learning Books",
+        "price": 2000,
+        "image": "https://m.media-amazon.com/images/I/61JR6St41mL.jpg",
+        "description": "A helpful guide for memorizing kanji characters, focusing on visual mnemonics to enhance memory and recall of kanji.",
+        "stock": 30,
+        "status": "available"
+      },
+      {
+        "id": "Japanese-from-Zero-1",
+        "name": "Japanese from Zero! 1",
+        "category": "Japanese Language Learning Books",
+        "price": 1400,
+        "image": "https://m.media-amazon.com/images/I/612UJcw3HkL._SL1303_.jpg",
+        "description": "A fun and engaging textbook for beginners with a clear approach to teaching grammar, kana, and kanji through interactive exercises.",
+        "stock": 50,
+        "status": "available"
+      },
+      {
+        "id": "A-Dictionary-of-Basic-Japanese-Grammar",
+        "name": "A Dictionary of Basic Japanese Grammar",
+        "category": "Japanese Language Learning Books",
+        "price": 1800,
+        "image": "https://sakurabookstore.com/cdn/shop/products/1bZq_UK6ZcR9atqJL7n5muLmdrOizcmVG_a8a35022-4508-48b5-8736-bea789a5f500_800x.jpg?v=1612753434",
+        "description": "This comprehensive reference book provides detailed explanations of essential Japanese grammar points with example sentences.",
+        "stock": 45,
+        "status": "available"
+      }
 ]
