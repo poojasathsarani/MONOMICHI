@@ -262,7 +262,7 @@ function test_input($data) {
                 <div class="mb-4 relative">
                     <label for="confirm_password" class="block text-lg text-gray-700">Confirm Password</label>
                     <input type="password" id="confirm_password" name="confirm_password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600 pr-10" required>
-                    <button type="button" onclick="togglePassword('password')" class="absolute inset-y-0 right-3 mt-8 flex items-center text-gray-500 hover:text-pink-600">
+                    <button type="button" onclick="togglePassword('confirm_password')" class="absolute inset-y-0 right-3 mt-8 flex items-center text-gray-500 hover:text-pink-600">
                         👁️
                     </button>
                 </div>
