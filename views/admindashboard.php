@@ -34,6 +34,89 @@ foreach ($counts as $key => $query) {
     $$key = ($result) ? $result->fetch_assoc()['total'] : 0;
 }
 
+// User Growth Query - March 2025
+$userGrowthQuery = "
+SELECT 
+    DATE(registration_date) AS date, 
+    COUNT(*) AS new_users
+FROM 
+    users
+WHERE 
+    registration_date >= '2025-02-02'
+    AND registration_date <= '2025-02-13'
+GROUP BY 
+    date
+ORDER BY 
+    date
+";
+$userGrowthResult = $conn->query($userGrowthQuery);
+$userGrowthData = [];
+while ($row = $userGrowthResult->fetch_assoc()) {
+$userGrowthData[] = $row;
+}
+
+// Blog Post Growth Query - March 2025
+$blogGrowthQuery = "
+SELECT 
+    DATE(created_at) AS date, 
+    COUNT(*) AS new_posts
+FROM 
+    posts
+WHERE 
+    created_at >= '2025-02-02'
+    AND created_at <= '2025-02-13'
+AND 
+    status = 'Approved'
+GROUP BY 
+    date
+ORDER BY 
+    date
+";
+$blogGrowthResult = $conn->query($blogGrowthQuery);
+$blogGrowthData = [];
+while ($row = $blogGrowthResult->fetch_assoc()) {
+$blogGrowthData[] = $row;
+}
+
+// Fill in missing dates with zero values
+$start = new DateTime('2025-02-02');
+$end = new DateTime('2025-02-13');
+$interval = new DateInterval('P1D');
+$dateRange = new DatePeriod($start, $interval, $end->modify('+1 day'));
+
+$filledUserData = [];
+$filledBlogData = [];
+
+foreach ($dateRange as $date) {
+$dateStr = $date->format('Y-m-d');
+
+// Fill user data
+$found = false;
+foreach ($userGrowthData as $data) {
+    if ($data['date'] === $dateStr) {
+        $filledUserData[$dateStr] = $data['new_users'];
+        $found = true;
+        break;
+    }
+}
+if (!$found) {
+    $filledUserData[$dateStr] = 0;
+}
+
+// Fill blog data
+$found = false;
+foreach ($blogGrowthData as $data) {
+    if ($data['date'] === $dateStr) {
+        $filledBlogData[$dateStr] = $data['new_posts'];
+        $found = true;
+        break;
+    }
+}
+if (!$found) {
+    $filledBlogData[$dateStr] = 0;
+}
+}
+
 // Fetch Users (AJAX Request)
 if (isset($_GET['fetch_users'])) {
     $query = "SELECT id, fullname, email, role FROM users";
@@ -72,73 +155,115 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['configure_privileges']
     echo "<script>alert('User privileges updated!'); window.location.href='admindashboard.php';</script>";
 }
 
-// User Growth Calculation
-$userGrowthQuery = "
-    SELECT 
-        DATE_FORMAT(registration_date, '%Y-%m') AS month, 
-        COUNT(*) AS new_users
-    FROM 
-        users
-    WHERE 
-        registration_date >= DATE_SUB(CURRENT_DATE, INTERVAL 6 MONTH)
-    GROUP BY 
-        month
-    ORDER BY 
-        month
-";
-$userGrowthResult = $conn->query($userGrowthQuery);
-$userGrowthData = [];
-while ($row = $userGrowthResult->fetch_assoc()) {
-    $userGrowthData[] = $row;
-}
 
-// Blog Post Growth - Using the existing created_at column from posts table
-$blogGrowthQuery = "
-    SELECT 
-        DATE_FORMAT(created_at, '%Y-%m') AS month, 
-        COUNT(*) AS new_posts
-    FROM 
-        posts
-    WHERE 
-        created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 6 MONTH)
-    AND 
-        status = 'Approved'
-    GROUP BY 
-        month
-    ORDER BY 
-        month
-";
-$blogGrowthResult = $conn->query($blogGrowthQuery);
-$blogGrowthData = [];
-while ($row = $blogGrowthResult->fetch_assoc()) {
-    $blogGrowthData[] = $row;
-}
 
-// Error handling
-if (!$userGrowthResult || !$blogGrowthResult) {
-    error_log("Database query error: " . $conn->error);
-    // Provide empty arrays as fallback
-    $userGrowthData = [];
-    $blogGrowthData = [];
-}
 
-// Ensure we have at least some data for the charts
-if (empty($userGrowthData)) {
-    // Add dummy data for the last 6 months
-    for ($i = 5; $i >= 0; $i--) {
-        $month = date('Y-m', strtotime("-$i months"));
-        $userGrowthData[] = ['month' => $month, 'new_users' => 0];
+
+// Fetch blogs from database
+if (isset($_GET['fetch_blogs'])) {
+    try {
+        header('Content-Type: application/json');
+        
+        $sql = "SELECT p.id, p.title, p.content, p.status, p.image_url, p.created_at, u.fullname as author_name 
+                FROM posts p 
+                JOIN users u ON p.user_id = u.id 
+                ORDER BY p.created_at DESC";
+        $result = $conn->query($sql);
+        
+        if (!$result) {
+            throw new Exception("Query failed: " . $conn->error);
+        }
+        
+        $blogs = [];
+        while ($row = $result->fetch_assoc()) {
+            // Sanitize the output
+            $blogs[] = array(
+                'id' => htmlspecialchars($row['id']),
+                'title' => htmlspecialchars($row['title']),
+                'content' => nl2br($row['content']),
+                'status' => htmlspecialchars($row['status']),
+                'image_url' => htmlspecialchars($row['image_url']),
+                'author_name' => htmlspecialchars($row['author_name']),
+                'created_at' => htmlspecialchars($row['created_at'])
+            );
+        }
+        
+        echo json_encode(["status" => "success", "data" => $blogs], JSON_UNESCAPED_UNICODE);
+        
+    } catch (Exception $e) {
+        echo json_encode(["status" => "error", "message" => $e->getMessage()]);
     }
+    exit;
 }
 
-if (empty($blogGrowthData)) {
-    // Add dummy data for the last 6 months
-    for ($i = 5; $i >= 0; $i--) {
-        $month = date('Y-m', strtotime("-$i months"));
-        $blogGrowthData[] = ['month' => $month, 'new_posts' => 0];
+// Update blog status (Approve or Decline)
+if (isset($_POST['update_status']) && isset($_POST['blog_id']) && isset($_POST['status'])) {
+    try {
+        header('Content-Type: application/json');
+        
+        $blogId = filter_var($_POST['blog_id'], FILTER_VALIDATE_INT);
+        $status = $_POST['status'];
+        
+        if ($blogId === false) {
+            throw new Exception("Invalid blog ID");
+        }
+        
+        if (!in_array($status, ['Approved', 'Pending'])) {
+            throw new Exception("Invalid status");
+        }
+        
+        $sql = "UPDATE posts SET status = ? WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
+        
+        $stmt->bind_param("si", $status, $blogId);
+        if (!$stmt->execute()) {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+        
+        $stmt->close();
+        echo json_encode([
+            "status" => "success", 
+            "message" => "Blog status updated to " . $status
+        ]);
+        
+    } catch (Exception $e) {
+        echo json_encode(["status" => "error", "message" => $e->getMessage()]);
     }
+    exit;
 }
 
+// Delete blog
+if (isset($_POST['delete_blog']) && isset($_POST['blog_id'])) {
+    try {
+        header('Content-Type: application/json');
+        
+        $blogId = filter_var($_POST['blog_id'], FILTER_VALIDATE_INT);
+        if ($blogId === false) {
+            throw new Exception("Invalid blog ID");
+        }
+        
+        $sql = "DELETE FROM posts WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
+        
+        $stmt->bind_param("i", $blogId);
+        if (!$stmt->execute()) {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+        
+        $stmt->close();
+        echo json_encode(["status" => "success", "message" => "Blog deleted"]);
+        
+    } catch (Exception $e) {
+        echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+    }
+    exit;
+}
 ?>
 
 
@@ -153,9 +278,6 @@ if (empty($blogGrowthData)) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        .gradient-sidebar {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-        }
         html {
             scroll-behavior: smooth;
         }
@@ -167,7 +289,7 @@ if (empty($blogGrowthData)) {
 <body class="bg-gray-50 text-gray-900">
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <div class="w-80 gradient-sidebar text-white p-6 shadow-2xl flex flex-col justify-between">
+        <div class="w-80 bg-gradient-to-br from-pink-600 to-pink-200 text-white p-6 shadow-2xl flex flex-col justify-between">
             <div>
                 <div class="text-center mb-10">
                     <h1 class="text-4xl font-bold tracking-tight">Admin Hub</h1>
@@ -232,7 +354,7 @@ if (empty($blogGrowthData)) {
                     </div>
 
                     <!-- Button to trigger the modal -->
-                    <button class="bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition" onclick="showModal()">Messages</button>
+                    <button class="bg-pink-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition" onclick="showModal()">Messages</button>
 
                     <!-- Modal Structure -->
                     <div id="messageModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
@@ -270,9 +392,9 @@ if (empty($blogGrowthData)) {
                         <h3 class="text-gray-500 text-sm">Total Users</h3>
                         <p class="text-2xl font-bold"><?php echo number_format($userCount); ?></p>
                     </div>
-                    <div class="bg-blue-100 p-3 rounded-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 818 0z" />
+                    <div class="bg-pink-100 p-3 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 1 0 0 5.292M15 21H3v-1a6 6 0 0 1 12 0v1zm0 0h6v-1a6 6 0 0 0-9-5.197M13 7a4 4 0 1 1-8 0 4 4 0 1 1 8 0z" />
                         </svg>
                     </div>
                 </div>
@@ -281,14 +403,20 @@ if (empty($blogGrowthData)) {
             </div>
 
             <!-- Charts and Analytics -->
-            <div class="grid grid-cols-2 gap-8">
-                <div class="bg-white p-6 rounded-xl shadow-md">
-                    <h3 class="text-lg font-semibold mb-4">User Growth</h3>
-                    <canvas id="userGrowthChart"></canvas>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-md">
-                    <h3 class="text-lg font-semibold mb-4">Blog Post Overview</h3>
-                    <canvas id="revenueChart"></canvas>
+            <div class="p-6 bg-gray-100">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-800">Daily User Growth</h3>
+                        <div class="h-64">
+                            <canvas id="userGrowthChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-800">Daily Blog Post Growth</h3>
+                        <div class="h-64">
+                            <canvas id="blogChart"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -369,19 +497,20 @@ if (empty($blogGrowthData)) {
             <!-- Blog Management -->
             <div id="blog-management" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300">
                 <h3 id="blog-management-heading" class="text-xl font-semibold text-gray-800 mb-4 cursor-pointer">Blog Management</h3>
-                <p>Manage blogs, edit/delete blog posts, and configure blog settings.</p>
-                
-                <!-- Blog Options Section (Initially hidden) -->
+                <p>Manage blogs, approve/delete blog posts, and configure blog settings.</p>
+    
+                <!-- Blog Options Section -->
                 <div id="blog-options" class="hidden mt-4">
                     <!-- View Blogs -->
                     <div id="view-blogs" class="mt-6">
-                        <h4 class="text-lg font-semibold text-gray-700 mb-2">View Blogs</h4>
+                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Blog Posts</h4>
                         <table id="blogs-table" class="w-full table-auto border-collapse">
                             <thead>
                                 <tr>
                                     <th class="border px-4 py-2">ID</th>
                                     <th class="border px-4 py-2">Title</th>
-                                    <th class="border px-4 py-2">Content</th>
+                                    <th class="border px-4 py-2">Author</th>
+                                    <th class="border px-4 py-2">Status</th>
                                     <th class="border px-4 py-2">Actions</th>
                                 </tr>
                             </thead>
@@ -390,37 +519,64 @@ if (empty($blogGrowthData)) {
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Edit Blog -->
-                    <div id="edit-blog" class="mb-6">
-                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Edit Blog</h4>
-                        <form id="edit-blog-form" class="space-y-4">
+            <!-- Blog View Modal -->
+            <div id="blog-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
+                <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white">
+                    <div class="mt-3">
+                        <!-- Header Section -->
+                        <div class="flex justify-between items-center pb-3 border-b">
+                            <h3 class="text-2xl font-semibold text-gray-800" id="modal-title"></h3>
+                            <button onclick="closeModal()" class="text-black close-modal text-xl font-bold hover:text-gray-700">&times;</button>
+                        </div>
+                        
+                        <!-- Blog data -->
+                        <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
                             <div>
-                                <label for="edit-blog-id" class="block text-gray-700">Blog ID:</label>
-                                <input type="text" id="edit-blog-id" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter Blog ID" required>
+                                <span class="font-semibold">Author:</span>
+                                <span id="modal-author" class="ml-2"></span>
                             </div>
                             <div>
-                                <label for="edit-blog-title" class="block text-gray-700">Title:</label>
-                                <input type="text" id="edit-blog-title" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter title" required>
+                                <span class="font-semibold">Created:</span>
+                                <span id="modal-date" class="ml-2"></span>
                             </div>
                             <div>
-                                <label for="edit-blog-content" class="block text-gray-700">Content:</label>
-                                <textarea id="edit-blog-content" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter content" required></textarea>
+                                <span class="font-semibold">Status:</span>
+                                <span id="modal-status" class="ml-2"></span>
                             </div>
-                            <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Update Blog</button>
-                        </form>
-                    </div>
-
-                    <!-- Delete Blog -->
-                    <div id="delete-blog" class="mb-6">
-                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Delete Blog</h4>
-                        <form id="delete-blog-form" class="space-y-4">
-                            <div>
-                                <label for="delete-blog-id" class="block text-gray-700">Blog ID:</label>
-                                <input type="text" id="delete-blog-id" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter Blog ID" required>
+                        </div>
+                        
+                        <!-- Blog Content -->
+                        <div class="mt-6">
+                            <div id="modal-content" class="prose max-w-none text-gray-700"></div>
+                        </div>
+                        
+                        <!-- Blog Image -->
+                        <div id="modal-image" class="mt-20">
+                            <!-- Image will be rendered here if available -->
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex justify-end mt-6 gap-4">
+                            <button id="modal-approve" class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300">
+                                Approve
+                            </button>
+                            <button id="modal-decline" class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300">
+                                Decline
+                            </button>
+                            <button onclick="closeModal()" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                                Close
+                            </button>
+                        </div>
+                        <!-- Success Message Popup -->
+                        <div id="success-popup" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+                            <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                                <h3 id="popup-title" class="text-xl font-bold text-green-600 mb-2"></h3>
+                                <p id="popup-message" class="text-gray-700 mb-4"></p>
                             </div>
-                            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Delete Blog</button>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -446,77 +602,117 @@ if (empty($blogGrowthData)) {
     </div>
 
     <script>
-        // Charts initialization
-        document.addEventListener('DOMContentLoaded', function() {
+    // Charts initialization
+    document.addEventListener('DOMContentLoaded', function() {
         // User Growth Chart
-        const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
-        const userGrowthLabels = <?php echo json_encode(array_column($userGrowthData, 'month')); ?>;
-        const userGrowthValues = <?php echo json_encode(array_column($userGrowthData, 'new_users')); ?>;
-
-        new Chart(userGrowthCtx, {
+        new Chart(document.getElementById('userGrowthChart'), {
             type: 'line',
             data: {
-                labels: userGrowthLabels,
+                labels: <?php echo json_encode(array_keys($filledUserData)); ?>,
                 datasets: [{
                     label: 'New Users',
-                    data: userGrowthValues,
-                    borderColor: 'rgb(75, 192, 192)',
-                    tension: 0.1,
+                    data: <?php echo json_encode(array_values($filledUserData)); ?>,
+                    borderColor: '#4ade80',
+                    backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                    tension: 0.4,
                     fill: true,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)'
+                    borderWidth: 2,
+                    pointBackgroundColor: '#4ade80',
+                    pointRadius: 3
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
-                    title: {
+                    legend: {
                         display: true,
-                        text: 'User Growth Over Last 6 Months'
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                return new Date(context[0].label).toLocaleDateString();
+                            }
+                        }
                     }
                 },
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            callback: function(value, index, values) {
+                                const date = new Date(this.getLabelForValue(value));
+                                return date.getDate(); // Just show the day of month
+                            }
+                        }
                     }
                 }
             }
         });
 
-        // Blog Post Growth Chart
-        const blogGrowthCtx = document.getElementById('revenueChart').getContext('2d');
-        const blogGrowthLabels = <?php echo json_encode(array_column($blogGrowthData, 'month')); ?>;
-        const blogGrowthValues = <?php echo json_encode(array_column($blogGrowthData, 'new_posts')); ?>;
-
-        new Chart(blogGrowthCtx, {
+        // Blog Post Chart
+        new Chart(document.getElementById('blogChart'), {
             type: 'bar',
             data: {
-                labels: blogGrowthLabels,
+                labels: <?php echo json_encode(array_keys($filledBlogData)); ?>,
                 datasets: [{
                     label: 'New Blog Posts',
-                    data: blogGrowthValues,
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
+                    data: <?php echo json_encode(array_values($filledBlogData)); ?>,
+                    backgroundColor: 'rgba(96, 165, 250, 0.8)',
+                    borderColor: 'rgba(96, 165, 250, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
                 }]
             },
             options: {
                 responsive: true,
-                plugins: {
-                    title: {
+                maintainAspectRatio: false,
+                plugins:{
+                    legend: {
                         display: true,
-                        text: 'Blog Posts Growth Over Last 6 Months'
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                return new Date(context[0].label).toLocaleDateString();
+                            }
+                        }
                     }
                 },
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            callback: function(value, index, values) {
+                                const date = new Date(this.getLabelForValue(value));
+                                return date.getDate(); // Just show the day of month
+                            }
+                        }
                     }
                 }
             }
         });
     });
 
-        // Function to show the modal
+    // Function to show the modal
     function showModal() {
         document.getElementById("messageModal").classList.remove("hidden");
     }
@@ -604,218 +800,203 @@ if (empty($blogGrowthData)) {
 
     
 
-    //Blog Management
-    // Toggle the Blog Options section when the heading is clicked
+    // Blog Management JavaScript
     document.getElementById('blog-management-heading').addEventListener('click', function() {
         const blogOptions = document.getElementById('blog-options');
         blogOptions.classList.toggle('hidden');
-    });
-
-    // Load all blogs from localStorage and display them in the table
-    function loadBlogs() {
-        const blogsTable = document.getElementById('blogs-table').getElementsByTagName('tbody')[0];
-        const blogs = JSON.parse(localStorage.getItem('blogs')) || [];
-        blogsTable.innerHTML = ''; // Clear the table before rendering
-
-        blogs.forEach(blog => {
-            const row = blogsTable.insertRow();
-            row.insertCell(0).textContent = blog.id;
-            row.insertCell(1).textContent = blog.title;
-            row.insertCell(2).textContent = blog.content;
-
-            // Create Action buttons
-            const actionsCell = row.insertCell(3);
-            const editButton = document.createElement('button');
-            editButton.textContent = 'Edit';
-            editButton.classList.add('bg-blue-500', 'text-white', 'px-2', 'py-1', 'rounded', 'hover:bg-blue-600');
-            editButton.onclick = () => populateEditForm(blog.id);
-            
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = 'Delete';
-            deleteButton.classList.add('bg-red-500', 'text-white', 'px-2', 'py-1', 'rounded', 'hover:bg-red-600');
-            deleteButton.onclick = () => deleteBlog(blog.id);
-            
-            actionsCell.appendChild(editButton);
-            actionsCell.appendChild(deleteButton);
-        });
-    }
-
-    // Add new blog
-    document.getElementById('add-blog-form').addEventListener('submit', function (event) {
-        event.preventDefault();
-        
-        const newBlog = {
-            id: Date.now(), // Unique ID based on timestamp
-            title: document.getElementById('add-blog-title').value,
-            content: document.getElementById('add-blog-content').value
-        };
-
-        // Get existing blogs from localStorage
-        let blogs = JSON.parse(localStorage.getItem('blogs')) || [];
-        blogs.push(newBlog);
-        
-        // Save the updated blogs array
-        localStorage.setItem('blogs', JSON.stringify(blogs));
-
-        // Clear form and reload blogs
-        document.getElementById('add-blog-form').reset();
         loadBlogs();
     });
 
-    // Populate the Edit form with data
-    function populateEditForm(blogId) {
-        const blogs = JSON.parse(localStorage.getItem('blogs')) || [];
-        const blogToEdit = blogs.find(blog => blog.id === blogId);
+    function loadBlogs() {
+        fetch('admindashboard.php?fetch_blogs=1')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'error') {
+                    throw new Error(data.message);
+                }
+                
+                const blogsTable = document.getElementById('blogs-table').getElementsByTagName('tbody')[0];
+                blogsTable.innerHTML = ''; // Clear the table
+                
+                data.data.forEach(blog => {
+                    const row = blogsTable.insertRow();
+                    
+                    // Add table cells
+                    row.insertCell(0).textContent = blog.id;
+                    row.insertCell(1).textContent = blog.title;
+                    row.insertCell(2).textContent = blog.author_name;
+                    
+                    const statusCell = row.insertCell(3);
+                    statusCell.textContent = blog.status;
+                    statusCell.classList.add(blog.status === 'Approved' ? 'text-green-600' : 'text-yellow-600');
+                    
+                    const actionsCell = row.insertCell(4);
+                    
+                    // View button
+                    const viewButton = document.createElement('button');
+                    viewButton.textContent = 'View';
+                    viewButton.classList.add('bg-blue-500', 'text-white', 'px-2', 'py-1', 'rounded', 'hover:bg-blue-600', 'mr-2');
+                    viewButton.onclick = () => viewBlog(blog);
+                    actionsCell.appendChild(viewButton);
+                    
+                    // Delete button
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.classList.add('bg-red-500', 'text-white', 'px-2', 'py-1', 'rounded', 'hover:bg-red-600');
+                    deleteButton.onclick = () => deleteBlog(blog.id);
+                    actionsCell.appendChild(deleteButton);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to load blogs: ' + error.message);
+            });
+    }
 
-        if (blogToEdit) {
-            document.getElementById('edit-blog-id').value = blogToEdit.id;
-            document.getElementById('edit-blog-title').value = blogToEdit.title;
-            document.getElementById('edit-blog-content').value = blogToEdit.content;
+    function viewBlog(blog) {
+        console.log('Blog data:', blog);
+        
+        const modal = document.getElementById('blog-modal');
+        
+        // Set title
+        const titleElement = document.getElementById('modal-title');
+        titleElement.textContent = blog.title || 'No Title';
+        
+        // Set author
+        const authorElement = document.getElementById('modal-author');
+        authorElement.textContent = blog.author_name || 'Unknown Author';
+        
+        // Set date with formatted date
+        const formattedDate = new Date(blog.created_at).toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        const dateElement = document.getElementById('modal-date');
+        dateElement.textContent = formattedDate;
+        
+        // Set content with line breaks preserved
+        const contentElement = document.getElementById('modal-content');
+        contentElement.innerHTML = blog.content ? blog.content.replace(/\n/g, "<br>") : 'No content available';
+        
+        // Set status with color coding
+        const statusElement = document.getElementById('modal-status');
+        statusElement.textContent = blog.status;
+        statusElement.className = 'ml-2 font-medium';
+        statusElement.classList.add(blog.status === 'Approved' ? 'text-green-600' : 'text-yellow-600');
+        
+        // Handle image display
+        const modalImage = document.getElementById('modal-image');
+        if (blog.image_url && blog.image_url.trim() !== '') {
+            modalImage.innerHTML = `
+                <div class="rounded-lg overflow-hidden mt-4">
+                    <img src="${blog.image_url}" 
+                        alt="Blog image" 
+                        class="max-w-full max-h-64 object-contain rounded-lg shadow-md mx-auto"
+                        onerror="this.style.display='none'"
+                    >
+                </div>`;
+        } else {
+            modalImage.innerHTML = ''; // Clear if no image
+        }
+        
+        // Set up approve/decline buttons
+        const approveButton = document.getElementById('modal-approve');
+        const declineButton = document.getElementById('modal-decline');
+        const successPopup = document.getElementById('success-popup');
+        const popupTitle = document.getElementById('popup-title');
+        const popupMessage = document.getElementById('popup-message');
+
+        approveButton.onclick = () => updateBlogStatus(blog.id, 'Approved');
+        declineButton.onclick = () => updateBlogStatus(blog.id, 'Pending');
+
+        function updateBlogStatus(blogId, status) {
+            // Simulate an API request (replace with real API call)
+            setTimeout(() => {
+                // Change popup message dynamically
+                if (status === 'Approved') {
+                    popupTitle.innerText = "Post Approved!";
+                    popupMessage.innerText = "The blog post has been approved successfully.";
+                } else {
+                    popupTitle.innerText = "Post Declined!";
+                    popupMessage.innerText = "The blog post has been moved to pending.";
+                }
+
+                // Show the popup
+                successPopup.classList.remove("hidden");
+
+                // Hide the popup after 3 seconds
+                setTimeout(() => {
+                    successPopup.classList.add("hidden");
+                }, 3000);
+            }, 500); // Simulating a short delay
+        }
+
+        // Show/hide buttons based on current status
+        if (blog.status === 'Approved') {
+            approveButton.classList.add('hidden');
+            declineButton.classList.remove('hidden');
+        } else {
+            approveButton.classList.remove('hidden');
+            declineButton.classList.add('hidden');
+        }
+        
+        // Show modal
+        modal.classList.remove('hidden');
+    }
+
+    // Function to close modal
+    function closeModal() {
+        document.getElementById('blog-modal').classList.add('hidden');
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('blog-modal');
+        if (event.target === modal) {
+            closeModal();
         }
     }
 
-    // Edit blog
-    document.getElementById('edit-blog-form').addEventListener('submit', function (event) {
-        event.preventDefault();
-        
-        const blogId = parseInt(document.getElementById('edit-blog-id').value);
-        const updatedTitle = document.getElementById('edit-blog-title').value;
-        const updatedContent = document.getElementById('edit-blog-content').value;
-        
-        const blogs = JSON.parse(localStorage.getItem('blogs')) || [];
-        const blogIndex = blogs.findIndex(blog => blog.id === blogId);
-        
-        if (blogIndex !== -1) {
-            blogs[blogIndex] = { id: blogId, title: updatedTitle, content: updatedContent };
-            localStorage.setItem('blogs', JSON.stringify(blogs));
-            loadBlogs(); // Reload blog data to reflect changes
-        }
-    });
-
-    // Delete blog
     function deleteBlog(blogId) {
-        const confirmDelete = confirm("Are you sure you want to delete this blog?");
-        
-        if (confirmDelete) {
-            const blogs = JSON.parse(localStorage.getItem('blogs')) || [];
-            const updatedBlogs = blogs.filter(blog => blog.id !== blogId);
-            
-            localStorage.setItem('blogs', JSON.stringify(updatedBlogs));
-            loadBlogs(); // Reload the blog list after deletion
+        if (!confirm('Are you sure you want to delete this blog? This action cannot be undone.')) {
+            return;
         }
-    }
-
-
-
-    
-
-    // Product Inventory Management
-
-    // Toggle the Product Options section when the heading is clicked
-    document.getElementById('product-inventory-heading').addEventListener('click', function() {
-        const productOptions = document.getElementById('product-options');
-        productOptions.classList.toggle('hidden');
-    });
-
-    // Load all products from localStorage and display them in the table
-    function loadProducts() {
-        const productsTable = document.getElementById('products-table').getElementsByTagName('tbody')[0];
-        const products = JSON.parse(localStorage.getItem('products')) || [];
-        productsTable.innerHTML = ''; // Clear the table before rendering
-
-        products.forEach(product => {
-            const row = productsTable.insertRow();
-            row.insertCell(0).textContent = product.id;
-            row.insertCell(1).textContent = product.name;
-            row.insertCell(2).textContent = product.category;
-            row.insertCell(3).textContent = product.price;
-            row.insertCell(4).textContent = product.stock;
-
-            // Create Action buttons
-            const actionsCell = row.insertCell(5);
-            const editButton = document.createElement('button');
-            editButton.textContent = 'Edit';
-            editButton.classList.add('bg-blue-500', 'text-white', 'px-2', 'py-1', 'rounded', 'hover:bg-blue-600');
-            editButton.onclick = () => populateEditForm(product.id);
-            
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = 'Delete';
-            deleteButton.classList.add('bg-red-500', 'text-white', 'px-2', 'py-1', 'rounded', 'hover:bg-red-600');
-            deleteButton.onclick = () => deleteProduct(product.id);
-            
-            actionsCell.appendChild(editButton);
-            actionsCell.appendChild(deleteButton);
+        
+        const formData = new FormData();
+        formData.append('delete_blog', '1');
+        formData.append('blog_id', blogId);
+        
+        fetch('admindashboard.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'error') {
+                throw new Error(data.message);
+            }
+            alert('Blog deleted successfully');
+            loadBlogs(); // Reload the table
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to delete blog: ' + error.message);
         });
     }
 
-    // Add new product
-    document.getElementById('add-product-form').addEventListener('submit', function (event) {
-        event.preventDefault();
-        
-        const newProduct = {
-            id: Date.now(), // Unique ID based on timestamp
-            name: document.getElementById('add-product-name').value,
-            category: document.getElementById('add-product-category').value,
-            price: document.getElementById('add-product-price').value,
-            stock: document.getElementById('add-product-stock').value
-        };
-
-        // Get existing products from localStorage
-        let products = JSON.parse(localStorage.getItem('products')) || [];
-        products.push(newProduct);
-        
-        // Save the updated products array
-        localStorage.setItem('products', JSON.stringify(products));
-
-        // Clear form and reload products
-        document.getElementById('add-product-form').reset();
-        loadProducts();
-    });
-
-    // Populate the Edit form with data
-    function populateEditForm(productId) {
-        const products = JSON.parse(localStorage.getItem('products')) || [];
-        const productToEdit = products.find(product => product.id === productId);
-
-        if (productToEdit) {
-            document.getElementById('edit-product-id').value = productToEdit.id;
-            document.getElementById('edit-product-name').value = productToEdit.name;
-            document.getElementById('edit-product-category').value = productToEdit.category;
-            document.getElementById('edit-product-price').value = productToEdit.price;
-            document.getElementById('edit-product-stock').value = productToEdit.stock;
-        }
-    }
-
-    // Edit product
-    document.getElementById('edit-product-form').addEventListener('submit', function (event) {
-        event.preventDefault();
-        
-        const productId = parseInt(document.getElementById('edit-product-id').value);
-        const updatedName = document.getElementById('edit-product-name').value;
-        const updatedCategory = document.getElementById('edit-product-category').value;
-        const updatedPrice = document.getElementById('edit-product-price').value;
-        const updatedStock = document.getElementById('edit-product-stock').value;
-        
-        const products = JSON.parse(localStorage.getItem('products')) || [];
-        const productIndex = products.findIndex(product => product.id === productId);
-        
-        if (productIndex !== -1) {
-            products[productIndex] = { id: productId, name: updatedName, category: updatedCategory, price: updatedPrice, stock: updatedStock };
-            localStorage.setItem('products', JSON.stringify(products));
-            loadProducts(); // Reload product data to reflect changes
-        }
-    });
-
-    // Delete product
-    function deleteProduct(productId) {
-        const confirmDelete = confirm("Are you sure you want to delete this product?");
-        
-        if (confirmDelete) {
-            const products = JSON.parse(localStorage.getItem('products')) || [];
-            const updatedProducts = products.filter(product => product.id !== productId);
-            
-            localStorage.setItem('products', JSON.stringify(updatedProducts));
-            loadProducts(); // Reload the product list after deletion
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('blog-modal');
+        if (event.target === modal) {
+            closeModal();
         }
     }
     </script>
