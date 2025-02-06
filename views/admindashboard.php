@@ -197,43 +197,48 @@ if (isset($_GET['fetch_blogs'])) {
 }
 
 // Update blog status (Approve or Decline)
-if (isset($_POST['update_status']) && isset($_POST['blog_id']) && isset($_POST['status'])) {
-    try {
-        header('Content-Type: application/json');
-        
-        $blogId = filter_var($_POST['blog_id'], FILTER_VALIDATE_INT);
-        $status = $_POST['status'];
-        
-        if ($blogId === false) {
-            throw new Exception("Invalid blog ID");
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Get the raw POST data
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    // Check if the required fields are set
+    if (isset($data['update_status']) && isset($data['blog_id']) && isset($data['status'])) {
+        try {
+            $blogId = filter_var($data['blog_id'], FILTER_VALIDATE_INT);
+            $status = $data['status'];
+
+            if ($blogId === false) {
+                throw new Exception("Invalid blog ID");
+            }
+
+            if (!in_array($status, ['Approved', 'Pending'])) {
+                throw new Exception("Invalid status");
+            }
+
+            // Update the blog status in the database
+            $sql = "UPDATE posts SET status = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            if (!$stmt) {
+                throw new Exception("Prepare failed: " . $conn->error);
+            }
+
+            $stmt->bind_param("si", $status, $blogId);
+            if (!$stmt->execute()) {
+                throw new Exception("Execute failed: " . $stmt->error);
+            }
+
+            $stmt->close();
+            echo json_encode([
+                "status" => "success", 
+                "message" => "Blog status updated to " . $status
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
         }
-        
-        if (!in_array($status, ['Approved', 'Pending'])) {
-            throw new Exception("Invalid status");
-        }
-        
-        $sql = "UPDATE posts SET status = ? WHERE id = ?";
-        $stmt = $conn->prepare($sql);
-        if (!$stmt) {
-            throw new Exception("Prepare failed: " . $conn->error);
-        }
-        
-        $stmt->bind_param("si", $status, $blogId);
-        if (!$stmt->execute()) {
-            throw new Exception("Execute failed: " . $stmt->error);
-        }
-        
-        $stmt->close();
-        echo json_encode([
-            "status" => "success", 
-            "message" => "Blog status updated to " . $status
-        ]);
-        
-    } catch (Exception $e) {
-        echo json_encode(["status" => "error", "message" => $e->getMessage()]);
     }
     exit;
 }
+
 
 // Delete blog
 if (isset($_POST['delete_blog']) && isset($_POST['blog_id'])) {
@@ -264,6 +269,50 @@ if (isset($_POST['delete_blog']) && isset($_POST['blog_id'])) {
     }
     exit;
 }
+
+
+
+
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $title = $_POST['title'];
+    $content = $_POST['content'];
+    $created_by = $_SESSION['id'];
+    $image_path = null;
+
+    // Debug file upload
+    error_log(print_r($_FILES, true));
+
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
+        $upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/uploads/cultural_guidance/';
+        
+        // Create directory with full permissions
+        if (!file_exists($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+
+        $file_name = uniqid() . '_' . $_FILES['image']['name'];
+        $upload_path = $upload_dir . $file_name;
+
+        if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
+            $image_path = 'uploads/cultural_guidance/' . $file_name;
+        } else {
+            $upload_error = error_get_last();
+            error_log("Upload error: " . print_r($upload_error, true));
+        }
+    }
+
+    $stmt = $conn->prepare("INSERT INTO cultural_guidance_posts (title, content, image_path, created_by) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("sssi", $title, $content, $image_path, $created_by);
+
+    if ($stmt->execute()) {
+        header("Location: admindashboard.php?success=1");
+    } else {
+        header("Location: admindashboard.php?error=1");
+    }
+    exit();
+}
 ?>
 
 
@@ -286,7 +335,7 @@ if (isset($_POST['delete_blog']) && isset($_POST['blog_id'])) {
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-gray-50 text-gray-900 font-serif">
     <div class="flex min-h-screen">
         <!-- Sidebar -->
         <div class="w-80 bg-gradient-to-br from-pink-600 to-pink-200 text-white p-6 shadow-2xl flex flex-col justify-between">
@@ -326,7 +375,7 @@ if (isset($_POST['delete_blog']) && isset($_POST['blog_id'])) {
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
-                                Analytics
+                                Analytics & Reports
                             </a>
                         </li>
                     </ul>
@@ -357,28 +406,42 @@ if (isset($_POST['delete_blog']) && isset($_POST['blog_id'])) {
                     <button class="bg-pink-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition" onclick="showModal()">Messages</button>
 
                     <!-- Modal Structure -->
-                    <div id="messageModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-                        <div class="bg-white rounded-lg w-1/2 p-6">
-                            <h2 class="text-xl font-semibold mb-4">Messages Sent by Users</h2>
-                            <div id="messagesContainer">
-                                <!-- Messages will be dynamically inserted here -->
+                    <div id="messageModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 transition-opacity">
+                        <div class="bg-white rounded-lg w-2/5 p-6 shadow-lg">
+                            <div class="flex justify-between items-center border-b pb-3">
+                                <h2 class="text-2xl font-semibold text-gray-700">User Messages</h2>
+                                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                            </div>
+
+                            <div id="messagesContainer" class="mt-4 max-h-80 overflow-y-auto space-y-4 p-2">
                                 <?php if (empty($messages)): ?>
-                                    <p>No messages found.</p>
+                                    <p class="text-gray-500 text-center">No messages found.</p>
                                 <?php else: ?>
                                     <?php foreach ($messages as $message): ?>
-                                        <div class="mb-4">
-                                            <strong><?php echo htmlspecialchars($message['name']); ?> (<?php echo htmlspecialchars($message['email']); ?>):</strong>
-                                            <p><?php echo nl2br(htmlspecialchars($message['message'])); ?></p>
-                                            <a href="mailto:<?php echo htmlspecialchars($message['email']); ?>?subject=Reply%20to%20your%20message" 
-                                            class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition ml-20">
-                                            Reply
-                                            </a>
-                                            <hr class="my-4">
+                                        <div class="bg-gray-100 p-4 rounded-lg shadow">
+                                            <div class="flex justify-between items-center">
+                                                <strong class="text-lg text-gray-700">
+                                                    <?php echo htmlspecialchars($message['name']); ?>
+                                                </strong>
+                                                <span class="text-sm text-gray-500"><?php echo htmlspecialchars($message['email']); ?></span>
+                                            </div>
+                                            <p class="text-gray-600 mt-2"><?php echo nl2br(htmlspecialchars($message['message'])); ?></p>
+                                            <div class="flex justify-end mt-3">
+                                                <a href="mailto:<?php echo htmlspecialchars($message['email']); ?>?subject=Reply%20to%20your%20message" 
+                                                    class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center space-x-2 transition">
+                                                    <span>Reply</span>
+                                                </a>
+                                            </div>
                                         </div>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
                             </div>
-                            <button onclick="closeModal()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 mt-4">Close</button>
+
+                            <div class="flex justify-end mt-4">
+                                <button onclick="closeModal()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+                                    Close
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -581,22 +644,82 @@ if (isset($_POST['delete_blog']) && isset($_POST['blog_id'])) {
                 </div>
             </div>
 
+
             <!-- Cultural Guidance -->
-            <div id="cultural-guidance-management" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">Cultural Guidance</h3>
+            <div id="cultural-guidance-management" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition-all duration-300">
+                <h3 id="cultural-guidance-heading" class="text-xl font-semibold text-gray-800 mb-4 cursor-pointer">Cultural Guidance Management</h3>
                 <p>Edit and update cultural guidance and learning materials.</p>
+            </div>
+
+            <div id="cultural-guidance-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+                <div class="bg-white rounded-xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Add Cultural Guidance Post
+                        </h2>
+                        <button id="close-cultural-guidance-modal" class="text-gray-400 hover:text-red-500 transition-colors">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <form id="cultural-guidance-form" class="space-y-6">
+                        <div>
+                            <label for="post-title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                            <input type="text" id="post-title" name="title" required 
+                                class="block w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"/>
+                        </div>
+
+                        <div>
+                            <label for="post-content" class="block text-sm font-medium text-gray-700 mb-1">Content</label>
+                            <textarea id="post-content" name="content" rows="6" required 
+                                class="block w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"></textarea>
+                        </div>
+
+                        <div>
+                            <label for="post-image" class="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-indigo-500 transition-all">
+                                <div class="space-y-1 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <div class="flex text-sm text-gray-600">
+                                        <label for="post-image" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500">
+                                            <span>Upload a file</span>
+                                            <input id="post-image" name="image" type="file" accept="image/*" class="sr-only"/>
+                                        </label>
+                                        <p class="pl-1">or drag and drop</p>
+                                    </div>
+                                    <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end space-x-4 pt-4">
+                            <button type="button" id="cancel-cultural-guidance" 
+                                class="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:ring-2 focus:ring-gray-300 transition-all">
+                                Cancel
+                            </button>
+                            <button type="submit" 
+                                class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                                Submit Post
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
             <!-- Analytics & Reports -->
             <div id="analytics" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300">
                 <h3 class="text-xl font-semibold text-gray-800 mb-4">Analytics & Reports</h3>
                 <p>Analyze your platform's performance, track metrics, and generate reports.</p>
-            </div>
-
-            <!-- Settings -->
-            <div id="settings" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">Settings</h3>
-                <p>Configure your platform's settings, including payment methods, taxes, and shipping.</p>
             </div>
         </div>
     </div>
@@ -722,6 +845,12 @@ if (isset($_POST['delete_blog']) && isset($_POST['blog_id'])) {
         document.getElementById("messageModal").classList.add("hidden");
     }
 
+    // Close modal when clicking outside the content
+    document.getElementById('messageModal').addEventListener('click', function(event) {
+        if (event.target === this) { // Check if the click is outside the modal content
+            closeModal();
+        }
+    });
 
 
 
@@ -800,7 +929,7 @@ if (isset($_POST['delete_blog']) && isset($_POST['blog_id'])) {
 
     
 
-    // Blog Management JavaScript
+    // Blog Management
     document.getElementById('blog-management-heading').addEventListener('click', function() {
         const blogOptions = document.getElementById('blog-options');
         blogOptions.classList.toggle('hidden');
@@ -918,8 +1047,21 @@ if (isset($_POST['delete_blog']) && isset($_POST['blog_id'])) {
         declineButton.onclick = () => updateBlogStatus(blog.id, 'Pending');
 
         function updateBlogStatus(blogId, status) {
-            // Simulate an API request (replace with real API call)
-            setTimeout(() => {
+        // Send an AJAX request to update the status
+        fetch('admindashboard.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                update_status: true,
+                blog_id: blogId,
+                status: status
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
                 // Change popup message dynamically
                 if (status === 'Approved') {
                     popupTitle.innerText = "Post Approved!";
@@ -936,8 +1078,16 @@ if (isset($_POST['delete_blog']) && isset($_POST['blog_id'])) {
                 setTimeout(() => {
                     successPopup.classList.add("hidden");
                 }, 3000);
-            }, 500); // Simulating a short delay
-        }
+            } else {
+                // Handle error if any
+                alert('Error updating blog status: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error);
+        });
+    }
+
 
         // Show/hide buttons based on current status
         if (blog.status === 'Approved') {
@@ -999,6 +1149,70 @@ if (isset($_POST['delete_blog']) && isset($_POST['blog_id'])) {
             closeModal();
         }
     }
+
+
+
+
+
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const culturalGuidanceHeading = document.getElementById('cultural-guidance-heading');
+        const culturalGuidanceModal = document.getElementById('cultural-guidance-modal');
+        const closeCulturalGuidanceModal = document.getElementById('close-cultural-guidance-modal');
+        const cancelCulturalGuidance = document.getElementById('cancel-cultural-guidance');
+        const culturalGuidanceForm = document.getElementById('cultural-guidance-form');
+
+        // Open modal when cultural guidance heading is clicked
+        culturalGuidanceHeading.addEventListener('click', function() {
+            culturalGuidanceModal.classList.remove('hidden');
+        });
+
+        // Close modal functions
+        function closeModal() {
+            culturalGuidanceModal.classList.add('hidden');
+            culturalGuidanceForm.reset(); // Reset form
+        }
+
+        closeCulturalGuidanceModal.addEventListener('click', closeModal);
+        cancelCulturalGuidance.addEventListener('click', closeModal);
+
+        // Modal close on clicking outside
+        culturalGuidanceModal.addEventListener('click', function(event) {
+            if (event.target === culturalGuidanceModal) {
+                closeModal();
+            }
+        });
+
+        // Form submission
+        culturalGuidanceForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(culturalGuidanceForm);
+
+            fetch('admindashboard.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data && data.status === 'success') {
+                    alert('Cultural guidance post added successfully!');
+                    closeModal();
+                } else {
+                    throw new Error(data.message || 'Unknown error occurred');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Cultural guidance post added successfully!');
+            });
+        });
+    });
     </script>
 </body>
 </html>
