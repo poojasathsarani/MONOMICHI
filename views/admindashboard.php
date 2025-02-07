@@ -313,6 +313,149 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     exit();
 }
+
+
+
+
+// Report generation functions
+function generateUserReport($conn, $start_date, $end_date) {
+    $query = "SELECT 
+                u.id,
+                u.fullname,
+                u.email,
+                u.registration_date,
+                u.role,
+                COUNT(DISTINCT o.id) as total_orders,
+                COUNT(DISTINCT p.id) as total_posts,
+                COUNT(DISTINCT c.id) as total_comments
+              FROM users u
+              LEFT JOIN orders o ON u.id = o.user_id AND o.order_date BETWEEN '$start_date' AND '$end_date'
+              LEFT JOIN posts p ON u.id = p.user_id AND p.created_at BETWEEN '$start_date' AND '$end_date'
+              LEFT JOIN comments c ON u.id = c.user_id AND c.created_at BETWEEN '$start_date' AND '$end_date'
+              GROUP BY u.id";
+    
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
+}
+
+function generateSalesReport($conn, $start_date, $end_date) {
+    $query = "SELECT 
+                DATE(o.order_date) as sale_date,
+                COUNT(o.id) as total_orders,
+                SUM(o.total_amount) as daily_revenue,
+                o.status,
+                COUNT(DISTINCT o.user_id) as unique_customers
+              FROM orders o
+              WHERE o.order_date BETWEEN '$start_date' AND '$end_date'
+              GROUP BY DATE(o.order_date), o.status
+              ORDER BY sale_date DESC";
+    
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
+}
+
+function generateProductReport($conn, $start_date, $end_date) {
+    $start_date = mysqli_real_escape_string($conn, $start_date);
+    $end_date = mysqli_real_escape_string($conn, $end_date);
+    
+    $query = "SELECT 
+                p.productid,
+                p.productname,
+                p.category,
+                p.price,
+                p.stock,
+                p.status,
+                p.brand,
+                COUNT(oi.id) as times_ordered
+              FROM products p
+              LEFT JOIN order_items oi ON p.productid = oi.product_id
+              LEFT JOIN orders o ON oi.order_id = o.id 
+                AND o.order_date BETWEEN '$start_date' AND '$end_date'
+              GROUP BY p.productid
+              ORDER BY times_ordered DESC";
+
+    // Debugging query
+    if ($result = mysqli_query($conn, $query)) {
+        $data = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        return $data;
+    } else {
+        // Log query error
+        error_log("Error executing query: " . mysqli_error($conn));
+        return [];
+    }
+}
+
+function generateContentReport($conn, $start_date, $end_date) {
+    $query = "SELECT 
+                p.id,
+                p.title,
+                u.fullname as author,
+                p.status,
+                p.created_at,
+                COUNT(DISTINCT l.id) as like_count,
+                COUNT(DISTINCT c.id) as comment_count
+              FROM posts p
+              LEFT JOIN users u ON p.user_id = u.id
+              LEFT JOIN likes l ON p.id = l.post_id
+              LEFT JOIN comments c ON p.id = c.post_id
+              WHERE p.created_at BETWEEN '$start_date' AND '$end_date'
+              GROUP BY p.id
+              ORDER BY like_count DESC";
+    
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
+}
+
+function generateCSV($data, $filename) {
+    $filepath = 'reports/' . $filename . '_' . date('Y-m-d_H-i-s') . '.csv';
+    $fp = fopen($filepath, 'w');
+
+    if (!empty($data)) {
+        // Write headers
+        fputcsv($fp, array_keys($data[0]));
+
+        // Write data
+        foreach ($data as $row) {
+            fputcsv($fp, $row);
+        }
+    } else {
+        // Write headers with "No data found" row if data is empty
+        fputcsv($fp, ["Message"]);
+        fputcsv($fp, ["No data found for the selected date range"]);
+    }
+
+    fclose($fp);
+    return $filepath;
+}
+
+// Handle report generation
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['report_type'])) {
+    $start_date = $_POST['start_date'];
+    $end_date = $_POST['end_date'];
+    $report_type = $_POST['report_type'];
+    
+    switch ($report_type) {
+        case 'user':
+            $data = generateUserReport($conn, $start_date, $end_date);
+            $file = generateCSV($data, 'user_report');
+            break;
+        case 'sales':
+            $data = generateSalesReport($conn, $start_date, $end_date);
+            $file = generateCSV($data, 'sales_report');
+            break;
+        case 'product':
+            $data = generateProductReport($conn, $start_date, $end_date);
+            $file = generateCSV($data, 'product_report');
+            break;
+        case 'content':
+            $data = generateContentReport($conn, $start_date, $end_date);
+            $file = generateCSV($data, 'content_report');
+            break;
+    }
+    
+    echo $file; // Return the file path
+    exit;
+}
 ?>
 
 
@@ -346,38 +489,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <nav>
                     <ul class="space-y-2">
-                        <li>
-                            <a href="#user-management" class="flex items-center p-3 hover:bg-white/10 rounded-lg transition duration-300 group">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                                User Management
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#blog-management" class="flex items-center p-3 hover:bg-white/10 rounded-lg transition duration-300 group">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                Blog Management
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#cultural-guidance-management" class="flex items-center p-3 hover:bg-white/10 rounded-lg transition duration-300 group">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                Cultural Guidance Management
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#analytics" class="flex items-center p-3 hover:bg-white/10 rounded-lg transition duration-300 group">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                                Analytics & Reports
-                            </a>
-                        </li>
+                    <li>
+                        <a href="#user-management" class="flex items-center p-3 hover:bg-white/10 rounded-lg transition duration-300 group">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-1a6 6 0 00-12 0v1h5M9 8a4 4 0 118 0 4 4 0 01-8 0z" />
+                            </svg>
+                            User Management
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#blog-management" class="flex items-center p-3 hover:bg-white/10 rounded-lg transition duration-300 group">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9M3 10h18M3 6h18M3 14h9M3 18h6" />
+                            </svg>
+                            Blog Management
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#cultural-guidance-management" class="flex items-center p-3 hover:bg-white/10 rounded-lg transition duration-300 group">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a10 10 0 110 20 10 10 0 010-20zm0 0v10m0 0h4m-4 0h-4" />
+                            </svg>
+                            Cultural Guidance Management
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#analytics" class="flex items-center p-3 hover:bg-white/10 rounded-lg transition duration-300 group">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19v-3m4 3v-6m4 6v-9m4 9V5m4 14V10" />
+                            </svg>
+                            Analytics & Reports
+                        </a>
+                    </li>
                     </ul>
                 </nav>
             </div>
@@ -716,10 +862,93 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
 
-            <!-- Analytics & Reports -->
-            <div id="analytics" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300">
+
+
+
+            <!-- Modal Trigger -->
+            <div id="analytics" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300 cursor-pointer">
                 <h3 class="text-xl font-semibold text-gray-800 mb-4">Analytics & Reports</h3>
-                <p>Analyze your platform's performance, track metrics, and generate reports.</p>
+                <p>Generate comprehensive reports and analyze platform metrics</p>
+            </div>
+
+            <!-- Modal Background Overlay -->
+            <div id="analyticsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+                <!-- Modal Content -->
+                <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white">
+                    <!-- Modal Header -->
+                    <div class="flex justify-between items-center pb-3 border-b">
+                        <h3 class="text-2xl font-semibold text-gray-800">Generate Reports</h3>
+                        <button id="closeAnalyticsModal" class="text-gray-400 hover:text-gray-500">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Report Categories -->
+                    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- User Analytics -->
+                        <div class="p-4 border rounded-lg hover:bg-blue-50 cursor-pointer transition" onclick="generateReport('users')">
+                            <h4 class="font-semibold text-gray-700">User Analytics</h4>
+                            <p class="text-sm text-gray-600 mt-1">Registration trends and user roles distribution</p>
+                        </div>
+
+                        <!-- Order Reports -->
+                        <div class="p-4 border rounded-lg hover:bg-blue-50 cursor-pointer transition" onclick="generateReport('orders')">
+                            <h4 class="font-semibold text-gray-700">Order Reports</h4>
+                            <p class="text-sm text-gray-600 mt-1">Sales data and order status analysis</p>
+                        </div>
+
+                        <!-- Product Analytics -->
+                        <div class="p-4 border rounded-lg hover:bg-blue-50 cursor-pointer transition" onclick="generateReport('products')">
+                            <h4 class="font-semibold text-gray-700">Product Analytics</h4>
+                            <p class="text-sm text-gray-600 mt-1">Product performance and inventory status</p>
+                        </div>
+
+                        <!-- Customer Feedback -->
+                        <div class="p-4 border rounded-lg hover:bg-blue-50 cursor-pointer transition" onclick="generateReport('customers')">
+                            <h4 class="font-semibold text-gray-700">Customer Feedback</h4>
+                            <p class="text-sm text-gray-600 mt-1">Customer messages and interaction analysis</p>
+                        </div>
+
+                        <!-- Community Engagement -->
+                        <div class="p-4 border rounded-lg hover:bg-blue-50 cursor-pointer transition" onclick="generateReport('engagement')">
+                            <h4 class="font-semibold text-gray-700">Community Engagement</h4>
+                            <p class="text-sm text-gray-600 mt-1">Posts, likes, and comments metrics</p>
+                        </div>
+
+                        <!-- Cultural Content -->
+                        <div class="p-4 border rounded-lg hover:bg-blue-50 cursor-pointer transition" onclick="generateReport('cultural')">
+                            <h4 class="font-semibold text-gray-700">Cultural Content</h4>
+                            <p class="text-sm text-gray-600 mt-1">Cultural guidance posts analytics</p>
+                        </div>
+                    </div>
+
+                    <!-- Date Range Selector -->
+                    <div class="mt-6 p-4 border rounded-lg bg-gray-50">
+                        <h4 class="font-semibold text-gray-700 mb-3">Select Date Range</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Start Date</label>
+                                <input type="date" id="startDate" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">End Date</label>
+                                <input type="date" id="endDate" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition">
+                            Cancel
+                        </button>
+                        <button id="generateBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                            Generate Report
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1150,12 +1379,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-
-
-
-
-
-
     document.addEventListener('DOMContentLoaded', function() {
         const culturalGuidanceHeading = document.getElementById('cultural-guidance-heading');
         const culturalGuidanceModal = document.getElementById('cultural-guidance-modal');
@@ -1213,6 +1436,137 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
         });
     });
+
+
+
+
+
+
+
+
+    // Modal functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const analytics = document.getElementById('analytics');
+        const modal = document.getElementById('analyticsModal');
+        const closeButton = document.getElementById('closeAnalyticsModal');
+        const generateBtn = document.getElementById('generateBtn');
+
+        analytics.addEventListener('click', function() {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        });
+
+        closeButton.addEventListener('click', closeModal);
+
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        let selectedReportType = '';
+
+        // Handle report type selection
+        document.querySelectorAll('[onclick^="generateReport"]').forEach(element => {
+            element.addEventListener('click', function() {
+                // Remove previous selection highlight
+                document.querySelectorAll('[onclick^="generateReport"]').forEach(el => {
+                    el.classList.remove('bg-blue-100');
+                    el.classList.add('hover:bg-blue-50');
+                });
+                
+                // Add highlight to selected report
+                this.classList.add('bg-blue-100');
+                this.classList.remove('hover:bg-blue-50');
+                
+                selectedReportType = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+            });
+        });
+
+        generateBtn.addEventListener('click', function() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!selectedReportType) {
+                alert('Please select a report type.');
+                return;
+            }
+
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates.');
+                return;
+            }
+
+            // Send the request to generate the report
+            const formData = new FormData();
+            formData.append('report_type', selectedReportType);
+            formData.append('start_date', startDate);
+            formData.append('end_date', endDate);
+
+            fetch('admindashboard.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(filePath => {
+                alert('Report generated: ' + filePath);
+                // Optionally, trigger download or show the link
+                window.location.href = filePath;
+            })
+            .catch(error => {
+                console.error('Error generating report:', error);
+                alert('An error occurred while generating the report.');
+            });
+        });
+    });
+
+    function closeModal() {
+        const modal = document.getElementById('analyticsModal');
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    function generateReport(type, startDate, endDate) {
+        const formData = new FormData();
+        formData.append('type', type);
+        formData.append('startDate', startDate);
+        formData.append('endDate', endDate);
+
+        const generateBtn = document.getElementById('generateBtn');
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = 'Generating...';
+
+        fetch('admindashboard.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = 'Generate Report';
+            
+            if (data.includes('Error')) {
+                alert(data);
+            } else {
+                const blob = new Blob([data], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${type}_report_${startDate}_to_${endDate}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                closeModal();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while generating the report');
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = 'Generate Report';
+        });
+    }
     </script>
 </body>
 </html>

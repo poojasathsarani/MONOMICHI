@@ -1,3 +1,157 @@
+<?php
+session_start();
+include('db_connection.php');
+
+// Redirect to login if not logged in
+if (!isset($_SESSION['id'])) {
+    header("Location: login.php");
+    exit;
+}
+
+$manager_id = $_SESSION['id'];
+$query = "SELECT fullname FROM users WHERE id = ? AND role = 'manager'";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $manager_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$managername = ($result->num_rows > 0) ? $result->fetch_assoc()['fullname'] : "Manager";
+
+// Fetch customer messages
+$sql = "SELECT name, email, message FROM customers ORDER BY created_at DESC";
+$result = $conn->query($sql);
+$messages = ($result) ? $result->fetch_all(MYSQLI_ASSOC) : [];
+
+// Fetch dashboard counts
+$counts = [
+    'userCount' => "SELECT COUNT(*) as total FROM users",
+    'blogCount' => "SELECT COUNT(*) as total FROM posts WHERE status='Approved'",
+    'culturalPostCount' => "SELECT COUNT(*) as total FROM cultural_guidance_posts",
+    'productCount' => "SELECT COUNT(*) as total FROM products WHERE status='available'"
+];
+
+foreach ($counts as $key => $query) {
+    $result = $conn->query($query);
+    $$key = ($result) ? $result->fetch_assoc()['total'] : 0;
+}
+
+// User Growth Query - March 2025
+$userGrowthQuery = "
+SELECT 
+    DATE(registration_date) AS date, 
+    COUNT(*) AS new_users
+FROM 
+    users
+WHERE 
+    registration_date >= '2025-02-02'
+    AND registration_date <= '2025-02-13'
+GROUP BY 
+    date
+ORDER BY 
+    date
+";
+$userGrowthResult = $conn->query($userGrowthQuery);
+$userGrowthData = [];
+while ($row = $userGrowthResult->fetch_assoc()) {
+$userGrowthData[] = $row;
+}
+
+// Blog Post Growth Query - March 2025
+$blogGrowthQuery = "
+SELECT 
+    DATE(created_at) AS date, 
+    COUNT(*) AS new_posts
+FROM 
+    posts
+WHERE 
+    created_at >= '2025-02-02'
+    AND created_at <= '2025-02-13'
+AND 
+    status = 'Approved'
+GROUP BY 
+    date
+ORDER BY 
+    date
+";
+$blogGrowthResult = $conn->query($blogGrowthQuery);
+$blogGrowthData = [];
+while ($row = $blogGrowthResult->fetch_assoc()) {
+$blogGrowthData[] = $row;
+}
+
+// Fill in missing dates with zero values
+$start = new DateTime('2025-02-02');
+$end = new DateTime('2025-02-13');
+$interval = new DateInterval('P1D');
+$dateRange = new DatePeriod($start, $interval, $end->modify('+1 day'));
+
+$filledUserData = [];
+$filledBlogData = [];
+
+foreach ($dateRange as $date) {
+$dateStr = $date->format('Y-m-d');
+
+// Fill user data
+$found = false;
+foreach ($userGrowthData as $data) {
+    if ($data['date'] === $dateStr) {
+        $filledUserData[$dateStr] = $data['new_users'];
+        $found = true;
+        break;
+    }
+}
+if (!$found) {
+    $filledUserData[$dateStr] = 0;
+}
+
+// Fill blog data
+$found = false;
+foreach ($blogGrowthData as $data) {
+    if ($data['date'] === $dateStr) {
+        $filledBlogData[$dateStr] = $data['new_posts'];
+        $found = true;
+        break;
+    }
+}
+if (!$found) {
+    $filledBlogData[$dateStr] = 0;
+}
+}
+
+
+
+
+// Handle Accept/Deny form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["request_id"]) && isset($_POST["action"])) {
+    $request_id = intval($_POST["request_id"]);
+    $action = $_POST["action"];
+
+    // Set status based on action
+    $status = ($action === 'accept') ? 'Accepted' : 'Denied';
+
+    // Update request status in the database
+    $sql = "UPDATE special_requests SET status = ? WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("si", $status, $request_id);
+    
+    if ($stmt->execute()) {
+        echo "<script>alert('Request updated successfully!'); window.location.href='admindashboard.php#special-requests-modal';</script>";
+    } else {
+        echo "<script>alert('Failed to update request!'); window.location.href='admindashboard.php#special-requests-modal';</script>";
+    }
+    
+    $stmt->close();
+}
+
+// Fetch special requests
+$sql = "SELECT sr.id, u.fullname AS customer_name, sr.item_name, sr.description, sr.created_at, sr.status 
+        FROM special_requests sr
+        JOIN users u ON sr.user_id = u.id
+        ORDER BY sr.created_at DESC";
+
+$result = $conn->query($sql);
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,11 +159,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manager Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         html {
             scroll-behavior: smooth;
         }
@@ -18,278 +171,448 @@
         }
     </style>
 </head>
-<body class="bg-gray-50">
-
-    <!-- Main Container -->
+<body class="bg-gray-50 text-gray-900 font-serif">
     <div class="flex min-h-screen">
-
         <!-- Sidebar -->
-        <div class="w-64 bg-gradient-to-b from-teal-600 to-teal-800 text-white p-6 flex flex-col space-y-8">
-            <div class="text-3xl font-extrabold mb-8 text-white">Manager Dashboard</div>
-            <ul class="space-y-6">
-                <li><a href="#user-management" class="text-lg font-semibold hover:text-cyan-300 transition duration-300">Manage Special Item Requests</a></li>
-                <li><a href="#blog-management" class="text-lg font-semibold hover:text-cyan-300 transition duration-300">Manage Limited-Time Product Drops</a></li>
-                <li><a href="#order-management" class="text-lg font-semibold hover:text-cyan-300 transition duration-300">Blog Management</a></li>
-                <li><a href="#product-management" class="text-lg font-semibold hover:text-cyan-300 transition duration-300">Content Moderation</a></li>
-                <li><a href="#holiday-drops" class="text-lg font-semibold hover:text-cyan-300 transition duration-300">Update Cultural Guidance</a></li>
-            </ul>
+        <div class="w-80 bg-gradient-to-br from-pink-600 to-pink-200 text-white p-6 shadow-2xl flex flex-col justify-between">
+            <div>
+                <div class="text-center mb-10">
+                    <h1 class="text-4xl font-bold tracking-tight">Manager Hub</h1>
+                    <p class="text-sm text-blue-100 mt-2">Management & Analytics Platform</p>
+                </div>
+                <nav>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="#special-request" class="flex items-center p-3 hover:bg-white/10 rounded-lg transition duration-300 group">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c2.21 0 4-1.79 4-4S14.21 0 12 0 8 1.79 8 4s1.79 4 4 4zm0 2c-3.31 0-6 2.69-6 6v2h12v-2c0-3.31-2.69-6-6-6z"/>
+                                </svg>
+                                Manage Customer Special Request Items
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#inventory-management" class="flex items-center p-3 hover:bg-white/10 rounded-lg transition duration-300 group">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h18M3 10h18M3 16h18M3 20h18M6 4v16M12 4v16M18 4v16"/>
+                                </svg>
+                                Inventory Management
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#limited-time-drops-management" class="flex items-center p-3 hover:bg-white/10 rounded-lg transition duration-300 group">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8V4M8 12H4m16 0h-4m-4 4v4m4-4l4 4m-8-8l-4 4m0-8l4-4"/>
+                                </svg>
+                                Limited Time Drops Management
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#order-management" class="flex items-center p-3 hover:bg-white/10 rounded-lg transition duration-300 group">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h18l-2 12H5L3 4zm0 0l3 6h12l3-6"/>
+                                </svg>
+                                Order Management
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#blog-management" class="flex items-center p-3 hover:bg-white/10 rounded-lg transition duration-300 group">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h10"/>
+                                </svg>
+                                Blog Management
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#analytics" class="flex items-center p-3 hover:bg-white/10 rounded-lg transition duration-300 group">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h16v16H4V4zm8 0v16M4 12h16"/>
+                                </svg>
+                                Analytics & Reports
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <button class="w-full bg-red-500 hover:bg-red-600 py-3 rounded-lg font-semibold transition"
+                onclick="window.location.href='logout.php'">
+                Logout
+            </button>
         </div>
 
         <!-- Main Content Area -->
-        <div class="flex-1 p-8 bg-gray-50">
+        <div class="flex-1 p-10 bg-gray-50 overflow-y-auto">
+            <!-- Header -->
+            <header class="flex justify-between items-center mb-10">
+                <div>
+                    <p class="text-2xl font-semibold text-gray-800">Welcome Back, <?php echo htmlspecialchars($managername); ?>!</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <input type="text" placeholder="Search..." class="pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
 
-            <!-- Header Section -->
-            <div class="flex justify-between items-center mb-8">
-                <div class="text-2xl font-semibold text-gray-800">Welcome Back, Manager!</div>
-                <div class="flex items-center space-x-6">
-                    <button class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition duration-200">Messages</button>
-                    <button class="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition duration-200">Logout</button>
+                    <!-- Button to trigger the modal -->
+                    <button class="bg-pink-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition" onclick="showModal()">Messages</button>
+
+                    <!-- Modal Structure -->
+                    <div id="messageModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 transition-opacity">
+                        <div class="bg-white rounded-lg w-2/5 p-6 shadow-lg">
+                            <div class="flex justify-between items-center border-b pb-3">
+                                <h2 class="text-2xl font-semibold text-gray-700">User Messages</h2>
+                                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                            </div>
+
+                            <div id="messagesContainer" class="mt-4 max-h-80 overflow-y-auto space-y-4 p-2">
+                                <?php if (empty($messages)): ?>
+                                    <p class="text-gray-500 text-center">No messages found.</p>
+                                <?php else: ?>
+                                    <?php foreach ($messages as $message): ?>
+                                        <div class="bg-gray-100 p-4 rounded-lg shadow">
+                                            <div class="flex justify-between items-center">
+                                                <strong class="text-lg text-gray-700">
+                                                    <?php echo htmlspecialchars($message['name']); ?>
+                                                </strong>
+                                                <span class="text-sm text-gray-500"><?php echo htmlspecialchars($message['email']); ?></span>
+                                            </div>
+                                            <p class="text-gray-600 mt-2"><?php echo nl2br(htmlspecialchars($message['message'])); ?></p>
+                                            <div class="flex justify-end mt-3">
+                                                <a href="mailto:<?php echo htmlspecialchars($message['email']); ?>?subject=Reply%20to%20your%20message" 
+                                                    class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center space-x-2 transition">
+                                                    <span>Reply</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="flex justify-end mt-4">
+                                <button onclick="closeModal()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Stats -->
+            <div class="grid grid-cols-4 gap-6 mb-10">
+            <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition transform hover:-translate-y-2">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-gray-500 text-sm">Total Users</h3>
+                        <p class="text-2xl font-bold"><?php echo number_format($userCount); ?></p>
+                    </div>
+                    <div class="bg-pink-100 p-3 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 1 0 0 5.292M15 21H3v-1a6 6 0 0 1 12 0v1zm0 0h6v-1a6 6 0 0 0-9-5.197M13 7a4 4 0 1 1-8 0 4 4 0 1 1 8 0z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+                <!-- Similar cards for other metrics -->
+            </div>
+
+            <!-- Charts and Analytics -->
+            <div class="p-6 bg-gray-100">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-800">Daily User Growth</h3>
+                        <div class="h-64">
+                            <canvas id="userGrowthChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-800">Daily Blog Post Growth</h3>
+                        <div class="h-64">
+                            <canvas id="blogChart"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Dashboard Overview -->
-            <div id="overview" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition duration-300 flex flex-col items-center space-y-4">
-                    <h3 class="text-xl font-semibold text-gray-800">Total Sales</h3>
-                    <p class="text-3xl font-bold text-teal-600">Rs. 10 000</p>
-                    <p class="text-sm text-gray-500">This Week</p>
+            <!-- Manager Special Request Card -->
+            <div id="manager-special-request" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300 cursor-pointer">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">
+                    Manager Dashboard
+                </h3>
+                <p class="text-gray-600">Comprehensive management of special requests and system controls</p>
+            </div>
+
+            <!-- Manager Modal -->
+            <div id="manager-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center">
+                <div class="bg-white rounded-xl shadow-2xl w-[600px] p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Manager Control Center</h2>
+                        <button id="close-manager-modal" class="text-gray-600 hover:text-red-500 text-3xl">&times;</button>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Special Item Request Button -->
+                        <button id="open-special-requests-modal" class="manager-option bg-blue-100 hover:bg-blue-200 p-4 rounded-lg flex flex-col items-center" data-action="special-requests">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                            </svg>
+                            <span class="font-semibold text-blue-800">Special Item Requests</span>
+                        </button>
+
+                        <!-- Modal for Special Requests -->
+                        <div id="special-requests-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center">
+                            <div class="bg-white rounded-xl shadow-2xl w-[800px] p-8 max-h-[80vh] overflow-y-auto">
+                                <div class="flex justify-between items-center mb-6">
+                                    <h2 class="text-2xl font-bold text-gray-800">Special Item Requests</h2>
+                                    <button id="close-special-requests-modal" class="text-gray-600 hover:text-red-500 text-3xl">&times;</button>
+                                </div>
+
+                                <div id="requests-container">
+                                    <?php
+                                    if ($result->num_rows > 0) {
+                                        while ($row = $result->fetch_assoc()) {
+                                            echo "
+                                                <div class='p-4 bg-gray-100 rounded-lg shadow mb-4'>
+                                                    <h3 class='text-lg font-semibold text-gray-800'>{$row['item_name']}</h3>
+                                                    <p class='text-gray-600'>Requested by: <span class='font-medium'>{$row['customer_name']}</span></p>
+                                                    <p class='text-gray-500'>{$row['description']}</p>
+                                                    <p class='text-gray-400 text-sm'>Requested on: {$row['created_at']}</p>
+                                                    <p class='text-gray-700 font-semibold'>Status: <span class='text-".($row['status'] === 'Accepted' ? "green" : ($row['status'] === 'Denied' ? "red" : "yellow"))."-500'>{$row['status']}</span></p>
+                                                    <div class='mt-4'>
+                                                        <form method='POST' class='inline-block'>
+                                                            <input type='hidden' name='request_id' value='{$row['id']}'>
+                                                            <button type='submit' name='action' value='accept' class='bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600'>Accept</button>
+                                                        </form>
+                                                        <form method='POST' class='inline-block ml-2'>
+                                                            <input type='hidden' name='request_id' value='{$row['id']}'>
+                                                            <button type='submit' name='action' value='deny' class='bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600'>Deny</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            ";
+                                        }
+                                    } else {
+                                        echo "<p class='text-gray-600'>No special requests found.</p>";
+                                    }
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="manager-option bg-green-100 hover:bg-green-200 p-4 rounded-lg flex flex-col items-center" data-action="inventory">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-green-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                            <span class="font-semibold text-green-800">Product Inventory</span>
+                        </button>
+
+                        <button class="manager-option bg-yellow-100 hover:bg-yellow-200 p-4 rounded-lg flex flex-col items-center" data-action="holiday-drops">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-yellow-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span class="font-semibold text-yellow-800">Holiday Drops</span>
+                        </button>
+
+                        <button class="manager-option bg-purple-100 hover:bg-purple-200 p-4 rounded-lg flex flex-col items-center" data-action="reports">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-purple-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            <span class="font-semibold text-purple-800">Reports</span>
+                        </button>
+
+                        <button class="manager-option bg-red-100 hover:bg-red-200 p-4 rounded-lg flex flex-col items-center" data-action="orders">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            </svg>
+                            <span class="font-semibold text-red-800">Manage Orders</span>
+                        </button>
+
+                        <button class="manager-option bg-indigo-100 hover:bg-indigo-200 p-4 rounded-lg flex flex-col items-center" data-action="blog-interactions">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                            </svg>
+                            <span class="font-semibold text-indigo-800">Blog Interactions</span>
+                        </button>
+                    </div>
                 </div>
-                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition duration-300 flex flex-col items-center space-y-4">
-                    <h3 class="text-xl font-semibold text-gray-800">Total Products</h3>
-                    <p class="text-3xl font-bold text-teal-600">100</p>
-                    <p class="text-sm text-gray-500">In Inventory</p>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition duration-300 flex flex-col items-center space-y-4">
-                    <h3 class="text-xl font-semibold text-gray-800">Active Orders</h3>
-                    <p class="text-3xl font-bold text-teal-600">12</p>
-                    <p class="text-sm text-gray-500">Pending Orders</p>
-                </div>
-            </div>
-
-            <!-- Manage Special Item Requests -->
-            <div id="special-requests" class="mb-8">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">Manage Special Item Requests</h3>
-                <table class="w-full table-auto bg-white shadow-lg rounded-lg">
-                    <thead>
-                        <tr>
-                            <th class="px-4 py-2 border text-left">Customer</th>
-                            <th class="px-4 py-2 border text-left">Item Requested</th>
-                            <th class="px-4 py-2 border text-left">Status</th>
-                            <th class="px-4 py-2 border text-left">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Example Row -->
-                        <tr>
-                            <td class="px-4 py-2 border">Viduni Hansini</td>
-                            <td class="px-4 py-2 border">Japanese Souvenirs(Omiyage)</td>
-                            <td class="px-4 py-2 border">Item Not Available</td> <!-- Status updated to reflect unavailable item -->
-                            <td class="px-4 py-2 border">
-                                <button class="bg-teal-600 text-white px-4 py-1 rounded-lg hover:bg-teal-700">Approve</button>
-                                <button class="bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700">Reject</button>
-                                <!-- Additional button to request adding the item to inventory -->
-                                <button class="bg-yellow-500 text-white px-4 py-1 rounded-lg hover:bg-yellow-600">Add to Inventory</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Manage Holiday Drops -->
-            <div id="holiday-drops" class="mb-8">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">Manage Limited-Time Product Drops</h3>
-                <button class="bg-teal-600 text-white px-6 py-2 rounded-lg hover:bg-teal-700">Add New Holiday Drop</button>
-                <div class="mt-4">
-                    <!-- Placeholder for listing holiday drops -->
-                    <ul class="space-y-4">
-                        <li class="text-lg text-gray-800">Christmas Limited Edition Items</li>
-                        <li class="text-lg text-gray-800">New Year Special Products</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Manage Blog Comments -->
-            <div id="blog-management" class="mb-8">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">Blog Management</h3>
-                <table class="w-full table-auto bg-white shadow-lg rounded-lg">
-                    <thead>
-                        <tr>
-                            <th class="px-4 py-2 border text-left">User</th>
-                            <th class="px-4 py-2 border text-left">Comment</th>
-                            <th class="px-4 py-2 border text-left">Status</th>
-                            <th class="px-4 py-2 border text-left">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Example Row -->
-                        <tr>
-                            <td class="px-4 py-2 border">Nethumi Dahamsa</td>
-                            <td class="px-4 py-2 border">Great blog on Japanese culture!</td>
-                            <td class="px-4 py-2 border">Pending</td>
-                            <td class="px-4 py-2 border">
-                                <button class="bg-teal-600 text-white px-4 py-1 rounded-lg hover:bg-teal-700">View the post</button>
-                                <button class="bg-teal-600 text-white px-4 py-1 rounded-lg hover:bg-teal-700">Approve</button>
-                                <button class="bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700">Reject</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Manage Content Moderation -->
-            <div id="content-moderation" class="mb-8">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">Content Moderation</h3>
-                <p>Ensure all posts and comments adhere to community guidelines.</p>
-                <button class="bg-teal-600 text-white px-6 py-2 rounded-lg hover:bg-teal-700">View Pending Content</button>
-            </div>
-
-            <!-- Update Cultural Guidance -->
-            <div id="cultural-guidance" class="mb-8">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">Update Cultural Guidance</h3>
-                <textarea class="w-full p-4 border rounded-lg" rows="6" placeholder="Edit cultural guidance and learning materials"></textarea>
-                <button class="bg-teal-600 text-white px-6 py-2 rounded-lg hover:bg-teal-700 mt-4">Update Guidance</button>
             </div>
         </div>
     </div>
 
+    <script>
+    // Charts initialization
+    document.addEventListener('DOMContentLoaded', function() {
+        // User Growth Chart
+        new Chart(document.getElementById('userGrowthChart'), {
+            type: 'line',
+            data: {
+                labels: <?php echo json_encode(array_keys($filledUserData)); ?>,
+                datasets: [{
+                    label: 'New Users',
+                    data: <?php echo json_encode(array_values($filledUserData)); ?>,
+                    borderColor: '#4ade80',
+                    backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 2,
+                    pointBackgroundColor: '#4ade80',
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                return new Date(context[0].label).toLocaleDateString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            callback: function(value, index, values) {
+                                const date = new Date(this.getLabelForValue(value));
+                                return date.getDate(); // Just show the day of month
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Blog Post Chart
+        new Chart(document.getElementById('blogChart'), {
+            type: 'bar',
+            data: {
+                labels: <?php echo json_encode(array_keys($filledBlogData)); ?>,
+                datasets: [{
+                    label: 'New Blog Posts',
+                    data: <?php echo json_encode(array_values($filledBlogData)); ?>,
+                    backgroundColor: 'rgba(96, 165, 250, 0.8)',
+                    borderColor: 'rgba(96, 165, 250, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins:{
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                return new Date(context[0].label).toLocaleDateString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            callback: function(value, index, values) {
+                                const date = new Date(this.getLabelForValue(value));
+                                return date.getDate(); // Just show the day of month
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+    // Function to show the modal
+    function showModal() {
+        document.getElementById("messageModal").classList.remove("hidden");
+    }
+
+    // Function to close the modal
+    function closeModal() {
+        document.getElementById("messageModal").classList.add("hidden");
+    }
+
+    // Close modal when clicking outside the content
+    document.getElementById('messageModal').addEventListener('click', function(event) {
+        if (event.target === this) { // Check if the click is outside the modal content
+            closeModal();
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const managerCard = document.getElementById('manager-special-request');
+        const managerModal = document.getElementById('manager-modal');
+        const closeModalBtn = document.getElementById('close-manager-modal');
+        const managerOptions = document.querySelectorAll('.manager-option');
+
+        // Open Modal
+        managerCard.addEventListener('click', () => {
+            managerModal.classList.remove('hidden');
+        });
+
+        // Close Modal
+        closeModalBtn.addEventListener('click', () => {
+            managerModal.classList.add('hidden');
+        });
+    });
+
+
+
+
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const openModalBtn = document.getElementById("open-special-requests-modal");
+        const closeModalBtn = document.getElementById("close-special-requests-modal");
+        const modal = document.getElementById("special-requests-modal");
+
+        // Open Modal
+        if (openModalBtn) {
+            openModalBtn.addEventListener("click", function () {
+                modal.classList.remove("hidden");
+            });
+        }
+
+        // Close Modal
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener("click", function () {
+                modal.classList.add("hidden");
+            });
+        }
+    });
+
+    </script>
 </body>
 </html>
-<!-- Order Management -->
-<div id="order-management" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300">
-                <h3 id="order-management-heading" class="text-xl font-semibold text-gray-800 mb-4 cursor-pointer">Order Management</h3>
-                <p>View and manage orders, update their status, and handle customer queries.</p>
-
-                <!-- Order Options Section (Initially hidden) -->
-                <div id="order-options" class="hidden mt-4">
-                    <!-- View Orders -->
-                    <div id="view-orders" class="mt-6">
-                        <h4 class="text-lg font-semibold text-gray-700 mb-2">View Orders</h4>
-                        <table id="orders-table" class="w-full table-auto border-collapse">
-                            <thead>
-                                <tr>
-                                    <th class="border px-4 py-2">Order ID</th>
-                                    <th class="border px-4 py-2">Customer Name</th>
-                                    <th class="border px-4 py-2">Order Date</th>
-                                    <th class="border px-4 py-2">Status</th>
-                                    <th class="border px-4 py-2">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Order rows will be dynamically added here -->
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Update Order Status -->
-                    <div id="update-order-status" class="mb-6">
-                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Update Order Status</h4>
-                        <form id="update-order-status-form" class="space-y-4">
-                            <div>
-                                <label for="update-order-id" class="block text-gray-700">Order ID:</label>
-                                <input type="text" id="update-order-id" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter Order ID" required>
-                            </div>
-                            <div>
-                                <label for="update-order-status" class="block text-gray-700">Status:</label>
-                                <select id="update-order-status" class="w-full border border-gray-300 p-2 rounded" required>
-                                    <option value="Pending">Pending</option>
-                                    <option value="Shipped">Shipped</option>
-                                    <option value="Delivered">Delivered</option>
-                                    <option value="Cancelled">Cancelled</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Update Status</button>
-                        </form>
-                    </div>
-
-                    <!-- Handle Customer Queries -->
-                    <div id="handle-queries" class="mb-6">
-                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Handle Customer Queries</h4>
-                        <form id="customer-query-form" class="space-y-4">
-                            <div>
-                                <label for="query-order-id" class="block text-gray-700">Order ID:</label>
-                                <input type="text" id="query-order-id" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter Order ID" required>
-                            </div>
-                            <div>
-                                <label for="query-response" class="block text-gray-700">Response:</label>
-                                <textarea id="query-response" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter your response" required></textarea>
-                            </div>
-                            <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Submit Response</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Product Inventory Management -->
-            <div id="product-inventory-management" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300">
-                <h3 id="product-inventory-heading" class="text-xl font-semibold text-gray-800 mb-4 cursor-pointer">Product Inventory Management</h3>
-                <p>Manage product inventory, edit/delete products, and configure product settings.</p>
-                
-                <!-- Product Options Section (Initially hidden) -->
-                <div id="product-options" class="hidden mt-4">
-                    <!-- View Products -->
-                    <div id="view-products" class="mt-6">
-                        <h4 class="text-lg font-semibold text-gray-700 mb-2">View Products</h4>
-                        <table id="products-table" class="w-full table-auto border-collapse">
-                            <thead>
-                                <tr>
-                                    <th class="border px-4 py-2">ID</th>
-                                    <th class="border px-4 py-2">Name</th>
-                                    <th class="border px-4 py-2">Category</th>
-                                    <th class="border px-4 py-2">Price</th>
-                                    <th class="border px-4 py-2">Stock</th>
-                                    <th class="border px-4 py-2">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Product rows will be dynamically added here -->
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Edit Product -->
-                    <div id="edit-product" class="mb-6">
-                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Edit Product</h4>
-                        <form id="edit-product-form" class="space-y-4">
-                            <div>
-                                <label for="edit-product-id" class="block text-gray-700">Product ID:</label>
-                                <input type="text" id="edit-product-id" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter Product ID" required>
-                            </div>
-                            <div>
-                                <label for="edit-product-name" class="block text-gray-700">Product Name:</label>
-                                <input type="text" id="edit-product-name" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter product name" required>
-                            </div>
-                            <div>
-                                <label for="edit-product-category" class="block text-gray-700">Category:</label>
-                                <input type="text" id="edit-product-category" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter category" required>
-                            </div>
-                            <div>
-                                <label for="edit-product-price" class="block text-gray-700">Price:</label>
-                                <input type="number" id="edit-product-price" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter price" required>
-                            </div>
-                            <div>
-                                <label for="edit-product-stock" class="block text-gray-700">Stock:</label>
-                                <input type="number" id="edit-product-stock" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter stock quantity" required>
-                            </div>
-                            <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">Update Product</button>
-                        </form>
-                    </div>
-
-                    <!-- Delete Product -->
-                    <div id="delete-product" class="mb-6">
-                        <h4 class="text-lg font-semibold text-gray-700 mb-2">Delete Product</h4>
-                        <form id="delete-product-form" class="space-y-4">
-                            <div>
-                                <label for="delete-product-id" class="block text-gray-700">Product ID:</label>
-                                <input type="text" id="delete-product-id" class="w-full border border-gray-300 p-2 rounded" placeholder="Enter Product ID" required>
-                            </div>
-                            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Delete Product</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Holiday Drops -->
-            <div id="holiday-drops" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">Limited-Time Holiday Drops</h3>
-                <p>Manage special product drops for Japanese holidays and events.</p>
-            </div>
+<?php
+$conn->close();
+?>

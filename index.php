@@ -374,9 +374,9 @@ $userProfileImage = isset($_SESSION['profile_image']) && $_SESSION['profile_imag
 
     <!-- Event Promo Banner -->
     <section class="bg-pink-500 text-white text-center py-8">
-        <h3 class="text-3xl font-semibold">Join Us for the Cherry Blossom Festival!</h3>
-        <p class="mt-4">Celebrate Japan’s culture with us and explore exclusive seasonal items.</p>
-        <a href="../views/events.php" class="mt-6 inline-block bg-white text-pink-600 py-3 px-8 rounded-full text-lg font-semibold hover:bg-pink-600 hover:text-white hover:scale-105">Learn More</a>
+        <h3 class="text-3xl font-semibold">Looking for something unique?</h3>
+        <p class="mt-4">Request items that are not available in our catalog.</p>
+        <a href="../views/specialrequest.php" class="mt-6 inline-block bg-white text-pink-600 py-3 px-8 rounded-full text-lg font-semibold hover:bg-pink-600 hover:text-white hover:scale-105">Request Now</a>
     </section>
 
     <!-- Scroll to Top Button -->
