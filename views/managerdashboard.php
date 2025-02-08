@@ -134,9 +134,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["request_id"]) && isset
     $stmt->bind_param("si", $status, $request_id);
     
     if ($stmt->execute()) {
-        echo "<script>alert('Request updated successfully!'); window.location.href='admindashboard.php#special-requests-modal';</script>";
+        echo "<script>alert('Request updated successfully!'); window.location.href='managerdashboard.php#special-requests-modal';</script>";
     } else {
-        echo "<script>alert('Failed to update request!'); window.location.href='admindashboard.php#special-requests-modal';</script>";
+        echo "<script>alert('Failed to update request!'); window.location.href='managerdashboard.php#special-requests-modal';</script>";
     }
     
     $stmt->close();
@@ -400,12 +400,309 @@ $result = $conn->query($sql);
                             </div>
                         </div>
 
-                        <button class="manager-option bg-green-100 hover:bg-green-200 p-4 rounded-lg flex flex-col items-center" data-action="inventory">
+                        <!-- Product Inventory Button -->
+                        <button class="manager-option bg-green-100 hover:bg-green-200 p-4 rounded-lg flex flex-col items-center transition-all duration-200 transform hover:scale-105" data-action="inventory">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-green-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                             </svg>
                             <span class="font-semibold text-green-800">Product Inventory</span>
                         </button>
+
+                        <script>
+                        // Modal HTML Template
+                        const modalHTML = `
+                        <div id="productModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden" style="z-index: 1001;">
+                            <div class="relative top-20 mx-auto p-5 border w-[32rem] shadow-lg rounded-md bg-white animate-modalSlide">
+                                <div class="mt-3">
+                                    <div class="flex items-center mb-4">
+                                        <svg class="h-8 w-8 text-green-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
+                                        <h3 class="text-xl font-semibold text-gray-900">Add New Product</h3>
+                                    </div>
+                                    
+                                    <form id="productForm" class="space-y-4">
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Product Name *</label>
+                                                <input type="text" name="productname" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-colors">
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Category *</label>
+                                                <select name="category" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-colors">
+                                                    <option value="">Select Category</option>
+                                                    <option value="New Arrivals">New Arrivals</option>
+                                                    <option value="Limited Time Offers">Limited Time Offers</option>
+                                                    <option value="Home & Interior">Home & Interior</option>
+                                                    <option value="Health & Beauty">Health & Beauty</option>
+                                                    <option value="Fashion & Lifestyle">Fashion & Lifestyle</option>
+                                                    <option value="Traditional Decorations">Traditional Decorations</option>
+                                                    <option value="Food & Drinks">Food & Drinks</option>
+                                                    <option value="Stationeries">Stationeries</option>
+                                                    <option value="Books">Books</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Price *</label>
+                                                <div class="mt-1 relative rounded-md shadow-sm">
+                                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                        <span class="text-gray-500 sm:text-sm">Rs. </span>
+                                                    </div>
+                                                    <input type="number" step="0.01" name="price" required class="pl-12 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-colors">
+                                                </div>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Stock *</label>
+                                                <input type="number" name="stock" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-colors">
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Image Selection *</label>
+                                            <div class="mt-2 space-y-4">
+                                                <div class="flex space-x-4">
+                                                    <label class="inline-flex items-center">
+                                                        <input type="radio" name="imageType" value="upload" class="form-radio" checked>
+                                                        <span class="ml-2">Upload Image</span>
+                                                    </label>
+                                                    <label class="inline-flex items-center">
+                                                        <input type="radio" name="imageType" value="url">
+                                                        <span class="ml-2">Image URL</span>
+                                                    </label>
+                                                </div>
+
+                                                <div id="uploadSection" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-indigo-500 transition-colors">
+                                                    <div class="space-y-1 text-center">
+                                                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                        </svg>
+                                                        <div class="flex text-sm text-gray-600">
+                                                            <label class="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none">
+                                                                <span>Upload a file</span>
+                                                                <input type="file" name="imageFile" accept="image/*" class="sr-only">
+                                                            </label>
+                                                            <p class="pl-1">or drag and drop</p>
+                                                        </div>
+                                                        <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                                                    </div>
+                                                </div>
+
+                                                <div id="urlSection" class="hidden">
+                                                    <input type="url" name="imageUrl" placeholder="Enter Google image URL" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-colors">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Description</label>
+                                            <textarea name="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-colors"></textarea>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Weight (kg)</label>
+                                                <input type="number" step="0.01" name="weight" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-colors">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Status</label>
+                                                <select name="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-colors">
+                                                    <option value="available">Available</option>
+                                                    <option value="unavailable">Unavailable</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex justify-end space-x-3 pt-4 border-t">
+                                            <button type="button" onclick="closeModal()" class="px-4 py-2 bg-white border border-gray-300 rounded-md font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                                                Cancel
+                                            </button>
+                                            <button type="submit" class="px-4 py-2 bg-green-600 border border-transparent rounded-md font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors inline-flex items-center">
+                                                <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                                </svg>
+                                                Add Product
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        `;
+
+                        // Loading Spinner HTML
+                        const loadingSpinnerHTML = `
+                        <div id="loadingSpinner" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center" style="z-index: 1002;">
+                            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-600"></div>
+                        </div>
+                        `;
+
+                        // Show loading spinner
+                        function showLoading() {
+                            const spinner = document.getElementById('loadingSpinner');
+                            if (spinner) {
+                                spinner.classList.remove('hidden');
+                            }
+                        }
+
+                        // Hide loading spinner
+                        function hideLoading() {
+                            const spinner = document.getElementById('loadingSpinner');
+                            if (spinner) {
+                                spinner.classList.add('hidden');
+                            }
+                        }
+
+                        // Wait for DOM to be fully loaded
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // Add modal and spinner to body
+                            document.body.insertAdjacentHTML('beforeend', modalHTML);
+                            document.body.insertAdjacentHTML('beforeend', loadingSpinnerHTML);
+
+                            // Add click event for inventory button
+                            const inventoryButton = document.querySelector('[data-action="inventory"]');
+                            if (inventoryButton) {
+                                inventoryButton.addEventListener('click', () => {
+                                    const modal = document.getElementById('productModal');
+                                    if (modal) modal.classList.remove('hidden');
+                                });
+                            }
+
+                            // Add form submit handler
+                            const productForm = document.getElementById('productForm');
+                            if (productForm) {
+                                productForm.addEventListener('submit', async (e) => {
+                                    e.preventDefault();
+                                    showLoading();  // Show the loading spinner
+                                    
+                                    const formData = new FormData(e.target);
+                                    const data = Object.fromEntries(formData);
+                                    const imageType = formData.get('imageType');
+
+                                    try {
+                                        if (imageType === 'upload') {
+                                            const imageFile = formData.get('imageFile');
+                                            if (imageFile && imageFile.size > 0) {
+                                                const uploadData = new FormData();
+                                                uploadData.append('image', imageFile);
+                                                
+                                                const uploadResponse = await fetch('api/upload_image.php', {
+                                                    method: 'POST',
+                                                    body: uploadData
+                                                });
+                                                
+                                                const uploadResult = await uploadResponse.json();
+                                                if (!uploadResult.success) {
+                                                    throw new Error(uploadResult.message);
+                                                }
+                                                
+                                                data.imagePath = uploadResult.imagePath;
+                                            } else {
+                                                throw new Error('Please select an image file');
+                                            }
+                                        } else {
+                                            const imageUrl = formData.get('imageUrl');
+                                            if (!imageUrl) {
+                                                throw new Error('Please enter an image URL');
+                                            }
+                                            data.imagePath = imageUrl;
+                                        }
+
+                                        console.log(data);  // Log the form data
+                                        
+                                        // **API Call**
+                                        const response = await fetch("http://localhost/MONOMICHI/api/insert_product.php", {
+                                            method: "POST",
+                                            headers: {
+                                                "Content-Type": "application/json",
+                                            },
+                                            body: JSON.stringify(data),
+                                            mode: 'cors'
+                                        })
+                                        .then(response => response.text())  // Use response.text() first for debugging
+                                        .then(text => {
+                                            console.log(text);  // Check the raw response
+                                            try {
+                                                const jsonResponse = JSON.parse(text);  // Parse the JSON manually
+                                                console.log(jsonResponse);
+                                            } catch (error) {
+                                                console.error('Error parsing JSON:', error);
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error('Error:', error);
+                                        });
+                                        
+                                        const result = await response.json();
+                                        console.log(result);  // Check if success is true
+                                        if (result.success) {
+                                            showNotification('Success', 'Product added successfully!', 'success');
+                                            closeModal();
+                                        } else {
+                                            throw new Error(result.message);
+                                        }
+                                    } catch (error) {
+                                        showNotification('Error', 'Error adding product: ' + error.message, 'error');
+                                    } finally {
+                                        hideLoading();  // Hide the loading spinner
+                                    }
+                                });
+                            }
+
+                            // Add image type toggle handlers
+                            const radioButtons = document.querySelectorAll('input[name="imageType"]');
+                            if (radioButtons) {
+                                radioButtons.forEach(radio => {
+                                    radio.addEventListener('change', (e) => {
+                                        const uploadSection = document.getElementById('uploadSection');
+                                        const urlSection = document.getElementById('urlSection');
+                                        
+                                        if (uploadSection && urlSection) {
+                                            if (e.target.value === 'upload') {
+                                                uploadSection.classList.remove('hidden');
+                                                urlSection.classList.add('hidden');
+                                                const urlInput = document.querySelector('input[name="imageUrl"]');
+                                                if (urlInput) urlInput.value = '';
+                                            } else {
+                                                uploadSection.classList.add('hidden');
+                                                urlSection.classList.remove('hidden');
+                                                const fileInput = document.querySelector('input[name="imageFile"]');
+                                                if (fileInput) fileInput.value = '';
+                                            }
+                                        }
+                                    });
+                                });
+                            }
+
+                            // Function to show notifications
+                            function showNotification(title, message, type) {
+                                const notification = document.createElement('div');
+                                notification.classList.add('notification', type); 
+                                notification.innerHTML = `
+                                    <strong>${title}</strong><br/>
+                                    ${message}
+                                `;
+                                document.body.appendChild(notification);
+                                setTimeout(() => {
+                                    notification.remove();
+                                }, 3000);
+                            }
+
+                            // Add modal outside click handler
+                            const modal = document.getElementById('productModal');
+                            if (modal) {
+                                modal.addEventListener('click', (e) => {
+                                    if (e.target === modal) {
+                                        closeModal();
+                                    }
+                                });
+                            }
+                        });
+                        </script>
 
                         <button class="manager-option bg-yellow-100 hover:bg-yellow-200 p-4 rounded-lg flex flex-col items-center" data-action="holiday-drops">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-yellow-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

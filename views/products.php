@@ -2,6 +2,43 @@
     session_start();
     $userIsLoggedIn = isset($_SESSION['user']);
     $userProfileImage = $userIsLoggedIn ? $_SESSION['user']['profile_image'] : null;
+
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $productname = $_POST['productname'];
+        $category = $_POST['category'];
+        $price = $_POST['price'];
+        $stock = $_POST['stock'];
+        $description = $_POST['description'];
+        $brand = $_POST['brand'];
+        $weight = $_POST['weight'];
+        $sku = $_POST['sku'];
+        
+        // Handle image upload
+        $image = '';
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
+            $target_dir = "../uploads/";
+            $file_extension = pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION);
+            $file_name = uniqid() . '.' . $file_extension;
+            $target_file = $target_dir . $file_name;
+            
+            if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
+                $image = '/uploads/' . $file_name;
+            }
+        }
+        
+        $sql = "INSERT INTO products (productname, category, price, image, stock, description, brand, weight, sku) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ssdsissds", $productname, $category, $price, $image, $stock, $description, $brand, $weight, $sku);
+        
+        if ($stmt->execute()) {
+            header("Location: manage_products.php?success=1");
+        } else {
+            header("Location: manage_products.php?error=1");
+        }
+    }
 ?>
 
 <!DOCTYPE html>
@@ -131,23 +168,31 @@
                 </button>
 
                 <!-- Dropdown Menu -->
-                <div id="profile-menu" class="absolute right-0 mt-80 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
+                <div id="profile-menu" class="absolute right-0 mt-40 w-40 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
                     <ul class="py-2 text-sm text-gray-700">
-                        <li>
-                            <a href="../views/signup.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Sign Up</a>
-                        </li>
-                        <li>
-                            <a href="../views/login.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Log In</a>
-                        </li>
-                        <li>
-                            <a href="../views/my-account.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
-                        </li>
-                        <li>
-                            <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
-                        </li>
-                        <li>
-                            <a href="../views/settings.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Settings</a>
-                        </li>
+                        <?php if (isset($_SESSION['id'])): ?>
+                            <li>
+                                <a href="../views/myaccount.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
+                            </li>
+
+                            <!-- Hide Order History for Admins & Managers -->
+                            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'customer'): ?>
+                                <li>
+                                    <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
+                                </li>
+                            <?php endif; ?>
+
+                            <li>
+                                <a href="../views/logout.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Logout</a>
+                            </li>
+                        <?php else: ?>
+                            <li>
+                                <a href="../views/signup.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Sign Up</a>
+                            </li>
+                            <li>
+                                <a href="../views/login.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Log In</a>
+                            </li>
+                        <?php endif; ?>
                     </ul>
                 </div>
             </div>
@@ -374,439 +419,86 @@
             </section>
 
             <br><br><br><br><br>
+
             <!-- Japanese Culture and History -->
-            <div class="category-section mt-8" id="japanese-culture-history-section">
-                <h2 class="text-xl font-semibold mb-4">Japanese Culture and History</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/61NKH3YFIcL.jpg" alt="The World of the Shining Prince" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">The World of the Shining Prince</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 2500</p>
-                            <p class="text-gray-600 mt-2">This book takes you into the world of Heian-era Japan, exploring the life and culture of the aristocracy through the lens of the famous *Genji Monogatari* (The Tale of Genji). A fascinating read for anyone interested in Japanese history and classical literature.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="The World of the Shining Prince" data-price="2500" data-img="https://m.media-amazon.com/images/I/61NKH3YFIcL.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="The World of the Shining Prince" data-price="2500" data-img="https://m.media-amazon.com/images/I/61NKH3YFIcL.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://img2.activant-inet.com/custom/039096/Image/g9781974727834.jpg" alt="The Tale of the Princess Kaguya" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">The Tale of the Princess Kaguya</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 2300</p>
-                            <p class="text-gray-600 mt-2">A captivating retelling of the Japanese folktale "The Tale of the Bamboo Cutter," this book delves into themes of love, beauty, and the transient nature of life. It's a visual and poetic masterpiece.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="The Tale of the Princess Kaguya" data-price="2300" data-img="https://img2.activant-inet.com/custom/039096/Image/g9781974727834.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="The Tale of the Princess Kaguya" data-price="2300" data-img="https://img2.activant-inet.com/custom/039096/Image/g9781974727834.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/71tU0lzeOGL._AC_UF1000,1000_QL80_.jpg" alt="Japanese Women: An Annotated Bibliography" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Japanese Women: An Annotated Bibliography</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 2700</p>
-                            <p class="text-gray-600 mt-2">A comprehensive resource for those interested in the role of women throughout Japanese history, culture, and literature. This book provides annotated references to help understand the complexities of gender and society in Japan.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Japanese Women: An Annotated Bibliography" data-price="2700" data-img="https://m.media-amazon.com/images/I/71tU0lzeOGL._AC_UF1000,1000_QL80_.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Japanese Women: An Annotated Bibliography" data-price="2700" data-img="https://m.media-amazon.com/images/I/71tU0lzeOGL._AC_UF1000,1000_QL80_.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
+            <section id="japanese-culture-history-section">
+                <h2 class="text-2xl font-bold text-center mb-6">Japanese Culture and History</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Products will be dynamically loaded here -->
                 </div>
-            </div>
+            </section>
+
+            <br><br><br><br><br>
 
             <!-- Manga and Graphic Novels -->
-            <div class="category-section mt-8" id="manga-graphic-section">
-                <h2 class="text-xl font-semibold mb-4">Manga and Graphic Novels</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/71WECnGLtIL._SL1200_.jpg" alt="Naruto Vol. 1" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Naruto Vol. 1</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1200</p>
-                            <p class="text-gray-600 mt-2">The first volume of the legendary series, *Naruto*, introduces the journey of Naruto Uzumaki, a young ninja with dreams of becoming the strongest ninja and the leader of his village. A must-read for fans of action, adventure, and unforgettable characters.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Naruto Vol. 1" data-price="1200" data-img="https://m.media-amazon.com/images/I/71WECnGLtIL._SL1200_.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Naruto Vol. 1" data-price="1200" data-img="https://m.media-amazon.com/images/I/71WECnGLtIL._SL1200_.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/71R3vtg1ghL._SY466_.jpg" alt="Naruto Vol. 2" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Naruto Vol. 2</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1200</p>
-                            <p class="text-gray-600 mt-2">Continuing the story of Naruto's growth, *Naruto Vol. 2* deepens his struggles and friendships with fellow ninjas. As Naruto faces new challenges, his bonds with others start to take shape, making this volume an exciting continuation of his epic journey.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Naruto Vol. 2" data-price="1200" data-img="https://m.media-amazon.com/images/I/71R3vtg1ghL._SY466_.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Naruto Vol. 2" data-price="1200" data-img="https://m.media-amazon.com/images/I/71R3vtg1ghL._SY466_.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://sw6.elbenwald.de/media/ba/b6/27/1629839118/E1066435_1.jpg" alt="Demon Slayer: Kimetsu no Yaiba Vol. 1" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Demon Slayer: Kimetsu no Yaiba Vol. 1</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1400</p>
-                            <p class="text-gray-600 mt-2">A compelling story of swords and demons, *Demon Slayer* introduces Tanjiro Kamado, a boy determined to save his demon-turned sister. With breathtaking action and emotional depth, this manga has captured the hearts of readers worldwide.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Demon Slayer: Kimetsu no Yaiba Vol. 1" data-price="1400" data-img="https://sw6.elbenwald.de/media/ba/b6/27/1629839118/E1066435_1.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Demon Slayer: Kimetsu no Yaiba Vol. 1" data-price="1400" data-img="https://sw6.elbenwald.de/media/ba/b6/27/1629839118/E1066435_1.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
+            <section id="manga-graphic-section">
+                <h2 class="text-2xl font-bold text-center mb-6">Manga and Graphic Novels</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Products will be dynamically loaded here -->
                 </div>
-            </div>
+            </section>
+
+            <br><br><br><br><br>
 
             <!-- Books on Japanese Cuisine -->
-            <div class="category-section mt-8" id="books-japanese-cuisine-section">
-                <h2 class="text-xl font-semibold mb-4">Books on Japanese Cuisine</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/817gBv8WfYL.jpg" alt="Japanese Cooking: A Simple Art" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Japanese Cooking: A Simple Art</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1800</p>
-                            <p class="text-gray-600 mt-2">This book offers easy-to-follow recipes and step-by-step instructions to create authentic Japanese dishes. Perfect for beginners and experienced cooks alike.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Japanese Cooking: A Simple Art" data-price="1800" data-img="https://m.media-amazon.com/images/I/817gBv8WfYL.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Japanese Cooking: A Simple Art" data-price="1800" data-img="https://m.media-amazon.com/images/I/817gBv8WfYL.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/81a0XVzM9TL.jpg" alt="The Japanese Kitchen: 250 Recipes in a Traditional Style" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">The Japanese Kitchen: 250 Recipes in a Traditional Style</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 2000</p>
-                            <p class="text-gray-600 mt-2">Explore a rich collection of traditional Japanese recipes, including sushi, tempura, ramen, and more. This book is a comprehensive guide to Japanese cooking techniques.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="The Japanese Kitchen: 250 Recipes in a Traditional Style" data-price="2000" data-img="https://m.media-amazon.com/images/I/81a0XVzM9TL.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="The Japanese Kitchen: 250 Recipes in a Traditional Style" data-price="2000" data-img="https://m.media-amazon.com/images/I/81a0XVzM9TL.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/41SOtH8MFUL._AC_UF1000,1000_QL80_.jpg" alt="Japanese Cooking: A Simple Art 2" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Japanese Cooking: A Simple Art 2</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1800</p>
-                            <p class="text-gray-600 mt-2">A continuation of the first volume, this book introduces more advanced dishes and cooking techniques, expanding your knowledge of Japanese cuisine.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Japanese Cooking: A Simple Art 2" data-price="1800" data-img="https://m.media-amazon.com/images/I/41SOtH8MFUL._AC_UF1000,1000_QL80_.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Japanese Cooking: A Simple Art 2" data-price="1800" data-img="https://m.media-amazon.com/images/I/41SOtH8MFUL._AC_UF1000,1000_QL80_.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
+            <section id="books-japanese-cuisine-section">
+                <h2 class="text-2xl font-bold text-center mb-6">Books on Japanese Cuisine</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Products will be dynamically loaded here -->
                 </div>
-            </div>
+            </section>
+
+            <br><br><br><br><br>
 
             <!-- Books for Japanese Calligraphy -->
-            <div class="category-section mt-8" id="books-japanese-calligraphy-section">
-                <h2 class="text-xl font-semibold mb-4">Books for Japanese Calligraphy</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://cdn.shopify.com/s/files/1/0625/6679/3413/files/The_20Simple_20Art_20of_20Japanese_20Calligraphy.jpg?v=1716704007" alt="The Art of Japanese Calligraphy" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">The Art of Japanese Calligraphy</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1500</p>
-                            <p class="text-gray-600 mt-2">This book is an introduction to the delicate art of Japanese calligraphy, featuring the basic strokes, kanji characters, and tips for mastering the brush technique.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="The Art of Japanese Calligraphy" data-price="1500" data-img="https://cdn.shopify.com/s/files/1/0625/6679/3413/files/The_20Simple_20Art_20of_20Japanese_20Calligraphy.jpg?v=1716704007">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="The Art of Japanese Calligraphy" data-price="1500" data-img="https://cdn.shopify.com/s/files/1/0625/6679/3413/files/The_20Simple_20Art_20of_20Japanese_20Calligraphy.jpg?v=1716704007">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://i.pinimg.com/originals/98/a0/24/98a0249136a14186b19dc9cf8d7c79da.jpg" alt="Mastering Japanese Calligraphy: A Step-by-Step Guide" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Mastering Japanese Calligraphy: A Step-by-Step Guide</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1800</p>
-                            <p class="text-gray-600 mt-2">This detailed step-by-step guide offers in-depth instructions for creating beautiful Japanese calligraphy, making it ideal for both beginners and advanced practitioners.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Mastering Japanese Calligraphy: A Step-by-Step Guide" data-price="1800" data-img="https://i.pinimg.com/originals/98/a0/24/98a0249136a14186b19dc9cf8d7c79da.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Mastering Japanese Calligraphy: A Step-by-Step Guide" data-price="1800" data-img="https://i.pinimg.com/originals/98/a0/24/98a0249136a14186b19dc9cf8d7c79da.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://images.booksense.com/images/450/421/9780990421450.jpg" alt="The Beauty of Japanese Calligraphy" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">The Beauty of Japanese Calligraphy</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1600</p>
-                            <p class="text-gray-600 mt-2">Learn the art of brush writing with this book, featuring examples from Japanese calligraphy masters and exercises for you to practice at home.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="The Beauty of Japanese Calligraphy" data-price="1600" data-img="https://images.booksense.com/images/450/421/9780990421450.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="The Beauty of Japanese Calligraphy" data-price="1600" data-img="https://images.booksense.com/images/450/421/9780990421450.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
+            <section id="books-japanese-calligraphy-section">
+                <h2 class="text-2xl font-bold text-center mb-6">Books for Japanese Calligraphy</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Products will be dynamically loaded here -->
                 </div>
-            </div>
+            </section>
 
             <br><br><br><br><br>
 
             <!-- Tea & Snacks -->
-            <div class="category-section mt-8" id="tea-snacks-section">
-                <h2 class="text-xl font-semibold mb-4">Tea & Snacks</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://colombomall.lk/wp-content/uploads/2024/02/51mYq0FawbL.jpg" alt="Matcha Tea" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Matcha Green Tea</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1,500</p>
-                            <p class="text-gray-500 mt-2">A premium quality green tea powder made from young, finely ground leaves. Perfect for making traditional matcha drinks and desserts.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Matcha Green Tea" data-price="1500" data-img="https://colombomall.lk/wp-content/uploads/2024/02/51mYq0FawbL.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Matcha Green Tea" data-price="1500" data-img="https://colombomall.lk/wp-content/uploads/2024/02/51mYq0FawbL.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/91HADrr5t+L._SL1500_.jpg" alt="Sencha Tea" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Sencha Green Tea</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1,200</p>
-                            <p class="text-gray-500 mt-2">A traditional Japanese green tea with a delicate balance of sweet and grassy flavors, perfect for any time of day.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Sencha Green Tea" data-price="1200" data-img="https://m.media-amazon.com/images/I/91HADrr5t+L._SL1500_.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Sencha Green Tea" data-price="1200" data-img="https://m.media-amazon.com/images/I/91HADrr5t+L._SL1500_.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/71yPq+lYqQL._SL1500_.jpg" alt="Yokan" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Yokan (Red Bean Jelly)</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 800</p>
-                            <p class="text-gray-500 mt-2">A traditional Japanese dessert made from sweet red bean paste, agar, and sugar. It has a smooth texture and is often served chilled.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Yokan (Red Bean Jelly)" data-price="800" data-img="https://m.media-amazon.com/images/I/71yPq+lYqQL._SL1500_.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Yokan (Red Bean Jelly)" data-price="800" data-img="https://m.media-amazon.com/images/I/71yPq+lYqQL._SL1500_.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/91ZcOBQN+PL.jpg" alt="Mochi" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Mochi (Sweet Rice Cake)</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1,000</p>
-                            <p class="text-gray-500 mt-2">A chewy, soft rice cake made with glutinous rice flour and filled with sweet fillings such as red bean paste. A popular Japanese snack.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Mochi (Sweet Rice Cake)" data-price="1000" data-img="https://m.media-amazon.com/images/I/91ZcOBQN+PL.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Mochi (Sweet Rice Cake)" data-price="1000" data-img="https://m.media-amazon.com/images/I/91ZcOBQN+PL.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://i.ebayimg.com/images/g/XvgAAOSwfVFcflUW/s-l400.jpg" alt="Matcha Sweets" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Matcha Sweets Set</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1,800</p>
-                            <p class="text-gray-500 mt-2">A delightful set of various sweets made with matcha green tea, offering a sweet and earthy taste in every bite.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Matcha Sweets Set" data-price="1800" data-img="https://i.ebayimg.com/images/g/XvgAAOSwfVFcflUW/s-l400.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Matcha Sweets Set" data-price="1800" data-img="https://i.ebayimg.com/images/g/XvgAAOSwfVFcflUW/s-l400.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://i0.wp.com/tokyotreatblog.wpcomstaging.com/wp-content/uploads/2022/11/shutterstock_1883044177-1-1.png?fit=1024%2C683&ssl=1" alt="Japanese Pocky" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Japanese Pocky Sticks</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 600</p>
-                            <p class="text-gray-500 mt-2">Crunchy biscuit sticks covered in various flavored coatings such as chocolate, strawberry, and matcha. A popular snack among Japanese people.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Japanese Pocky Sticks" data-price="600" data-img="https://i0.wp.com/tokyotreatblog.wpcomstaging.com/wp-content/uploads/2022/11/shutterstock_1883044177-1-1.png?fit=1024%2C683&ssl=1">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Japanese Pocky Sticks" data-price="600" data-img="https://i0.wp.com/tokyotreatblog.wpcomstaging.com/wp-content/uploads/2022/11/shutterstock_1883044177-1-1.png?fit=1024%2C683&ssl=1">Add to Wishlist</button>
-                        </div>
-                    </div>
+            <section id="tea-snacks-section">
+                <h2 class="text-2xl font-bold text-center mb-6">Tea & Snacks</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Products will be dynamically loaded here -->
                 </div>
-            </div>
+            </section>
 
             <br><br><br><br><br>
 
             <!-- Home & Interior Items -->
-            <div class="category-section mt-8" id="home-interior-section">
-                <h2 class="text-xl font-semibold mb-4">Home & Interior Items</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://cdn.shopify.com/s/files/1/0437/4950/7224/t/14/assets/japanese-vase-matches-interior-1675392224730.webp?v=1675392226" alt="Decorative Vase" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Decorative Vase</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 3,200</p>
-                            <p class="text-gray-600 mt-2">A beautifully designed vase, perfect for enhancing any living space with a touch of Japanese elegance. Ideal for flowers or as a standalone decorative piece.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Decorative Vase" data-price="3200" data-img="https://cdn.shopify.com/s/files/1/0437/4950/7224/t/14/assets/japanese-vase-matches-interior-1675392224730.webp?v=1675392226">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Decorative Vase" data-price="3200" data-img="https://cdn.shopify.com/s/files/1/0437/4950/7224/t/14/assets/japanese-vase-matches-interior-1675392224730.webp?v=1675392226">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/51GPM1h48oL._AC_US750_.jpg" alt="Wooden Coffee Table" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Wooden Coffee Table</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 5,500</p>
-                            <p class="text-gray-600 mt-2">Crafted from high-quality wood, this coffee table offers a timeless look and a sturdy surface for your drinks, books, or decorations.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Wooden Coffee Table" data-price="5500" data-img="https://m.media-amazon.com/images/I/51GPM1h48oL._AC_US750_.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Wooden Coffee Table" data-price="5500" data-img="https://m.media-amazon.com/images/I/51GPM1h48oL._AC_US750_.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/71dtjB-bOCL._AC_UF350,350_QL80_.jpg" alt="Floor Lamp" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Floor Lamp</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 4,800</p>
-                            <p class="text-gray-600 mt-2">An elegant floor lamp that provides ambient lighting, perfect for creating a cozy atmosphere in your home or office.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Floor Lamp" data-price="4800" data-img="https://m.media-amazon.com/images/I/71dtjB-bOCL._AC_UF350,350_QL80_.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Floor Lamp" data-price="4800" data-img="https://m.media-amazon.com/images/I/71dtjB-bOCL._AC_UF350,350_QL80_.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/71UFnEfphiL._AC_UF894,1000_QL80_.jpg" alt="Wall Art" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Wall Art</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 2,200</p>
-                            <p class="text-gray-600 mt-2">Bring life to your walls with this exquisite piece of art, designed to evoke the serenity and beauty of traditional Japanese aesthetics.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Wall Art" data-price="2200" data-img="https://m.media-amazon.com/images/I/71UFnEfphiL._AC_UF894,1000_QL80_.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Wall Art" data-price="2200" data-img="https://m.media-amazon.com/images/I/71UFnEfphiL._AC_UF894,1000_QL80_.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/71Upwa6U8qL.jpg" alt="Indoor Plant Pot" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Indoor Plant Pot</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1,800</p>
-                            <p class="text-gray-600 mt-2">A stylish indoor plant pot to enhance your home decor. Perfect for plants such as bonsais, orchids, or succulents.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Indoor Plant Pot" data-price="1800" data-img="https://m.media-amazon.com/images/I/71Upwa6U8qL.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Indoor Plant Pot" data-price="1800" data-img="https://m.media-amazon.com/images/I/71Upwa6U8qL.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/71npHdzU3fL.jpg" alt="Throw Blanket" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Throw Blanket</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1,500</p>
-                            <p class="text-gray-600 mt-2">This soft and cozy throw blanket is perfect for adding warmth and comfort to your couch, bed, or favorite chair.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Throw Blanket" data-price="1500" data-img="https://m.media-amazon.com/images/I/71npHdzU3fL.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Throw Blanket" data-price="1500" data-img="https://m.media-amazon.com/images/I/71npHdzU3fL.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
+            <section id="home-interior-section">
+                <h2 class="text-2xl font-bold text-center mb-6">Home & Interior Items</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Products will be dynamically loaded here -->
                 </div>
-            </div>
+            </section>
 
             <br><br><br><br><br>
 
             <!-- Health & Beauty Items -->
-            <div class="category-section mt-8" id="health-beauty-section">
-                <h2 class="text-xl font-semibold mb-4">Health & Beauty Items</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://cdn.shopify.com/s/files/1/0512/5429/6766/files/japanese-facial-mask5_480x480.png?v=1695372576" alt="Japanese Face Mask" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Japanese Face Mask</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1,500</p>
-                            <p class="text-gray-500 mt-2">A nourishing Japanese face mask designed to hydrate and refresh your skin with a blend of traditional ingredients for a glowing complexion.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Japanese Face Mask" data-price="1500" data-img="https://cdn.shopify.com/s/files/1/0512/5429/6766/files/japanese-facial-mask5_480x480.png?v=1695372576">Add to Cart</button>
-                            <button class="bg-blue-400 text-white mt-2 py-2 px-4 rounded hover:bg-blue-500 add-to-wishlist" data-name="Japanese Face Mask" data-price="1500" data-img="https://cdn.shopify.com/s/files/1/0512/5429/6766/files/japanese-facial-mask5_480x480.png?v=1695372576">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://cdn.shopify.com/s/files/1/1969/5775/files/topics_pic01_sp_480x480.png?v=1707100431" alt="Herbal Shampoo" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Herbal Shampoo</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1,800</p>
-                            <p class="text-gray-500 mt-2">A gentle herbal shampoo formulated with natural ingredients to cleanse and nourish your hair, leaving it soft and shiny.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Herbal Shampoo" data-price="1800" data-img="https://cdn.shopify.com/s/files/1/1969/5775/files/topics_pic01_sp_480x480.png?v=1707100431">Add to Cart</button>
-                            <button class="bg-blue-400 text-white mt-2 py-2 px-4 rounded hover:bg-blue-500 add-to-wishlist" data-name="Herbal Shampoo" data-price="1800" data-img="https://cdn.shopify.com/s/files/1/1969/5775/files/topics_pic01_sp_480x480.png?v=1707100431">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://rimage.gnst.jp/livejapan.com/public/article/detail/a/30/00/a3000177/img/basic/a3000177_main.jpg" alt="Japanese Bath Salts" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Japanese Bath Salts</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1,200</p>
-                            <p class="text-gray-500 mt-2">A relaxing bath salt enriched with Japanese botanical extracts that soothe the body and mind, ideal for unwinding after a long day.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Japanese Bath Salts" data-price="1200" data-img="https://rimage.gnst.jp/livejapan.com/public/article/detail/a/30/00/a3000177/img/basic/a3000177_main.jpg">Add to Cart</button>
-                            <button class="bg-blue-400 text-white mt-2 py-2 px-4 rounded hover:bg-blue-500 add-to-wishlist" data-name="Japanese Bath Salts" data-price="1200" data-img="https://rimage.gnst.jp/livejapan.com/public/article/detail/a/30/00/a3000177/img/basic/a3000177_main.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/71As88Uq3ML._SL1500_.jpg" alt="Moisturizing Cream" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Moisturizing Cream</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1,000</p>
-                            <p class="text-gray-500 mt-2">A rich moisturizing cream that deeply nourishes and hydrates the skin, providing long-lasting softness and protection against dryness.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Moisturizing Cream" data-price="1000" data-img="https://m.media-amazon.com/images/I/71As88Uq3ML._SL1500_.jpg">Add to Cart</button>
-                            <button class="bg-blue-400 text-white mt-2 py-2 px-4 rounded hover:bg-blue-500 add-to-wishlist" data-name="Moisturizing Cream" data-price="1000" data-img="https://m.media-amazon.com/images/I/71As88Uq3ML._SL1500_.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://static.wixstatic.com/media/955b86_5fc8f1d4218e4d30b7411d6db8327bca~mv2.jpg/v1/fill/w_980,h_980,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/955b86_5fc8f1d4218e4d30b7411d6db8327bca~mv2.jpg" alt="Japanese Skincare Set" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Japanese Skincare Set</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 3,500</p>
-                            <p class="text-gray-500 mt-2">A luxurious skincare set featuring premium Japanese products that cleanse, hydrate, and rejuvenate the skin for a radiant glow.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Japanese Skincare Set" data-price="3500" data-img="https://static.wixstatic.com/media/955b86_5fc8f1d4218e4d30b7411d6db8327bca~mv2.jpg/v1/fill/w_980,h_980,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/955b86_5fc8f1d4218e4d30b7411d6db8327bca~mv2.jpg">Add to Cart</button>
-                            <button class="bg-blue-400 text-white mt-2 py-2 px-4 rounded hover:bg-blue-500 add-to-wishlist" data-name="Japanese Skincare Set" data-price="3500" data-img="https://static.wixstatic.com/media/955b86_5fc8f1d4218e4d30b7411d6db8327bca~mv2.jpg/v1/fill/w_980,h_980,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/955b86_5fc8f1d4218e4d30b7411d6db8327bca~mv2.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://www.gosupps.com/media/catalog/product/7/1/71nsO4HKT0L.jpg" alt="Hair Treatment Oil" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Hair Treatment Oil</h3>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1,800</p>
-                            <p class="text-gray-500 mt-2">An intensive hair treatment oil made from Japanese botanicals that nourishes and repairs damaged hair, leaving it silky smooth and manageable.</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Hair Treatment Oil" data-price="1800" data-img="https://www.gosupps.com/media/catalog/product/7/1/71nsO4HKT0L.jpg">Add to Cart</button>
-                            <button class="bg-blue-400 text-white mt-2 py-2 px-4 rounded hover:bg-blue-500 add-to-wishlist" data-name="Hair Treatment Oil" data-price="1800" data-img="https://www.gosupps.com/media/catalog/product/7/1/71nsO4HKT0L.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
+            <section id="health-beauty-section">
+                <h2 class="text-2xl font-bold text-center mb-6">Health & Beauty Items</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Products will be dynamically loaded here -->
                 </div>
-            </div>
+            </section>
             
             <br><br><br><br><br>
 
             <!-- Fashion & Lifestyle -->
-            <div class="category-section mt-8" id="fashion-lifestyle-section">
-                <h2 class="text-xl font-semibold mb-4">Fashion & Lifestyle</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://samurai-store.com/images2/H012/H012-kabuto-helmet.jpg" alt="Kabuto Helmet" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Kabuto Helmet</h3>
-                            <p class="text-gray-600 mt-2">A decorative samurai helmet symbolizing strength and protection.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 3,500</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Kabuto Helmet" data-price="3500" data-img="https://samurai-store.com/images2/H012/H012-kabuto-helmet.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-2 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Kabuto Helmet" data-price="3500" data-img="https://samurai-store.com/images2/H012/H012-kabuto-helmet.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://m.media-amazon.com/images/I/61kmnssA8RL.jpg" alt="Koinobori (Carp Streamer)" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Koinobori (Carp Streamer)</h3>
-                            <p class="text-gray-600 mt-2">Traditional carp-shaped windsocks flown for Children's Day.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1,800</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Koinobori (Carp Streamer)" data-price="1800" data-img="https://m.media-amazon.com/images/I/61kmnssA8RL.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-2 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Koinobori (Carp Streamer)" data-price="1800" data-img="https://m.media-amazon.com/images/I/61kmnssA8RL.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://www.worthingtongallery.com/wp-content/uploads/2016/03/ikebana-1.jpg" alt="Ikebana Vase" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Ikebana Vase</h3>
-                            <p class="text-gray-600 mt-2">Elegant vases designed for traditional Japanese flower arrangements.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 2,400</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Ikebana Vase" data-price="2400" data-img="https://www.worthingtongallery.com/wp-content/uploads/2016/03/ikebana-1.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-2 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Ikebana Vase" data-price="2400" data-img="https://www.worthingtongallery.com/wp-content/uploads/2016/03/ikebana-1.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://i.etsystatic.com/9308450/r/il/e8052d/5722865834/il_fullxfull.5722865834_5f59.jpg" alt="Uchiwa Fan" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Uchiwa Fan</h3>
-                            <p class="text-gray-600 mt-2">Hand-painted fans used for summer festivals and traditional dances.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 750</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Uchiwa Fan" data-price="750" data-img="https://i.etsystatic.com/9308450/r/il/e8052d/5722865834/il_fullxfull.5722865834_5f59.jpg">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-2 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Uchiwa Fan" data-price="750" data-img="https://i.etsystatic.com/9308450/r/il/e8052d/5722865834/il_fullxfull.5722865834_5f59.jpg">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://hackaday.com/wp-content/uploads/2020/06/shojilamp_thumb.jpg?w=600&h=600" alt="Shoji Lantern" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Shoji Lantern</h3>
-                            <p class="text-gray-600 mt-2">Traditional paper lanterns to create warm, ambient lighting.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 4,000</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Shoji Lantern" data-price="4000" data-img="https://hackaday.com/wp-content/uploads/2020/06/shojilamp_thumb.jpg?w=600&h=600">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-2 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Shoji Lantern" data-price="4000" data-img="https://hackaday.com/wp-content/uploads/2020/06/shojilamp_thumb.jpg?w=600&h=600">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://www.spiritjapan.com/cdn/shop/products/H179a15678c074e73a10c1a3536fc2e55M_1200x1200.jpg?v=1629284950" alt="Daruma Doll" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Daruma Doll</h3>
-                            <p class="text-gray-600 mt-2">A symbol of perseverance and good luck, used for goal-setting.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1,500</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Daruma Doll" data-price="1500" data-img="https://www.spiritjapan.com/cdn/shop/products/H179a15678c074e73a10c1a3536fc2e55M_1200x1200.jpg?v=1629284950">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-2 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Daruma Doll" data-price="1500" data-img="https://www.spiritjapan.com/cdn/shop/products/H179a15678c074e73a10c1a3536fc2e55M_1200x1200.jpg?v=1629284950">Add to Wishlist</button>
-                        </div>
-                    </div>
-                    <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform">
-                        <img src="https://youeni.com/cdn/shop/products/lucky-cat-maneki-neko-light-lighting-the-kawaii-shoppu-2.jpg?v=1677165416&width=1445" alt="Maneki-Neko" class="w-full h-64 object-cover">
-                        <div class="p-4 text-center">
-                            <h3 class="text-lg font-medium">Maneki-Neko</h3>
-                            <p class="text-gray-600 mt-2">The 'beckoning cat' that brings good fortune and wealth.</p>
-                            <p class="text-gray-600 mt-2">Price: Rs. 1,200</p>
-                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" data-name="Maneki-Neko" data-price="1200" data-img="https://youeni.com/cdn/shop/products/lucky-cat-maneki-neko-light-lighting-the-kawaii-shoppu-2.jpg?v=1677165416&width=1445">Add to Cart</button>
-                            <button class="bg-blue-300 text-white mt-2 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" data-name="Maneki-Neko" data-price="1200" data-img="https://youeni.com/cdn/shop/products/lucky-cat-maneki-neko-light-lighting-the-kawaii-shoppu-2.jpg?v=1677165416&width=1445">Add to Wishlist</button>
-                        </div>
-                    </div>
+            <section id="fashion-lifestyle-section">
+                <h2 class="text-2xl font-bold text-center mb-6">Fashion & Lifestyle</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Products will be dynamically loaded here -->
                 </div>
-            </div>
+            </section>
+            
+            <br><br><br><br><br>
 
             <!-- Cart Sidebar -->
             <div id="cart-sidebar" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
@@ -1130,7 +822,7 @@
 
     //Retrieve from json and Display the Products
     document.addEventListener("DOMContentLoaded", function () {
-        fetch("../json/products.json") // Load the JSON data
+        fetch("../json/products1.json") // Load the JSON data
             .then(response => response.json())
             .then(products => {
                 const container = document.getElementById("new-arrivals-section").querySelector(".grid");
