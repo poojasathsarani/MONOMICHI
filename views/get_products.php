@@ -1,26 +1,33 @@
 <?php
-// get_products.php - Retrieve products from the database
+include('../views/db_connection.php');
+header('Access-Control-Allow-Origin: *');
+header('Content-Type: application/json');
+header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods,Authorization,X-Requested-With');
 
-include('db_connection.php'); // Include the database connection file
+try {
+    $query = "SELECT * FROM products WHERE status = 'available' ORDER BY category, created_at DESC";
+    $result = mysqli_query($conn, $query);
 
-// Prepare the SQL query to select all products
-$sql = "SELECT * FROM products";
-$result = $conn->query($sql);
-
-// Check if any products were found
-if ($result->num_rows > 0) {
-    // Fetch all products into an array
-    $products = [];
-    while ($row = $result->fetch_assoc()) {
-        $products[] = $row;
+    if (!$result) {
+        throw new Exception(mysqli_error($conn));
     }
-    // Send the products as a JSON response
-    echo json_encode($products);
-} else {
-    // If no products found, send a message
-    echo json_encode(["message" => "No products found"]);
+
+    $groupedProducts = [];
+    while ($product = mysqli_fetch_assoc($result)) {
+        $category = $product['category'];
+        if (!isset($groupedProducts[$category])) {
+            $groupedProducts[$category] = [];
+        }
+        $groupedProducts[$category][] = $product;
+    }
+
+    echo json_encode(['success' => true, 'data' => $groupedProducts]);
+
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
 }
 
-// Close the connection
-$conn->close();
+mysqli_close($conn);
 ?>

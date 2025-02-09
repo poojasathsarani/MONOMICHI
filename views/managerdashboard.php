@@ -601,7 +601,7 @@ $result = $conn->query($sql);
                                                 const uploadData = new FormData();
                                                 uploadData.append('image', imageFile);
                                                 
-                                                const uploadResponse = await fetch('../api/upload_image.php', {
+                                                const uploadResponse = await fetch('upload_image.php', {
                                                     method: 'POST',
                                                     body: uploadData
                                                 });
@@ -632,7 +632,7 @@ $result = $conn->query($sql);
                                         }
 
                                         // Make the API call
-                                        const response = await fetch("../api/insert_product.php", {
+                                        const response = await fetch("insert_product.php", {
                                             method: "POST",
                                             headers: {
                                                 "Content-Type": "application/json",

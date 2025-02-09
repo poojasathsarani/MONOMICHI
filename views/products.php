@@ -49,8 +49,8 @@
     <title>MONOMICHI - PRODUCTS</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <script src="../json/products.js"></script>
     <style>
         /* cannot add the ::placeholder selector directly in the inline CSS because inline styles only apply to elements directly and do not support pseudo-elements like ::placeholder, ::before, ::after, or any other pseudo-selectors. */
         #search-bar::placeholder {
@@ -387,24 +387,26 @@
 
     <!-- Content Area -->
     <div id="content" class="ml-40 flex-1 transition-all duration-300">
-        <!-- Display products -->
         <div id="productsContainer" class="container mx-auto p-4 transition-all duration-300">
             <div class="flex justify-between items-center mb-4">
                 <h1 class="text-xl font-semibold text-center">Our Collection</h1>
                 <div class="flex gap-4">
-                    <select class="p-2 border border-gray-300 rounded">
+                    <select id="sortSelect" class="p-2 border border-gray-300 rounded">
                         <option value="">Sort by</option>
                         <option value="price_low">Price: Low to High</option>
                         <option value="price_high">Price: High to Low</option>
-                        <option value="popularity">Popularity</option>
                     </select>
-                    <select class="p-2 border border-gray-300 rounded">
-                        <option value="">Filter by Category</option>
-                        <option value="stationery">Stationery</option>
-                        <option value="books">Educational Books</option>
-                        <option value="tea">Tea & Snacks</option>
-                        <option value="decor">Home Decor</option>
-                        <option value="pop_culture">Pop Culture Items</option>
+                    <select id="filterSelect" class="p-2 border border-gray-300 rounded">
+                        <option value="">All Categories</option>
+                        <option value="New Arrivals">New Arrivals</option>
+                        <option value="Limited Time Offers">Limited Time Offers</option>
+                        <option value="Home & Interior">Home & Interior</option>
+                        <option value="Health & Beauty">Health & Beauty</option>
+                        <option value="Fashion & Lifestyle">Fashion & Lifestyle</option>
+                        <option value="Traditional Decorations">Traditional Decorations</option>
+                        <option value="Food & Drinks">Food & Drinks</option>
+                        <option value="Stationeries">Stationeries</option>
+                        <option value="Books">Books</option>
                     </select>
                 </div>
             </div>
@@ -420,9 +422,9 @@
 
             <br><br><br><br><br>
 
-            <!-- Japanese Culture and History -->
-            <section id="japanese-culture-history-section">
-                <h2 class="text-2xl font-bold text-center mb-6">Japanese Culture and History</h2>
+            <!-- Limited Time Summer Offers --> 
+            <section id="limited-time-summer-offers-section"> 
+                <h2 class="text-2xl font-bold text-center mb-6">Limited Time Summer Offers</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <!-- Products will be dynamically loaded here -->
                 </div>
@@ -430,9 +432,9 @@
 
             <br><br><br><br><br>
 
-            <!-- Manga and Graphic Novels -->
-            <section id="manga-graphic-section">
-                <h2 class="text-2xl font-bold text-center mb-6">Manga and Graphic Novels</h2>
+            <!-- Home & Interior --> 
+            <section id="home-interior-section"> 
+                <h2 class="text-2xl font-bold text-center mb-6">Home & Interior</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <!-- Products will be dynamically loaded here -->
                 </div>
@@ -440,9 +442,9 @@
 
             <br><br><br><br><br>
 
-            <!-- Books on Japanese Cuisine -->
-            <section id="books-japanese-cuisine-section">
-                <h2 class="text-2xl font-bold text-center mb-6">Books on Japanese Cuisine</h2>
+            <!-- Health & Beauty --> 
+            <section id="health-beauty-section"> 
+                <h2 class="text-2xl font-bold text-center mb-6">Health & Beauty</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <!-- Products will be dynamically loaded here -->
                 </div>
@@ -450,116 +452,53 @@
 
             <br><br><br><br><br>
 
-            <!-- Books for Japanese Calligraphy -->
-            <section id="books-japanese-calligraphy-section">
-                <h2 class="text-2xl font-bold text-center mb-6">Books for Japanese Calligraphy</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    <!-- Products will be dynamically loaded here -->
-                </div>
-            </section>
-
-            <br><br><br><br><br>
-
-            <!-- Tea & Snacks -->
-            <section id="tea-snacks-section">
-                <h2 class="text-2xl font-bold text-center mb-6">Tea & Snacks</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    <!-- Products will be dynamically loaded here -->
-                </div>
-            </section>
-
-            <br><br><br><br><br>
-
-            <!-- Home & Interior Items -->
-            <section id="home-interior-section">
-                <h2 class="text-2xl font-bold text-center mb-6">Home & Interior Items</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    <!-- Products will be dynamically loaded here -->
-                </div>
-            </section>
-
-            <br><br><br><br><br>
-
-            <!-- Health & Beauty Items -->
-            <section id="health-beauty-section">
-                <h2 class="text-2xl font-bold text-center mb-6">Health & Beauty Items</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    <!-- Products will be dynamically loaded here -->
-                </div>
-            </section>
-            
-            <br><br><br><br><br>
-
-            <!-- Fashion & Lifestyle -->
-            <section id="fashion-lifestyle-section">
+            <!-- Fashion & Lifestyle --> 
+            <section id="fashion-lifestyle-section"> 
                 <h2 class="text-2xl font-bold text-center mb-6">Fashion & Lifestyle</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <!-- Products will be dynamically loaded here -->
                 </div>
             </section>
+
+            <br><br><br><br><br>
+
+            <!-- Traditional Decorations --> 
+            <section id="traditional-decorations-section"> 
+                <h2 class="text-2xl font-bold text-center mb-6">Traditional Decorations</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Products will be dynamically loaded here -->
+                </div>
+            </section>
+
+            <br><br><br><br><br>
+
+            <!-- Food & Drinks --> 
+            <section id="food-drinks-section"> 
+                <h2 class="text-2xl font-bold text-center mb-6">Food & Drinks</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Products will be dynamically loaded here -->
+                </div>
+            </section>
+
+            <br><br><br><br><br>
+
+            <!-- Stationeries & Collectibles --> 
+            <section id="stationeries-collectibles-section"> 
+                <h2 class="text-2xl font-bold text-center mb-6">Stationeries & Collectibles</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Products will be dynamically loaded here -->
+                </div>
+            </section>
             
             <br><br><br><br><br>
 
-            <!-- Cart Sidebar -->
-            <div id="cart-sidebar" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
-                <div class="absolute top-0 right-0 w-1/3 bg-white h-full shadow-lg p-6 overflow-y-auto">
-                    <!-- Cross Icon to Close Sidebar -->
-                    <button id="close-cart" class="absolute top-4 right-4 text-2xl text-gray-600 hover:text-gray-900">
-                        &times;
-                    </button>
-
-                    <h2 class="text-xl font-semibold mb-4">Your Cart</h2>
-
-                    <!-- Cart Summary: Items Count and Total Price -->
-                    <div id="cart-summary" class="mb-6">
-                        <p id="cart-item-count" class="text-lg">Items: 0</p>
-                        <p id="cart-total-price" class="text-lg">Total: Rs. 0.00</p>
-                    </div>
-
-                    <!-- Cart Items -->
-                    <div id="cart-items">
-                        <!-- Cart items will be dynamically inserted here -->
-                    </div>
-
-                    <!-- Subtotal and Checkout Button -->
-                    <div class="mt-6 flex justify-between items-center">
-                        <p id="cart-subtotal" class="font-semibold">Subtotal: Rs. 0.00</p>
-                    </div>
-
-                    <!-- Full-width Checkout Button -->
-                    <button id="checkout-btn" class="w-full bg-green-500 text-white py-3 mt-4 rounded hover:bg-green-600">
-                        Checkout
-                    </button>
+            <!-- Books & Movies --> 
+            <section id="books-movies-section"> 
+                <h2 class="text-2xl font-bold text-center mb-6">Books & Movies</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Products will be dynamically loaded here -->
                 </div>
-            </div>
-
-            <!-- Wishlist Sidebar -->
-            <div id="wishlist-sidebar" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
-                <div class="absolute top-0 right-0 w-1/3 bg-white h-full shadow-lg p-6 overflow-y-auto">
-                    <!-- Cross Icon to Close Sidebar -->
-                    <button id="close-wishlist" class="absolute top-4 right-4 text-2xl text-gray-600 hover:text-gray-900">
-                        &times;
-                    </button>
-
-                    <h2 class="text-xl font-semibold mb-4">Your Wishlist</h2>
-
-                    <!-- Wishlist Summary: Items Count -->
-                    <div id="wishlist-summary" class="mb-6">
-                        <p id="wishlist-item-count" class="text-lg">Items: 0</p>
-                    </div>
-
-                    <!-- Wishlist Items -->
-                    <div id="wishlist-items">
-                        <!-- Wishlist items will be dynamically inserted here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Success Message Popup -->
-            <div id="success-message" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white py-2 px-4 rounded shadow-lg opacity-0 transition-opacity duration-500">
-                Successfully Added to Wishlist
-            </div>
-
+            </section>
         </div>
     </div>
 
@@ -635,9 +574,11 @@
 </body>
 <script>
     // Show the header after the page loads
-    document.addEventListener("DOMContentLoaded", () => {
-        const header = document.getElementById("header");
-        header.classList.remove("hidden");
+    document.addEventListener("DOMContentLoaded", function(){
+        const header = document.querySelector("header");
+        if (header) {
+            header.classList.remove("hidden");
+        }
         header.classList.add("opacity-100");
     });
 
@@ -820,362 +761,98 @@
     });
 
 
-    //Retrieve from json and Display the Products
-    document.addEventListener("DOMContentLoaded", function () {
-        fetch("../json/products1.json") // Load the JSON data
-            .then(response => response.json())
-            .then(products => {
-                const container = document.getElementById("new-arrivals-section").querySelector(".grid");
 
-                products.forEach(product => {
-                    const productHTML = `
-                        <div class="bg-white border border-gray-300 rounded-lg shadow hover:scale-105 transform transition-transform" id="${product.id}">
-                            <img src="${product.image}" alt="${product.name}" class="w-full h-64 object-cover">
-                            <div class="p-4 text-center">
-                                <h3 class="text-lg font-medium">${product.name}</h3>
-                                <p class="text-gray-600 mt-2">${product.description}</p>
-                                <p class="text-gray-600 mt-2">Price: Rs. ${product.price}</p>
-                                <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" 
-                                    data-name="${product.name}" data-price="${product.price}" data-img="${product.image}">
-                                    Add to Cart
-                                </button>
-                                <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" 
-                                    data-name="${product.name}" data-price="${product.price}" data-img="${product.image}">
-                                    Add to Wishlist
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    container.innerHTML += productHTML;
-                });
+    
+
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('get_products.php')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Products data:', data);
+                if (data.success) {
+                    const products = data.data;
+                    
+                    const sectionMapping = {
+                        'new-arrivals-section': 'New Arrivals',
+                        'limited-time-summer-offers-section': 'Limited Time Summer Offers',
+                        'home-interior-section': 'Home & Interior',
+                        'health-beauty-section': 'Health & Beauty',
+                        'fashion-lifestyle-section': 'Fashion & Lifestyle',
+                        'traditional-decorations-section': 'Traditional Decorations',
+                        'food-drinks-section': 'Food & Drinks',
+                        'stationeries-collectibles-section': 'Stationeries & Collectibles',
+                        'books-movies-section': 'Books & Movies'
+                    };
+
+                    Object.entries(sectionMapping).forEach(([sectionId, categoryName]) => {
+                        const sectionProducts = products[categoryName] || [];
+                        loadProductsIntoSection(sectionId, sectionProducts);
+                    });
+                }
             })
-            .catch(error => console.error("Error loading products:", error));
+            .catch(error => console.error('Error loading products:', error));
     });
 
+    function loadProductsIntoSection(sectionId, products) {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
 
+        const container = section.querySelector('.grid');
 
-
-    // Cart display
-    const addToCartButtons = document.querySelectorAll('.add-to-cart');
-    const cartSidebar = document.getElementById('cart-sidebar');
-    const cartItems = document.getElementById('cart-items');
-    const cartItemCount = document.getElementById('cart-item-count');
-    const cartTotalPrice = document.getElementById('cart-total-price');
-    const cartSubtotal = document.getElementById('cart-subtotal');
-    const checkoutButton = document.getElementById('checkout-btn');
-    const closeCartButton = document.getElementById('close-cart');
-    const cartIcon = document.getElementById('cart-icon'); // Cart icon
-    const cartItemCountIcon = document.getElementById('cart-item-count-icon'); // Cart item count on icon
-
-    // Initialize cart from localStorage
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-    // Function to update the cart display
-    function updateCartDisplay() {
-        cartItems.innerHTML = ''; // Clear current cart items
-        let total = 0;
-        let totalQuantity = 0;
-
-        cart.forEach(item => {
-            const cartItem = document.createElement('div');
-            cartItem.classList.add('mb-4', 'flex', 'items-center', 'justify-between');
-
-            const cartItemDetails = document.createElement('div');
-            cartItemDetails.classList.add('flex', 'items-center');
-            cartItemDetails.innerHTML = `
-                <img src="${item.img}" alt="${item.name}" class="w-16 h-16 mr-4">
-                <div>
-                    <h3 class="text-lg">${item.name}</h3>
-                    <p class="text-gray-600">Rs. ${item.price}</p>
+        products.forEach(product => {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300';
+            
+            card.innerHTML = `
+                <div class="relative pb-[100%] bg-gray-100">
+                    <img class="absolute top-0 left-0 w-full h-full object-cover opacity-0 transition-opacity duration-300" 
+                        src="${product.image}" 
+                        alt="${product.productname}"
+                        onerror="this.onerror=null; this.src='placeholder.jpg';">
+                    <div class="absolute inset-0 flex items-center justify-center text-gray-400">
+                        <svg class="animate-spin h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">${product.productname}</h3>
+                    <p class="text-sm text-gray-600 mb-3 line-clamp-2">${product.description}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xl font-bold text-pink-600">Rs.${parseFloat(product.price).toFixed(2)}</span>
+                        <button class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-700 transition-colors">
+                            Add to Cart
+                        </button>
+                    </div>
                 </div>
             `;
 
-            // Quantity Changer with + and -
-            const quantityControls = document.createElement('div');
-            quantityControls.classList.add('flex', 'items-center', 'space-x-2');
-            quantityControls.innerHTML = `
-                <button class="quantity-decrease text-gray-600 hover:text-gray-800">-</button>
-                <span class="quantity">${item.quantity}</span>
-                <button class="quantity-increase text-gray-600 hover:text-gray-800">+</button>
-            `;
-
-            // Handle increase quantity
-            quantityControls.querySelector('.quantity-increase').addEventListener('click', () => {
-                item.quantity += 1;
-                updateCartDisplay();
-            });
-
-            // Handle decrease quantity
-            quantityControls.querySelector('.quantity-decrease').addEventListener('click', () => {
-                if (item.quantity > 1) {
-                    item.quantity -= 1;
-                    updateCartDisplay();
-                } else {
-                    // Remove item if quantity is 1 and '-' is clicked
-                    cart = cart.filter(cartItem => cartItem.name !== item.name);
-                    updateCartDisplay();
+            // Handle image loading
+            const img = card.querySelector('img');
+            img.addEventListener('load', () => {
+                img.classList.remove('opacity-0');
+                const loadingSpinner = img.nextElementSibling;
+                if (loadingSpinner) {
+                    loadingSpinner.remove();
                 }
             });
 
-            // Remove item button
-            const removeButton = document.createElement('button');
-            removeButton.classList.add('text-red-500', 'hover:text-red-700');
-            removeButton.innerText = 'Remove';
-            removeButton.addEventListener('click', () => {
-                cart = cart.filter(cartItem => cartItem.name !== item.name);
-                updateCartDisplay();
+            // Add click handler for add to cart button
+            const addToCartBtn = card.querySelector('button');
+            addToCartBtn.addEventListener('click', () => {
+                console.log(`Added ${product.productname} to cart`);
             });
 
-            cartItem.appendChild(cartItemDetails);
-            cartItem.appendChild(quantityControls);
-            cartItem.appendChild(removeButton);
-            cartItems.appendChild(cartItem);
-
-            total += parseFloat(item.price) * item.quantity; // Multiply by quantity
-            totalQuantity += item.quantity; // Sum up total quantity
+            container.appendChild(card);
         });
 
-        // Update cart summary
-        cartItemCount.innerText = `Items: ${totalQuantity}`; // Display total quantity of items
-        cartTotalPrice.innerText = `Total: Rs. ${total.toFixed(2)}`;
-        cartSubtotal.innerText = `Subtotal: Rs. ${total.toFixed(2)}`;
-        
-        // Update item count on the cart icon
-        cartItemCountIcon.innerText = totalQuantity; // Show item count on the icon
-        
-        // Save updated cart to localStorage
-        localStorage.setItem('cart', JSON.stringify(cart));
+        // Hide empty sections
+        if (products.length === 0) {
+            section.style.display = 'none';
+        }
     }
-
-    // Handle Add to Cart button click
-    addToCartButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const name = button.getAttribute('data-name');
-            const price = parseFloat(button.getAttribute('data-price'));  // Convert price to number
-            const img = button.getAttribute('data-img');
-
-            // Check if price is valid before adding it to the cart
-            if (!isNaN(price)) {
-                // Check if item already exists in the cart
-                const existingItem = cart.find(item => item.name === name);
-                if (existingItem) {
-                    existingItem.quantity += 1; // Increase quantity if item is already in the cart
-                } else {
-                    // Add new item to cart
-                    cart.push({ name, price, img, quantity: 1 });
-                }
-
-                updateCartDisplay();
-
-                // Show the cart sidebar
-                cartSidebar.classList.remove('hidden');
-            } else {
-                console.error('Invalid price');
-            }
-        });
-    });
-
-    // Close sidebar when clicking the cross button
-    closeCartButton.addEventListener('click', () => {
-        cartSidebar.classList.add('hidden');
-    });
-
-    // Close sidebar if the user clicks outside the sidebar
-    cartSidebar.addEventListener('click', (e) => {
-        if (e.target === cartSidebar) {
-            cartSidebar.classList.add('hidden');
-        }
-    });
-
-    // Show cart sidebar when clicking the cart icon
-    cartIcon.addEventListener('click', () => {
-        cartSidebar.classList.remove('hidden');
-    });
-
-    // Checkout button functionality (for now, it can be a placeholder)
-    checkoutButton.addEventListener('click', () => {
-        alert('Proceeding to checkout...');
-        window.location.href = 'checkout.php';  // Redirect to checkout.php
-    });
-
-    // Initialize the cart display on page load
-    updateCartDisplay();
-
-
-
-
-    document.addEventListener("DOMContentLoaded", () => {
-        let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
-
-        // Handle Add to Wishlist button click
-        document.querySelectorAll('.add-to-wishlist').forEach(button => {
-            button.addEventListener('click', (event) => {
-                const item = {
-                    name: event.target.dataset.name,
-                    price: event.target.dataset.price,
-                    img: event.target.dataset.img,
-                    quantity: 1
-                };
-
-                // Check if the item is already in the wishlist
-                const existingItemIndex = wishlist.findIndex(wishlistItem => wishlistItem.name === item.name);
-                if (existingItemIndex !== -1) {
-                    // If item exists, increase the quantity
-                    wishlist[existingItemIndex].quantity += 1;
-                } else {
-                    // If item doesn't exist, add it to the wishlist
-                    wishlist.push(item);
-                }
-
-                // Save updated wishlist to localStorage
-                localStorage.setItem('wishlist', JSON.stringify(wishlist));
-
-                // Update wishlist icon count
-                updateWishlistCount();
-
-                // Update wishlist sidebar
-                updateWishlistSidebar();
-
-                // Show success message
-                showSuccessMessage();
-            });
-        });
-
-        // Function to show success message
-        function showSuccessMessage() {
-            const successMessage = document.getElementById('success-message');
-            successMessage.style.visibility = 'visible';
-            successMessage.style.opacity = 1;
-
-            // Hide the message after 3 seconds
-            setTimeout(() => {
-                successMessage.style.opacity = 0;
-                successMessage.style.visibility = 'hidden';
-            }, 3000);
-        }
-
-        // Function to update wishlist count
-        function updateWishlistCount() {
-            document.getElementById('wishlist-count').textContent = wishlist.length;
-            document.getElementById('wishlist-item-count').textContent = `Items: ${wishlist.length}`;
-        }
-
-        // Function to update the wishlist sidebar
-        function updateWishlistSidebar() {
-            const wishlistItemsContainer = document.getElementById('wishlist-items');
-            wishlistItemsContainer.innerHTML = '';
-
-            wishlist.forEach(item => {
-                const itemElement = document.createElement('div');
-                itemElement.classList.add('mb-4', 'flex', 'items-center', 'justify-between');
-
-                const itemDetails = document.createElement('div');
-                itemDetails.classList.add('flex', 'items-center');
-                itemDetails.innerHTML = `
-                    <img src="${item.img}" alt="${item.name}" class="w-16 h-16 mr-4">
-                    <div>
-                        <h3 class="text-lg">${item.name}</h3>
-                        <p class="text-gray-600">Rs. ${item.price}</p>
-                    </div>
-                `;
-
-                const removeButton = document.createElement('button');
-                removeButton.classList.add('text-red-500', 'hover:text-red-700');
-                removeButton.innerText = 'Remove';
-                removeButton.addEventListener('click', () => {
-                    wishlist = wishlist.filter(wishlistItem => wishlistItem.name !== item.name);
-                    localStorage.setItem('wishlist', JSON.stringify(wishlist));
-                    updateWishlistCount();
-                    updateWishlistSidebar();
-                });
-
-                itemElement.appendChild(itemDetails);
-                itemElement.appendChild(removeButton);
-                wishlistItemsContainer.appendChild(itemElement);
-            });
-        }
-
-        // Function to increase the quantity of an item
-        function increaseQuantity(name) {
-            const item = wishlist.find(wishlistItem => wishlistItem.name === name);
-            if (item) {
-                item.quantity += 1;
-                localStorage.setItem('wishlist', JSON.stringify(wishlist));
-                updateWishlistCount();
-                updateWishlistSidebar();
-            }
-        }
-
-        // Function to decrease the quantity of an item
-        function decreaseQuantity(name) {
-            const item = wishlist.find(wishlistItem => wishlistItem.name === name);
-            if (item && item.quantity > 1) {
-                item.quantity -= 1;
-                localStorage.setItem('wishlist', JSON.stringify(wishlist));
-                updateWishlistCount();
-                updateWishlistSidebar();
-            }
-        }
-
-        // Function to open wishlist sidebar
-        function openWishlist() {
-            document.getElementById('wishlist-sidebar').classList.remove('hidden');
-        }
-
-        // Function to close wishlist sidebar
-        function closeWishlist() {
-            document.getElementById('wishlist-sidebar').classList.add('hidden');
-        }
-
-        // Open wishlist sidebar when clicking the wishlist icon
-        document.getElementById('wishlist-icon').addEventListener('click', () => {
-            openWishlist();
-        });
-
-        // Close wishlist sidebar when clicking the close button
-        document.getElementById('close-wishlist').addEventListener('click', () => {
-            closeWishlist();
-        });
-
-        // Initialize wishlist count and sidebar on page load
-        updateWishlistCount();
-        updateWishlistSidebar();
-    });
-
-
-
-
-    // Get the button
-    let scrollToTopBtn = document.getElementById("scrollToTopBtn");
-
-    // When the user scrolls down 100px from the top, show the button
-    window.onscroll = function() {
-        if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
-            scrollToTopBtn.classList.remove("hidden");
-        } else {
-            scrollToTopBtn.classList.add("hidden");
-        }
-    };
-
-    // When the button is clicked, scroll to the top smoothly
-    scrollToTopBtn.onclick = function() {
-        window.scrollTo({
-            top: 0,
-            left: 0,
-            behavior: "smooth" // Scroll smoothly
-        });
-    };
-
-    window.addEventListener('DOMContentLoaded', (event) => {
-        // Check for the hash in the URL and show the relevant sidebar
-        if (window.location.hash === "#wishlist-sidebar") {
-            // Open wishlist sidebar
-            document.getElementById('wishlist-sidebar').style.display = 'block';
-        }
-        if (window.location.hash === "#cart-sidebar") {
-            // Open cart sidebar
-            document.getElementById('cart-sidebar').style.display = 'block';
-        }
-    });
 </script>
 </html>
