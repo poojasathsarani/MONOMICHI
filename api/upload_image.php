@@ -3,7 +3,7 @@
 header('Content-Type: application/json');
 
 $response = array();
-$uploadDir = 'uploads/';
+$uploadDir = '../uploads/';
 
 // Create uploads directory if it doesn't exist
 if (!file_exists($uploadDir)) {

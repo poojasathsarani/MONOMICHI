@@ -518,9 +518,11 @@ $result = $conn->query($sql);
                                         </div>
 
                                         <div class="flex justify-end space-x-3 pt-4 border-t">
-                                            <button type="button" onclick="closeModal()" class="px-4 py-2 bg-white border border-gray-300 rounded-md font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-                                                Cancel
-                                            </button>
+                                            <div class="mt-4 flex justify-end">
+                                                <button type="button" onclick="closeModal()" class="px-4 py-2 bg-white border border-gray-300 rounded-md font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                                                    Cancel
+                                                </button>
+                                            </div>
                                             <button type="submit" class="px-4 py-2 bg-green-600 border border-transparent rounded-md font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors inline-flex items-center">
                                                 <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -572,32 +574,41 @@ $result = $conn->query($sql);
                                 });
                             }
 
-                            // Add form submit handler
+                            // Form submission handler
                             const productForm = document.getElementById('productForm');
                             if (productForm) {
                                 productForm.addEventListener('submit', async (e) => {
                                     e.preventDefault();
-                                    showLoading();  // Show the loading spinner
-                                    
-                                    const formData = new FormData(e.target);
-                                    const data = Object.fromEntries(formData);
-                                    const imageType = formData.get('imageType');
+                                    showLoading();
 
                                     try {
+                                        const formData = new FormData(e.target);
+                                        const data = {
+                                            productname: formData.get('productname').trim(),
+                                            category: formData.get('category'),
+                                            price: parseFloat(formData.get('price')),
+                                            stock: parseInt(formData.get('stock')),
+                                            description: formData.get('description')?.trim() || '',
+                                            weight: parseFloat(formData.get('weight')) || 0,
+                                            status: formData.get('status') || 'available'
+                                        };
+
+                                        // Handle image upload/URL
+                                        const imageType = formData.get('imageType');
                                         if (imageType === 'upload') {
                                             const imageFile = formData.get('imageFile');
                                             if (imageFile && imageFile.size > 0) {
                                                 const uploadData = new FormData();
                                                 uploadData.append('image', imageFile);
                                                 
-                                                const uploadResponse = await fetch('api/upload_image.php', {
+                                                const uploadResponse = await fetch('../api/upload_image.php', {
                                                     method: 'POST',
                                                     body: uploadData
                                                 });
-                                                
+
                                                 const uploadResult = await uploadResponse.json();
                                                 if (!uploadResult.success) {
-                                                    throw new Error(uploadResult.message);
+                                                    throw new Error(uploadResult.message || 'Image upload failed');
                                                 }
                                                 
                                                 data.imagePath = uploadResult.imagePath;
@@ -606,51 +617,87 @@ $result = $conn->query($sql);
                                             }
                                         } else {
                                             const imageUrl = formData.get('imageUrl');
-                                            if (!imageUrl) {
+                                            if (!imageUrl || imageUrl.trim() === '') {
                                                 throw new Error('Please enter an image URL');
                                             }
-                                            data.imagePath = imageUrl;
+                                            data.imagePath = imageUrl.trim();
                                         }
 
-                                        console.log(data);  // Log the form data
+                                        // Validate required fields
+                                        const requiredFields = ['productname', 'category', 'price', 'stock', 'imagePath'];
+                                        const missingFields = requiredFields.filter(field => !data[field]);
                                         
-                                        // **API Call**
-                                        const response = await fetch("http://localhost/MONOMICHI/api/insert_product.php", {
+                                        if (missingFields.length > 0) {
+                                            throw new Error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+                                        }
+
+                                        // Make the API call
+                                        const response = await fetch("../api/insert_product.php", {
                                             method: "POST",
                                             headers: {
                                                 "Content-Type": "application/json",
                                             },
-                                            body: JSON.stringify(data),
-                                            mode: 'cors'
-                                        })
-                                        .then(response => response.text())  // Use response.text() first for debugging
-                                        .then(text => {
-                                            console.log(text);  // Check the raw response
-                                            try {
-                                                const jsonResponse = JSON.parse(text);  // Parse the JSON manually
-                                                console.log(jsonResponse);
-                                            } catch (error) {
-                                                console.error('Error parsing JSON:', error);
-                                            }
-                                        })
-                                        .catch(error => {
-                                            console.error('Error:', error);
+                                            body: JSON.stringify(data)
                                         });
-                                        
+
                                         const result = await response.json();
-                                        console.log(result);  // Check if success is true
+                                        
                                         if (result.success) {
-                                            showNotification('Success', 'Product added successfully!', 'success');
+                                            showPopup('Success', 'Product added successfully!', 'success');
                                             closeModal();
                                         } else {
-                                            throw new Error(result.message);
+                                            throw new Error(result.error || 'Failed to add product');
                                         }
+
                                     } catch (error) {
-                                        showNotification('Error', 'Error adding product: ' + error.message, 'error');
+                                        console.error('Error:', error);
+                                        showNotification('Error', error.message, 'error');
                                     } finally {
-                                        hideLoading();  // Hide the loading spinner
+                                        hideLoading();
                                     }
                                 });
+                            }
+
+                            // Function to close popup
+                            function closePopup() {
+                                const popup = document.getElementById("customPopup");
+                                if (popup) {
+                                    popup.remove();
+                                }
+                            }
+
+                            // Function to display a popup message
+                            function showPopup(title, message, type) {
+                                // Remove existing popups before adding a new one
+                                closePopup();
+
+                                const popup = document.createElement("div");
+                                popup.id = "customPopup"; // Assign an ID for easy selection
+                                popup.classList.add(
+                                    "fixed",
+                                    "inset-0",
+                                    "bg-gray-900",
+                                    "bg-opacity-50",
+                                    "flex",
+                                    "items-center",
+                                    "justify-center",
+                                    "z-50"
+                                );
+
+                                popup.innerHTML = `
+                                    <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                                        <h3 class="text-xl font-bold ${
+                                            type === "success" ? "text-green-600" : "text-red-600"
+                                        } mb-2">${title}</h3>
+                                        <p class="text-gray-700 mb-4">${message}</p>
+                                        <button id="popupCloseBtn" class="bg-blue-500 text-white px-4 py-2 rounded-lg">OK</button>
+                                    </div>
+                                `;
+
+                                document.body.appendChild(popup);
+
+                                // Attach event listener to close button after adding to DOM
+                                document.getElementById("popupCloseBtn").addEventListener("click", closePopup);
                             }
 
                             // Add image type toggle handlers
@@ -700,6 +747,13 @@ $result = $conn->query($sql);
                                         closeModal();
                                     }
                                 });
+                            }
+
+                            function closeModal() {
+                                const modal = document.getElementById('productModal');
+                                if (modal) {
+                                    modal.classList.add('hidden'); // Hide the modal
+                                }
                             }
                         });
                         </script>

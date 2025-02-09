@@ -1,43 +1,79 @@
 <?php
-header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: *"); // Allow requests from all origins
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE"); // Allow certain methods
-header("Access-Control-Allow-Headers: Content-Type"); // Allow specific headers
+include('../views/db_connection.php');
+header('Access-Control-Allow-Origin: *');
+header('Content-Type: application/json');
+header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods,Authorization,X-Requested-With');
 
-if (!file_exists('../views/db_connection.php')) {
-    echo json_encode(["error" => "Database connection file is missing"]);
+// Get posted data
+$data = json_decode(file_get_contents("php://input"), true);
+
+// Validate required fields
+$required_fields = ['productname', 'category', 'price', 'stock', 'imagePath'];
+$missing_fields = [];
+
+foreach ($required_fields as $field) {
+    if (!isset($data[$field]) || empty($data[$field])) {
+        $missing_fields[] = $field;
+    }
+}
+
+if (!empty($missing_fields)) {
+    echo json_encode([
+        'success' => false,
+        'error' => 'Missing required fields: ' . implode(', ', $missing_fields)
+    ]);
     exit;
 }
 
-require '../views/db_connection.php';
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $data = json_decode(file_get_contents("php://input"));
-
-    if (!empty($data->productname) && !empty($data->category) && !empty($data->price) && !empty($data->stock) && !empty($data->image)) {
-        $sql = "INSERT INTO products (productname, category, price, image, stock, description, weight, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssdsdsss", 
-            $data->productname, 
-            $data->category, 
-            $data->price, 
-            $data->image, 
-            $data->stock, 
-            $data->description, 
-            $data->weight, 
-            $data->status
-        );
-
-        if ($stmt->execute()) {
-            echo json_encode(["message" => "Product added successfully"]);
-        } else {
-            echo json_encode(["error" => "Failed to add product"]);
-        }
-        $stmt->close();
-    } else {
-        echo json_encode(["error" => "All fields are required"]);
+try {
+    // Prepare the SQL statement
+    $sql = "INSERT INTO products (productname, category, price, stock, image, description, weight, status) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            
+    $stmt = $conn->prepare($sql);
+    
+    if (!$stmt) {
+        throw new Exception("Prepare failed: " . $conn->error);
     }
-} else {
-    echo json_encode(["error" => "Invalid request"]);
+    
+    // Note: Using 'image' instead of 'imagePath' to match your table structure
+    $description = isset($data['description']) ? $data['description'] : '';
+    $weight = isset($data['weight']) ? $data['weight'] : 0;
+    $status = isset($data['status']) ? $data['status'] : 'available';
+    
+    $stmt->bind_param("ssddssds", 
+        $data['productname'],
+        $data['category'],
+        $data['price'],
+        $data['stock'],
+        $data['imagePath'],  // This will be stored in the 'image' column
+        $description,
+        $weight,
+        $status
+    );
+    
+    // Execute the statement
+    if (!$stmt->execute()) {
+        throw new Exception("Execute failed: " . $stmt->error);
+    }
+    
+    echo json_encode([
+        'success' => true,
+        'message' => 'Product added successfully',
+        'productId' => $conn->insert_id
+    ]);
+
+} catch (Exception $e) {
+    echo json_encode([
+        'success' => false,
+        'error' => $e->getMessage()
+    ]);
 }
+
+// Close the statement and connection
+if (isset($stmt)) {
+    $stmt->close();
+}
+$conn->close();
 ?>
