@@ -414,7 +414,7 @@
             <!-- Product Card -->
             <!-- New Arrivals -->
             <section id="new-arrivals-section">
-                <h2 class="text-2xl font-bold text-center mb-6">New Arrivals</h2>
+                <h2 class="text-2xl font-bold text-center mb-6 text-pink-700">New Arrivals</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <!-- Products will be dynamically loaded here -->
                 </div>
@@ -424,7 +424,7 @@
 
             <!-- Limited Time Summer Offers --> 
             <section id="limited-time-summer-offers-section"> 
-                <h2 class="text-2xl font-bold text-center mb-6">Limited Time Summer Offers</h2>
+                <h2 class="text-2xl font-bold text-center mb-6 text-pink-700">Limited Time Summer Offers</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <!-- Products will be dynamically loaded here -->
                 </div>
@@ -434,7 +434,7 @@
 
             <!-- Home & Interior --> 
             <section id="home-interior-section"> 
-                <h2 class="text-2xl font-bold text-center mb-6">Home & Interior</h2>
+                <h2 class="text-2xl font-bold text-center mb-6 text-pink-700">Home & Interior</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <!-- Products will be dynamically loaded here -->
                 </div>
@@ -444,7 +444,7 @@
 
             <!-- Health & Beauty --> 
             <section id="health-beauty-section"> 
-                <h2 class="text-2xl font-bold text-center mb-6">Health & Beauty</h2>
+                <h2 class="text-2xl font-bold text-center mb-6 text-pink-700">Health & Beauty</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <!-- Products will be dynamically loaded here -->
                 </div>
@@ -454,7 +454,7 @@
 
             <!-- Fashion & Lifestyle --> 
             <section id="fashion-lifestyle-section"> 
-                <h2 class="text-2xl font-bold text-center mb-6">Fashion & Lifestyle</h2>
+                <h2 class="text-2xl font-bold text-center mb-6 text-pink-700">Fashion & Lifestyle</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <!-- Products will be dynamically loaded here -->
                 </div>
@@ -464,7 +464,7 @@
 
             <!-- Traditional Decorations --> 
             <section id="traditional-decorations-section"> 
-                <h2 class="text-2xl font-bold text-center mb-6">Traditional Decorations</h2>
+                <h2 class="text-2xl font-bold text-center mb-6 text-pink-700">Traditional Decorations</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <!-- Products will be dynamically loaded here -->
                 </div>
@@ -474,7 +474,7 @@
 
             <!-- Food & Drinks --> 
             <section id="food-drinks-section"> 
-                <h2 class="text-2xl font-bold text-center mb-6">Food & Drinks</h2>
+                <h2 class="text-2xl font-bold text-center mb-6 text-pink-700">Food & Drinks</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <!-- Products will be dynamically loaded here -->
                 </div>
@@ -484,7 +484,7 @@
 
             <!-- Stationeries & Collectibles --> 
             <section id="stationeries-collectibles-section"> 
-                <h2 class="text-2xl font-bold text-center mb-6">Stationeries & Collectibles</h2>
+                <h2 class="text-2xl font-bold text-center mb-6 text-pink-700">Stationeries & Collectibles</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <!-- Products will be dynamically loaded here -->
                 </div>
@@ -494,11 +494,13 @@
 
             <!-- Books & Movies --> 
             <section id="books-movies-section"> 
-                <h2 class="text-2xl font-bold text-center mb-6">Books & Movies</h2>
+                <h2 class="text-2xl font-bold text-center mb-6 text-pink-700">Books & Movies</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <!-- Products will be dynamically loaded here -->
                 </div>
             </section>
+
+            <br><br><br><br><br>
         </div>
     </div>
 
@@ -762,97 +764,40 @@
 
 
 
-    
 
 
 
-    document.addEventListener('DOMContentLoaded', function() {
-        fetch('get_products.php')
-            .then(response => response.json())
-            .then(data => {
-                console.log('Products data:', data);
-                if (data.success) {
-                    const products = data.data;
-                    
-                    const sectionMapping = {
-                        'new-arrivals-section': 'New Arrivals',
-                        'limited-time-summer-offers-section': 'Limited Time Summer Offers',
-                        'home-interior-section': 'Home & Interior',
-                        'health-beauty-section': 'Health & Beauty',
-                        'fashion-lifestyle-section': 'Fashion & Lifestyle',
-                        'traditional-decorations-section': 'Traditional Decorations',
-                        'food-drinks-section': 'Food & Drinks',
-                        'stationeries-collectibles-section': 'Stationeries & Collectibles',
-                        'books-movies-section': 'Books & Movies'
-                    };
 
-                    Object.entries(sectionMapping).forEach(([sectionId, categoryName]) => {
-                        const sectionProducts = products[categoryName] || [];
-                        loadProductsIntoSection(sectionId, sectionProducts);
+
+
+    document.addEventListener("DOMContentLoaded", function() {
+        fetch("get_products.php")
+        .then(response => response.json())
+        .then(categories => {
+            categories.forEach(category => {
+                let categorySection = document.getElementById(category.categoryname.toLowerCase().replace(/\s/g, '-') + "-section");
+                if (categorySection) {
+                    category.subcategories.forEach(subcategory => {
+                        let subcategoryContainer = document.createElement("div");
+                        subcategoryContainer.innerHTML = `
+                            <h3 class="text-xl font-semibold text-center mt-6">${subcategory.subcategoryname}</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4">
+                                ${subcategory.products.map(product => `
+                                    <div class="border rounded-lg p-4 shadow-lg">
+                                        <img src="${product.image}" alt="${product.productname}" class="w-full h-48 object-cover rounded-md">
+                                        <h4 class="text-lg font-bold mt-2">${product.productname}</h4>
+                                        <p class="text-gray-600 text-sm">${product.description}</p>
+                                        <p class="text-red-500 font-bold mt-2">$${product.price}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                        categorySection.appendChild(subcategoryContainer);
                     });
                 }
-            })
-            .catch(error => console.error('Error loading products:', error));
+            });
+        })
+        .catch(error => console.error("Error fetching data:", error));
     });
-
-    function loadProductsIntoSection(sectionId, products) {
-        const section = document.getElementById(sectionId);
-        if (!section) return;
-
-        const container = section.querySelector('.grid');
-
-        products.forEach(product => {
-            const card = document.createElement('div');
-            card.className = 'bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300';
-            
-            card.innerHTML = `
-                <div class="relative pb-[100%] bg-gray-100">
-                    <img class="absolute top-0 left-0 w-full h-full object-cover opacity-0 transition-opacity duration-300" 
-                        src="${product.image}" 
-                        alt="${product.productname}"
-                        onerror="this.onerror=null; this.src='placeholder.jpg';">
-                    <div class="absolute inset-0 flex items-center justify-center text-gray-400">
-                        <svg class="animate-spin h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-2">${product.productname}</h3>
-                    <p class="text-sm text-gray-600 mb-3 line-clamp-2">${product.description}</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-xl font-bold text-pink-600">Rs.${parseFloat(product.price).toFixed(2)}</span>
-                        <button class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-700 transition-colors">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            // Handle image loading
-            const img = card.querySelector('img');
-            img.addEventListener('load', () => {
-                img.classList.remove('opacity-0');
-                const loadingSpinner = img.nextElementSibling;
-                if (loadingSpinner) {
-                    loadingSpinner.remove();
-                }
-            });
-
-            // Add click handler for add to cart button
-            const addToCartBtn = card.querySelector('button');
-            addToCartBtn.addEventListener('click', () => {
-                console.log(`Added ${product.productname} to cart`);
-            });
-
-            container.appendChild(card);
-        });
-
-        // Hide empty sections
-        if (products.length === 0) {
-            section.style.display = 'none';
-        }
-    }
 </script>
 </html>

@@ -1,33 +1,47 @@
 <?php
-include('../views/db_connection.php');
+include('db_connection.php');
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods,Authorization,X-Requested-With');
 
-try {
-    $query = "SELECT * FROM products WHERE status = 'available' ORDER BY category, created_at DESC";
-    $result = mysqli_query($conn, $query);
+// Get all categories
+$sqlCategories = "SELECT * FROM Categories";
+$resultCategories = $conn->query($sqlCategories);
 
-    if (!$result) {
-        throw new Exception(mysqli_error($conn));
-    }
+$categories = [];
 
-    $groupedProducts = [];
-    while ($product = mysqli_fetch_assoc($result)) {
-        $category = $product['category'];
-        if (!isset($groupedProducts[$category])) {
-            $groupedProducts[$category] = [];
+while ($category = $resultCategories->fetch_assoc()) {
+    $categoryId = $category['categoryid'];
+
+    // Get subcategories for each category
+    $sqlSubcategories = "SELECT * FROM Subcategories WHERE categoryid = $categoryId";
+    $resultSubcategories = $conn->query($sqlSubcategories);
+
+    $subcategories = [];
+    while ($subcategory = $resultSubcategories->fetch_assoc()) {
+        $subcategoryId = $subcategory['subcategoryid'];
+
+        // Get products under each subcategory
+        $sqlProducts = "SELECT * FROM Products WHERE subcategoryid = $subcategoryId";
+        $resultProducts = $conn->query($sqlProducts);
+
+        $products = [];
+        while ($product = $resultProducts->fetch_assoc()) {
+            $products[] = $product;
         }
-        $groupedProducts[$category][] = $product;
+
+        $subcategory['products'] = $products;
+        $subcategories[] = $subcategory;
     }
 
-    echo json_encode(['success' => true, 'data' => $groupedProducts]);
-
-} catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+    $category['subcategories'] = $subcategories;
+    $categories[] = $category;
 }
 
-mysqli_close($conn);
+$conn->close();
+
+// Return JSON response
+header('Content-Type: application/json');
+echo json_encode($categories);
 ?>
