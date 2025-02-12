@@ -1,43 +1,27 @@
 <?php
+require "db_connection.php";
     session_start();
     $userIsLoggedIn = isset($_SESSION['user']);
     $userProfileImage = $userIsLoggedIn ? $_SESSION['user']['profile_image'] : null;
 
-
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $productname = $_POST['productname'];
-        $category = $_POST['category'];
-        $price = $_POST['price'];
-        $stock = $_POST['stock'];
-        $description = $_POST['description'];
-        $brand = $_POST['brand'];
-        $weight = $_POST['weight'];
-        $sku = $_POST['sku'];
+    if (isset($_SESSION['id'])) {
+        $user_id = $_SESSION['id'];
         
-        // Handle image upload
-        $image = '';
-        if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-            $target_dir = "../uploads/";
-            $file_extension = pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION);
-            $file_name = uniqid() . '.' . $file_extension;
-            $target_file = $target_dir . $file_name;
-            
-            if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-                $image = '/uploads/' . $file_name;
-            }
-        }
+        // Query to get the count of products in the user's wishlist
+        $stmt = $conn->prepare("SELECT COUNT(*) AS wishlist_count FROM wishlist WHERE user_id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $data = $result->fetch_assoc();
         
-        $sql = "INSERT INTO products (productname, category, price, image, stock, description, brand, weight, sku) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssdsissds", $productname, $category, $price, $image, $stock, $description, $brand, $weight, $sku);
+        // Get the count of wishlist items
+        $wishlist_count = $data['wishlist_count'];
         
-        if ($stmt->execute()) {
-            header("Location: manage_products.php?success=1");
-        } else {
-            header("Location: manage_products.php?error=1");
-        }
+        // Close the statement and connection
+        $stmt->close();
+        $conn->close();
+    } else {
+        $wishlist_count = 0; // If not logged in, show 0 count
     }
 ?>
 
@@ -50,6 +34,8 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         /* cannot add the ::placeholder selector directly in the inline CSS because inline styles only apply to elements directly and do not support pseudo-elements like ::placeholder, ::before, ::after, or any other pseudo-selectors. */
@@ -94,13 +80,6 @@
                     </button>
                 </form>
             </div>
-
-            <!-- Hamburger Menu Button -->
-            <button id="menu-btn" class="lg:hidden block text-gray-800 focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
-            </button>
 
             <!-- Sidebar -->
             <aside id="sidebar" class="fixed top-0 left-0 h-full bg-gray-50 shadow-lg flex flex-col items-center py-6 px-2 transition-all duration-300 w-16 hover:w-48 overflow-hidden">
@@ -150,8 +129,27 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8a4 4 0 016-3.92A4 4 0 0121 8c0 4-6 8-9 8s-9-4-9-8z" />
                     </svg>
-                    <span id="wishlist-count" class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                    <!-- Display the wishlist count dynamically -->
+                    <span id="wishlist-count" class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        <?php echo $wishlist_count; ?>
+                    </span>
                 </a>
+
+                <!-- Modal for Wishlist -->
+                <div id="wishlist-modal" class="fixed inset-0 z-50 hidden bg-gray-800 bg-opacity-50 flex justify-center items-center">
+                    <div class="bg-white w-1/3 p-4 overflow-y-auto rounded-lg shadow-lg" id="wishlist-content" style="max-height: 80%;">
+                        <!-- Heading and Close button in the same line -->
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-semibold">Your Wishlist</h2>
+                            <button id="close-modal" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                                X
+                            </button>
+                        </div>
+                        <div id="wishlist-items">
+                            <!-- Wishlist items will be dynamically inserted here -->
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Shopping Cart Icon -->
                 <a href="javascript:void(0);" id="cart-icon" class="relative">
@@ -405,8 +403,8 @@
                         <option value="Fashion & Lifestyle">Fashion & Lifestyle</option>
                         <option value="Traditional Decorations">Traditional Decorations</option>
                         <option value="Food & Drinks">Food & Drinks</option>
-                        <option value="Stationeries">Stationeries</option>
-                        <option value="Books">Books</option>
+                        <option value="Stationeries">Stationeries & Collectibles</option>
+                        <option value="Books">Books & Movies</option>
                     </select>
                 </div>
             </div>
@@ -433,7 +431,7 @@
             <br><br><br><br><br>
 
             <!-- Home & Interior --> 
-            <section id="home-interior-section"> 
+            <section id="home-&-interior-section"> 
                 <h2 class="text-2xl font-bold text-center mb-6 text-pink-700">Home & Interior</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <!-- Products will be dynamically loaded here -->
@@ -770,34 +768,185 @@
 
 
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         fetch("get_products.php")
-        .then(response => response.json())
-        .then(categories => {
-            categories.forEach(category => {
-                let categorySection = document.getElementById(category.categoryname.toLowerCase().replace(/\s/g, '-') + "-section");
-                if (categorySection) {
-                    category.subcategories.forEach(subcategory => {
-                        let subcategoryContainer = document.createElement("div");
-                        subcategoryContainer.innerHTML = `
-                            <h3 class="text-xl font-semibold text-center mt-6">${subcategory.subcategoryname}</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4">
-                                ${subcategory.products.map(product => `
-                                    <div class="border rounded-lg p-4 shadow-lg">
-                                        <img src="${product.image}" alt="${product.productname}" class="w-full h-48 object-cover rounded-md">
-                                        <h4 class="text-lg font-bold mt-2">${product.productname}</h4>
-                                        <p class="text-gray-600 text-sm">${product.description}</p>
-                                        <p class="text-red-500 font-bold mt-2">$${product.price}</p>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `;
-                        categorySection.appendChild(subcategoryContainer);
-                    });
+            .then(response => response.json())
+            .then(categories => {
+                categories.forEach(category => {
+                    let categorySection = document.getElementById(category.categoryname.toLowerCase().replace(/\s/g, '-') + "-section");
+                    if (categorySection) {
+                        category.subcategories.forEach(subcategory => {
+                            let subcategoryContainer = document.createElement("div");
+                            subcategoryContainer.innerHTML = `
+                                <h3 class="text-xl font-semibold text-center mt-6">${subcategory.subcategoryname}</h3>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4">
+                                    ${subcategory.products.map(product => `
+                                        <div class="border rounded-lg p-4 shadow-lg">
+                                            <img src="${product.image}" alt="${product.productname}" class="w-full h-48 object-cover rounded-md">
+                                            <h4 class="text-lg font-bold mt-2">${product.productname}</h4>
+                                            <p class="text-gray-600 text-sm">${product.description}</p>
+                                            <p class="text-red-500 font-bold mt-2">Rs. ${product.price}</p>
+                                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" 
+                                                data-name="${product.productname}" 
+                                                data-price="${product.price}" 
+                                                data-img="${product.image}">
+                                                Add to Cart
+                                            </button> 
+                                            <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" 
+                                                data-name="${product.productname}" 
+                                                data-price="${product.price}" 
+                                                data-img="${product.image}">
+                                                Add to Wishlist
+                                            </button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `;
+                            categorySection.appendChild(subcategoryContainer);
+                        });
+                    }
+                });
+            })
+            .catch(error => console.error("Error fetching data:", error));
+
+        // Add product to wishlist
+        document.body.addEventListener("click", function (event) {
+            if (event.target.classList.contains("add-to-wishlist")) {
+                let button = event.target;
+                let product = {
+                    name: button.getAttribute("data-name"),
+                    price: button.getAttribute("data-price"),
+                    img: button.getAttribute("data-img"),
+                };
+
+                fetch("wishlist.php", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(product),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success popup message
+                        showSuccessPopup(data.message);
+                    } else {
+                        alert(data.message); // Show error message if any
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+            }
+        });
+
+        // Function to display success popup
+        function showSuccessPopup(message) {
+            const popupHTML = `
+                <div class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50" id="success-popup">
+                    <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                        <h3 class="text-xl font-bold text-pink-600 mb-2">Product Added to Wishlist!</h3>
+                        <p class="text-gray-700 mb-4">${message}</p>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', popupHTML);
+
+            // Close the popup when clicking outside the modal
+            document.getElementById('success-popup').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    document.getElementById('success-popup').style.display = 'none';
                 }
             });
-        })
-        .catch(error => console.error("Error fetching data:", error));
+
+            // Optional: Hide the popup after 3 seconds
+            setTimeout(() => {
+                document.getElementById('success-popup').style.display = 'none';
+            }, 3000);
+        }
+
+        // Open Modal when Wishlist icon is clicked
+        document.getElementById("wishlist-icon").addEventListener("click", function () {
+            // Show the modal
+            document.getElementById("wishlist-modal").classList.remove("hidden");
+
+            // Fetch wishlist data from view_wishlist.php
+            fetch("view_wishlist.php")
+                .then(response => response.text())
+                .then(data => {
+                    // Display the data in the modal
+                    document.getElementById("wishlist-items").innerHTML = data;
+                })
+                .catch(error => console.error("Error fetching wishlist:", error));
+        });
+
+        // Close Modal when clicking the 'X' button
+        document.getElementById("close-modal").addEventListener("click", function () {
+            document.getElementById("wishlist-modal").classList.add("hidden");
+        });
+
+        // Event delegation for "Add to Cart" and "Remove" buttons
+        document.body.addEventListener("click", function (event) {
+            // Remove from Wishlist
+            if (event.target.classList.contains("remove-from-wishlist")) {
+                const productId = event.target.getAttribute("data-id");
+
+                fetch("remove_from_wishlist.php", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ id: productId }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message); // Show success message
+                    // Refresh the wishlist after removing an item
+                    document.getElementById("wishlist-items").innerHTML = "";
+                    fetch("view_wishlist.php") // Reload wishlist
+                        .then(response => response.text())
+                        .then(data => {
+                            document.getElementById("wishlist-items").innerHTML = data;
+                        });
+                })
+                .catch(error => console.error("Error:", error));
+            }
+
+            // Add to cart button from wishlist
+            if (event.target.classList.contains("add-to-cart-from-wishlist")) {
+                const button = event.target;
+                const product = {
+                    name: button.getAttribute("data-name"),
+                    price: button.getAttribute("data-price"),
+                    img: button.getAttribute("data-img"),
+                };
+
+                // You can define a function to add to cart here
+                addToCart(product);
+            }
+        });
+
+        // Function to add product to cart
+        function addToCart(product) {
+            // Your logic to add the product to the cart
+            console.log("Adding to cart:", product);
+            // For example, save it in local storage or session, etc.
+        }
     });
+
+    // If you want to dynamically update the wishlist count without reloading the page
+    // Add event listener to handle updates when an item is added/removed from the wishlist
+    function updateWishlistCount(count) {
+        document.getElementById('wishlist-count').textContent = count;
+    }
+
+    // You can make an AJAX request to get the updated wishlist count after adding/removing an item
+    function fetchWishlistCount() {
+        fetch('products.php')
+            .then(response => response.json())
+            .then(data => {
+                updateWishlistCount(data.count);
+            })
+            .catch(error => console.error("Error fetching wishlist count:", error));
+    }
 </script>
 </html>
