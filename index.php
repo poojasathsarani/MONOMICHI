@@ -247,45 +247,6 @@ $userProfileImage = isset($_SESSION['profile_image']) && $_SESSION['profile_imag
         <a href="../views/products.php#limited-time-offers-section" class="mt-6 inline-block bg-white text-red-600 py-3 px-8 rounded-full text-lg font-semibold">Shop Now</a>
     </section>
 
-    <!-- Categories Section -->
-    <section id="categories" class="container mx-auto px-40 py-16">
-        <h3 class="text-3xl font-semibold text-center text-gray-800">Shop by Categories</h3>
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Stationery Category -->
-            <div class="category-card bg-white shadow-lg rounded-lg overflow-hidden relative transform transition duration-300">
-                <img src="https://m.media-amazon.com/images/I/71yV-gx2KiL.jpg" alt="Stationery" class="w-full h-48 object-cover">
-                <div class="p-4">
-                    <h4 class="text-xl font-semibold">Stationery</h4>
-                    <p class="mt-2 text-gray-600">Explore a collection of authentic Japanese stationery items.</p>
-                </div>
-                <div class="hover-overlay absolute inset-0 bg-pink-300 opacity-0 transition-opacity duration-300"></div>
-            </div>
-            
-            <!-- Educational Books Category -->
-            <div class="category-card bg-white shadow-lg rounded-lg overflow-hidden relative transform transition duration-300">
-                <img src="https://miro.medium.com/v2/resize:fit:1080/1*v5fYCtaEIlF_v-Pe8szVbg.png" alt="Educational Books" class="w-full h-48 object-cover">
-                <div class="p-4">
-                    <h4 class="text-xl font-semibold">Educational Books</h4>
-                    <p class="mt-2 text-gray-600">Dive into Japanese language and culture with our books.</p>
-                </div>
-                <div class="hover-overlay absolute inset-0 bg-blue-300 opacity-0 transition-opacity duration-300"></div>
-            </div>
-            
-            <!-- Redirect Arrow to Products Page -->
-            <div class="bg-white shadow-lg rounded-lg overflow-hidden flex items-center justify-center bg-gray-100 transform hover:scale-105 transition duration-300 ease-in-out relative">
-                <div class="absolute inset-0 bg-cover bg-center filter blur-sm" style="background-image: url('https://thumbs.dreamstime.com/b/zen-home-decor-japanese-pottery-displayed-bamboo-mat-sunlit-room-view-blooming-cherry-garden-348802394.jpg');"></div>
-
-                <!-- Content (Text and Icon) -->
-                <a href="../views/products.php" class="flex flex-col items-center text-gray-800 hover:text-white transition relative z-10">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                    <span class="mt-2 text-lg font-medium">View All Products</span>
-                </a>
-            </div>
-        </div>
-    </section>
-
     <!-- Cultural Insights Section -->
     <section id="cultural-insights" class="container mx-auto px-40 py-16">
         <h3 class="text-3xl font-semibold text-center text-gray-800">Learn About Japanese Culture</h3>

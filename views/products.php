@@ -159,6 +159,17 @@ require "db_connection.php";
                     <span id="cart-item-count-icon" class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"></span>
                 </a>
 
+                <!-- Cart Modal -->
+                <div id="cart-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="bg-white rounded-lg shadow-lg p-6 w-[600px] max-h-[600px] overflow-hidden">
+                        <h3 class="text-xl font-bold text-gray-700 mb-4">Your Shopping Cart</h3>
+                        <div id="cart-items" class="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                            <!-- Cart items will be displayed here -->
+                        </div>
+                        <button id="close-cart" class="mt-4 w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">Close</button>
+                    </div>
+                </div>
+
                 <!-- Profile Icon (Trigger) -->
                 <button id="profile-button" class="flex items-center space-x-2 p-0 bg-gray-200 rounded-full hover:bg-gray-300 focus:outline-none">
                     <!-- Conditional Rendering of User Avatar or Profile Icon -->
@@ -786,12 +797,13 @@ require "db_connection.php";
                                             <h4 class="text-lg font-bold mt-2">${product.productname}</h4>
                                             <p class="text-gray-600 text-sm">${product.description}</p>
                                             <p class="text-red-500 font-bold mt-2">Rs. ${product.price}</p>
-                                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart" 
-                                                data-name="${product.productname}" 
-                                                data-price="${product.price}" 
-                                                data-img="${product.image}">
+                                            <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart"
+                                                    data-id="${product.productid}"
+                                                    data-name="${product.productname}"
+                                                    data-price="${product.price}"
+                                                    data-img="${product.image}">
                                                 Add to Cart
-                                            </button> 
+                                            </button>
                                             <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" 
                                                 data-name="${product.productname}" 
                                                 data-price="${product.price}" 
@@ -919,9 +931,6 @@ require "db_connection.php";
                     price: button.getAttribute("data-price"),
                     img: button.getAttribute("data-img"),
                 };
-
-                // You can define a function to add to cart here
-                addToCart(product);
             }
         });
 
@@ -948,5 +957,107 @@ require "db_connection.php";
             })
             .catch(error => console.error("Error fetching wishlist count:", error));
     }
+
+
+
+
+
+
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const cartIcon = document.getElementById("cart-icon");
+        const cartModal = document.getElementById("cart-modal");
+        const closeCart = document.getElementById("close-cart");
+        const cartCountIcon = document.getElementById("cart-item-count-icon");
+
+        // Initialize cart count
+        updateCartItemCount();
+
+        if (cartIcon) {
+            cartIcon.addEventListener("click", function() {
+                if (cartModal) {
+                    cartModal.classList.remove("hidden");
+                    refreshCartContents();
+                }
+            });
+        }
+
+        if (closeCart) {
+            closeCart.addEventListener("click", function() {
+                if (cartModal) {
+                    cartModal.classList.add("hidden");
+                }
+            });
+        }
+
+        // Add to cart functionality
+        document.addEventListener("click", function(event) {
+            if (event.target.classList.contains("add-to-cart")) {
+                event.preventDefault();
+                
+                const button = event.target;
+                const productId = button.getAttribute("data-id");
+                console.log("Product ID:", productId); // Debug log
+
+                const product = {
+                    product_id: productId,
+                    name: button.getAttribute("data-name"),
+                    price: button.getAttribute("data-price"),
+                    img: button.getAttribute("data-img")
+                };
+
+                console.log("Sending product data:", product); // Debug log
+
+                fetch("add_to_cart.php", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(product),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Server response:", data); // Debug log
+                    if (data.success) {
+                        updateCartItemCount();
+                        if (cartModal && cartModal.classList.contains("hidden")) {
+                            cartModal.classList.remove("hidden");
+                        }
+                        refreshCartContents();
+                    } else {
+                        alert(data.message || "Failed to add to cart");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Error adding to cart. Please try again.");
+                });
+            }
+        });
+
+        function refreshCartContents() {
+            fetch("view_cart.php")
+                .then(response => response.text())
+                .then(data => {
+                    const cartItems = document.getElementById("cart-items");
+                    if (cartItems) {
+                        cartItems.innerHTML = data;
+                    }
+                })
+                .catch(error => console.error("Error fetching cart data:", error));
+        }
+
+        function updateCartItemCount() {
+            fetch("cart_count.php")
+                .then(response => response.text())
+                .then(count => {
+                    if (cartCountIcon) {
+                        cartCountIcon.textContent = count;
+                    }
+                })
+                .catch(error => console.error("Error updating cart count:", error));
+        }
+    });
 </script>
 </html>
