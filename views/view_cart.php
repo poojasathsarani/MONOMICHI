@@ -27,6 +27,9 @@ $total = 0;
 
 echo "<div class='p-4 bg-white shadow-md rounded-lg'>";
 
+// Add a scrollable container for cart items
+echo "<div class='max-h-96 overflow-y-auto'>";
+
 while ($item = $result->fetch_assoc()) {
     $subtotal = $item['price'] * $item['quantity'];
     $total += $subtotal;
@@ -47,6 +50,8 @@ while ($item = $result->fetch_assoc()) {
     </div>";
 }
 
+echo "</div>"; // Close the scrollable div
+
 echo "
 <div class='mt-4 border-t pt-4 text-right'>
     <p class='text-lg font-bold text-gray-800'>Total: Rs. " . number_format($total, 2) . "</p>
@@ -58,7 +63,8 @@ echo "
     </button>
 </div>";
 
-echo "</div>";
+echo "</div>"; // Close the main container
+
 ?>
 
 <script>

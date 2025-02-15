@@ -780,6 +780,7 @@ require "db_connection.php";
 
 
     document.addEventListener("DOMContentLoaded", function () {
+        // Fetch and display products
         fetch("get_products.php")
             .then(response => response.json())
             .then(categories => {
@@ -805,6 +806,7 @@ require "db_connection.php";
                                                 Add to Cart
                                             </button>
                                             <button class="bg-blue-300 text-white mt-3 py-2 px-4 rounded hover:bg-blue-400 add-to-wishlist" 
+                                                data-id="${product.productid}"
                                                 data-name="${product.productname}" 
                                                 data-price="${product.price}" 
                                                 data-img="${product.image}">
@@ -826,6 +828,7 @@ require "db_connection.php";
             if (event.target.classList.contains("add-to-wishlist")) {
                 let button = event.target;
                 let product = {
+                    product_id: button.getAttribute("data-id"),
                     name: button.getAttribute("data-name"),
                     price: button.getAttribute("data-price"),
                     img: button.getAttribute("data-img"),
@@ -841,63 +844,15 @@ require "db_connection.php";
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Show success popup message
                         showSuccessPopup(data.message);
+                        fetchWishlistCount();
                     } else {
-                        alert(data.message); // Show error message if any
+                        alert(data.message);
                     }
                 })
                 .catch(error => console.error("Error:", error));
             }
-        });
 
-        // Function to display success popup
-        function showSuccessPopup(message) {
-            const popupHTML = `
-                <div class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50" id="success-popup">
-                    <div class="bg-white rounded-lg shadow-lg p-6 text-center">
-                        <h3 class="text-xl font-bold text-pink-600 mb-2">Product Added to Wishlist!</h3>
-                        <p class="text-gray-700 mb-4">${message}</p>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', popupHTML);
-
-            // Close the popup when clicking outside the modal
-            document.getElementById('success-popup').addEventListener('click', function(event) {
-                if (event.target === this) {
-                    document.getElementById('success-popup').style.display = 'none';
-                }
-            });
-
-            // Optional: Hide the popup after 3 seconds
-            setTimeout(() => {
-                document.getElementById('success-popup').style.display = 'none';
-            }, 3000);
-        }
-
-        // Open Modal when Wishlist icon is clicked
-        document.getElementById("wishlist-icon").addEventListener("click", function () {
-            // Show the modal
-            document.getElementById("wishlist-modal").classList.remove("hidden");
-
-            // Fetch wishlist data from view_wishlist.php
-            fetch("view_wishlist.php")
-                .then(response => response.text())
-                .then(data => {
-                    // Display the data in the modal
-                    document.getElementById("wishlist-items").innerHTML = data;
-                })
-                .catch(error => console.error("Error fetching wishlist:", error));
-        });
-
-        // Close Modal when clicking the 'X' button
-        document.getElementById("close-modal").addEventListener("click", function () {
-            document.getElementById("wishlist-modal").classList.add("hidden");
-        });
-
-        // Event delegation for "Add to Cart" and "Remove" buttons
-        document.body.addEventListener("click", function (event) {
             // Remove from Wishlist
             if (event.target.classList.contains("remove-from-wishlist")) {
                 const productId = event.target.getAttribute("data-id");
@@ -911,52 +866,140 @@ require "db_connection.php";
                 })
                 .then(response => response.json())
                 .then(data => {
-                    alert(data.message); // Show success message
-                    // Refresh the wishlist after removing an item
-                    document.getElementById("wishlist-items").innerHTML = "";
-                    fetch("view_wishlist.php") // Reload wishlist
-                        .then(response => response.text())
-                        .then(data => {
-                            document.getElementById("wishlist-items").innerHTML = data;
-                        });
+                    if (data.success) {
+                        showSuccessPopup("Item removed from wishlist");
+                        refreshWishlist();
+                        fetchWishlistCount();
+                    } else {
+                        alert(data.message);
+                    }
                 })
                 .catch(error => console.error("Error:", error));
             }
 
-            // Add to cart button from wishlist
+            // Add to cart from wishlist
             if (event.target.classList.contains("add-to-cart-from-wishlist")) {
                 const button = event.target;
                 const product = {
+                    product_id: button.getAttribute("data-id"),
                     name: button.getAttribute("data-name"),
                     price: button.getAttribute("data-price"),
-                    img: button.getAttribute("data-img"),
+                    img: button.getAttribute("data-img")
                 };
+
+                // First check if the product is already in the cart
+                fetch("check_cart.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ product_id: product.product_id })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        // If product exists in cart, update quantity
+                        return fetch("update_cart_quantity.php", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                            body: `product_id=${product.product_id}&action=increase`
+                        });
+                    } else {
+                        // If product does not exist, add it to cart
+                        return fetch("add_to_cart.php", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(product)
+                        });
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove from wishlist after successfully adding to cart
+                        return fetch("remove_from_wishlist.php", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ id: product.product_id }),
+                        });
+                    } else {
+                        throw new Error(data.message || "Failed to update/add to cart");
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccessPopup("Item moved from wishlist to cart!");
+                        refreshWishlist();
+                        fetchWishlistCount();
+                        updateCartItemCount();
+                        refreshCartContents();
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert(error.message || "Error moving item to cart");
+                });
             }
         });
 
-        // Function to add product to cart
-        function addToCart(product) {
-            // Your logic to add the product to the cart
-            console.log("Adding to cart:", product);
-            // For example, save it in local storage or session, etc.
+        // Wishlist Modal Controls
+        document.getElementById("wishlist-icon").addEventListener("click", function () {
+            document.getElementById("wishlist-modal").classList.remove("hidden");
+            refreshWishlist();
+        });
+
+        document.getElementById("close-modal").addEventListener("click", function () {
+            document.getElementById("wishlist-modal").classList.add("hidden");
+        });
+
+        // Helper Functions
+        function showSuccessPopup(message) {
+            const popupHTML = `
+                <div class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50" id="success-popup">
+                    <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                        <h3 class="text-xl font-bold text-pink-600 mb-2">Success!</h3>
+                        <p class="text-gray-700 mb-4">${message}</p>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', popupHTML);
+
+            const popup = document.getElementById('success-popup');
+            
+            popup.addEventListener('click', function(event) {
+                if (event.target === this) {
+                    popup.remove();
+                }
+            });
+
+            setTimeout(() => {
+                if (popup) {
+                    popup.remove();
+                }
+            }, 3000);
+        }
+
+        function refreshWishlist() {
+            fetch("view_wishlist.php")
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("wishlist-items").innerHTML = data;
+                })
+                .catch(error => console.error("Error refreshing wishlist:", error));
+        }
+
+        function updateWishlistCount(count) {
+            document.getElementById('wishlist-count').textContent = count;
+        }
+
+        function fetchWishlistCount() {
+            fetch('get_wishlist_count.php')
+                .then(response => response.json())
+                .then(data => {
+                    updateWishlistCount(data.count);
+                })
+                .catch(error => console.error("Error fetching wishlist count:", error));
         }
     });
-
-    // If you want to dynamically update the wishlist count without reloading the page
-    // Add event listener to handle updates when an item is added/removed from the wishlist
-    function updateWishlistCount(count) {
-        document.getElementById('wishlist-count').textContent = count;
-    }
-
-    // You can make an AJAX request to get the updated wishlist count after adding/removing an item
-    function fetchWishlistCount() {
-        fetch('products.php')
-            .then(response => response.json())
-            .then(data => {
-                updateWishlistCount(data.count);
-            })
-            .catch(error => console.error("Error fetching wishlist count:", error));
-    }
 
 
 
@@ -974,6 +1017,7 @@ require "db_connection.php";
         // Initialize cart count
         updateCartItemCount();
 
+        // Cart Modal Toggle
         if (cartIcon) {
             cartIcon.addEventListener("click", function() {
                 if (cartModal) {
@@ -998,7 +1042,7 @@ require "db_connection.php";
                 
                 const button = event.target;
                 const productId = button.getAttribute("data-id");
-                console.log("Product ID:", productId); // Debug log
+                console.log("Product ID:", productId);
 
                 const product = {
                     product_id: productId,
@@ -1007,7 +1051,7 @@ require "db_connection.php";
                     img: button.getAttribute("data-img")
                 };
 
-                console.log("Sending product data:", product); // Debug log
+                console.log("Sending product data:", product);
 
                 fetch("add_to_cart.php", {
                     method: "POST",
@@ -1018,7 +1062,7 @@ require "db_connection.php";
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log("Server response:", data); // Debug log
+                    console.log("Server response:", data);
                     if (data.success) {
                         updateCartItemCount();
                         if (cartModal && cartModal.classList.contains("hidden")) {
@@ -1033,6 +1077,80 @@ require "db_connection.php";
                     console.error("Error:", error);
                     alert("Error adding to cart. Please try again.");
                 });
+            }
+
+            // Quantity Update Handler
+            if (event.target.classList.contains("update-quantity")) {
+                const button = event.target;
+                const productId = button.getAttribute("data-id");
+                const action = button.getAttribute("data-action");
+                const quantitySpan = button.parentElement.querySelector("span");
+                const currentQuantity = parseInt(quantitySpan.textContent);
+
+                if (action === "decrease" && currentQuantity <= 1) {
+                    return;
+                }
+
+                fetch("update_cart_quantity.php", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: `product_id=${productId}&action=${action}`,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        refreshCartContents();
+                        updateCartItemCount();
+                    } else {
+                        alert(data.message || "Failed to update quantity");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Error updating quantity. Please try again.");
+                });
+            }
+
+            // Remove Item Handler
+            if (event.target.classList.contains("remove-item")) {
+                const productId = event.target.getAttribute("data-id");
+                
+                fetch("remove_from_cart.php", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: "product_id=" + productId,
+                })
+                .then(response => response.text())
+                .then(data => {
+                    refreshCartContents();
+                    updateCartItemCount();
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Error removing item. Please try again.");
+                });
+            }
+        });
+
+        // Clear Cart Handler
+        document.addEventListener("click", function(event) {
+            if (event.target.id === "clear-cart") {
+                if (confirm("Are you sure you want to clear your entire cart?")) {
+                    fetch("clear_cart.php", { method: "POST" })
+                    .then(response => response.text())
+                    .then(data => {
+                        refreshCartContents();
+                        updateCartItemCount();
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        alert("Error clearing cart. Please try again.");
+                    });
+                }
             }
         });
 

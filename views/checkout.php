@@ -1,8 +1,72 @@
 <?php
-    session_start();
-    $userIsLoggedIn = isset($_SESSION['user']);
-    $userProfileImage = $userIsLoggedIn ? $_SESSION['user']['profile_image'] : null;
+session_start();
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Validate input fields
+    $errors = [];
+    $required_fields = ['full-name', 'address', 'city', 'postal-code', 'country'];
+    
+    foreach ($required_fields as $field) {
+        if (empty($_POST[$field])) {
+            $errors[] = ucfirst(str_replace('-', ' ', $field)) . " is required";
+        }
+    }
+    
+    // Get payment method from hidden input
+    $payment_method = $_POST['payment_method'] ?? '';
+    if (empty($payment_method)) {
+        $errors[] = "Please select a payment method";
+    }
+    
+    if (empty($errors)) {
+        // Sanitize inputs
+        $full_name = $db->real_escape_string($_POST['full-name']);
+        $address = $db->real_escape_string($_POST['address']);
+        $city = $db->real_escape_string($_POST['city']);
+        $postal_code = $db->real_escape_string($_POST['postal-code']);
+        $country = $db->real_escape_string($_POST['country']);
+        $payment_method = $db->real_escape_string($payment_method);
+        
+        // Get user_id from session (assuming user is logged in)
+        $user_id = $_SESSION['user_id'] ?? 1; // Default to 1 for testing
+        
+        // Insert order into database
+        $query = "INSERT INTO orders (user_id, full_name, address, city, postal_code, country, payment_method) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
+        
+        $stmt = $db->prepare($query);
+        $stmt->bind_param("issssss", $user_id, $full_name, $address, $city, $postal_code, $country, $payment_method);
+        
+        if ($stmt->execute()) {
+            $order_id = $db->insert_id;
+            echo json_encode([
+                'success' => true,
+                'message' => 'Order placed successfully!',
+                'order_id' => $order_id
+            ]);
+            exit;
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error processing order. Please try again.'
+            ]);
+            exit;
+        }
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Validation errors',
+            'errors' => $errors
+        ]);
+        exit;
+    }
+}
+
+$userIsLoggedIn = isset($_SESSION['user']);
+$userProfileImage = $userIsLoggedIn ? $_SESSION['user']['profile_image'] : null;
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -109,17 +173,31 @@
                 </button>
 
                 <!-- Dropdown Menu -->
-                <div id="profile-menu" class="absolute right-0 mt-80 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
+                <div id="profile-menu" class="absolute right-0 mt-40 w-40 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
                     <ul class="py-2 text-sm text-gray-700">
-                        <li>
-                            <a href="../views/my-account.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
-                        </li>
-                        <li>
-                            <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
-                        </li>
-                        <li>
-                            <a href="../views/settings.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Settings</a>
-                        </li>
+                        <?php if (isset($_SESSION['id'])): ?>
+                            <li>
+                                <a href="../views/myaccount.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
+                            </li>
+
+                            <!-- Hide Order History for Admins & Managers -->
+                            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'customer'): ?>
+                                <li>
+                                    <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
+                                </li>
+                            <?php endif; ?>
+
+                            <li>
+                                <a href="../views/logout.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Logout</a>
+                            </li>
+                        <?php else: ?>
+                            <li>
+                                <a href="../views/signup.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Sign Up</a>
+                            </li>
+                            <li>
+                                <a href="../views/login.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Log In</a>
+                            </li>
+                        <?php endif; ?>
                     </ul>
                 </div>
             </div>
@@ -132,7 +210,7 @@
             <h2 class="text-3xl font-semibold text-center text-gray-800 mb-6">Checkout</h2>
 
             <!-- Shipping Information Form -->
-            <form action="#" method="POST" class="space-y-6">
+            <form action="payment.php" method="POST" class="space-y-6">
                 <div>
                     <label for="full-name" class="block text-lg text-gray-700">Full Name</label>
                     <input type="text" id="full-name" name="full-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
@@ -189,8 +267,9 @@
             </form>
         </div>
     </section>
-<!-- Footer -->
-<footer class="bg-gray-50 px-40 py-10 text-gray-700">
+    
+    <!-- Footer -->
+    <footer class="bg-gray-50 px-40 py-10 text-gray-700">
         <div class="container mx-auto px-6">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 <!-- Here For You Section -->
@@ -362,6 +441,28 @@
             alert(`You selected: ${selectedMethod}. Redirecting to payment details page...`);
             window.location.href = `payment.php?method=${selectedMethod}`; // Redirect to payment.php with method parameter
         });
+    });
+
+
+    // On page load, check if data exists in localStorage and fill the form fields
+    document.addEventListener('DOMContentLoaded', function() {
+        if (localStorage.getItem('checkout_data')) {
+            const checkoutData = JSON.parse(localStorage.getItem('checkout_data'));
+            
+            document.getElementById('full-name').value = checkoutData['full-name'] || '';
+            document.getElementById('address').value = checkoutData['address'] || '';
+            // Similarly fill other fields here
+        }
+    });
+
+    // On form submit, save form data to localStorage
+    document.querySelector('form').addEventListener('submit', function() {
+        const checkoutData = {
+            'full-name': document.getElementById('full-name').value,
+            'address': document.getElementById('address').value,
+            // Include other fields as needed
+        };
+        localStorage.setItem('checkout_data', JSON.stringify(checkoutData));
     });
 </script>
 </html>

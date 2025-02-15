@@ -28,12 +28,16 @@ if ($result->num_rows == 0) {
                 </div>
             </div>
             <div class='flex space-x-2'>
-                <button class='bg-pink-300 text-white py-2 px-4 rounded hover:bg-pink-700 remove-from-wishlist' data-id='{$row['id']}'>Remove</button>
+                <button class='bg-pink-300 text-white py-2 px-4 rounded hover:bg-pink-700 remove-from-wishlist' 
+                    data-id='{$row['id']}'>
+                    Remove
+                </button>
                 <button class='bg-blue-300 text-white py-2 px-4 rounded hover:bg-blue-700 add-to-cart-from-wishlist flex items-center space-x-2' 
+                    data-id='{$row['id']}'
                     data-name='{$row['product_name']}' 
                     data-price='{$row['product_price']}' 
                     data-img='{$row['product_image']}'>
-                    <i class='fas fa-shopping-cart'></i> <!-- Cart icon -->
+                    <i class='fas fa-shopping-cart'></i>
                 </button>
             </div>
         </div><hr>";
