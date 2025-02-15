@@ -510,6 +510,24 @@ require "db_connection.php";
             </section>
 
             <br><br><br><br><br>
+
+            <!-- Product Modal -->
+            <div id="product-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div class="relative bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+                    <!-- Close Button -->
+                    <button id="close-modal" class="absolute top-3 right-3 bg-gray-500 text-white px-2 py-1 rounded-full hover:bg-gray-700">X</button>
+                    
+                    <!-- Product Image -->
+                    <div class="w-full h-64 bg-gray-200 flex justify-center items-center">
+                        <img id="modal-img" class="max-w-full max-h-64 object-contain rounded-md" alt="Product Image">
+                    </div>
+
+                    <!-- Product Details -->
+                    <h2 id="modal-title" class="text-2xl font-bold mt-4"></h2>
+                    <p id="modal-description" class="text-gray-700 mt-2"></p>
+                    <p id="modal-price" class="text-red-500 font-bold mt-2"></p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -795,7 +813,14 @@ require "db_connection.php";
                                     ${subcategory.products.map(product => `
                                         <div class="border rounded-lg p-4 shadow-lg">
                                             <img src="${product.image}" alt="${product.productname}" class="w-full h-48 object-cover rounded-md">
-                                            <h4 class="text-lg font-bold mt-2">${product.productname}</h4>
+                                            <h4 class="text-lg font-bold mt-2 product-name cursor-pointer text-blue-500 hover:underline"
+                                                data-id="${product.productid}"
+                                                data-name="${product.productname}"
+                                                data-description="${product.description}"
+                                                data-price="${product.price}"
+                                                data-img="${product.image}">
+                                                ${product.productname}
+                                            </h4>
                                             <p class="text-gray-600 text-sm">${product.description}</p>
                                             <p class="text-red-500 font-bold mt-2">Rs. ${product.price}</p>
                                             <button class="bg-red-300 text-white mt-3 py-2 px-4 rounded hover:bg-red-400 add-to-cart"
@@ -819,6 +844,23 @@ require "db_connection.php";
                             categorySection.appendChild(subcategoryContainer);
                         });
                     }
+                });
+
+                // Attach event listener for product names dynamically
+                document.querySelectorAll(".product-name").forEach(item => {
+                    item.addEventListener("click", function () {
+                        const modal = document.getElementById("product-modal");
+                        document.getElementById("modal-img").src = this.dataset.img;
+                        document.getElementById("modal-title").textContent = this.dataset.name;
+                        document.getElementById("modal-description").textContent = this.dataset.description;
+                        document.getElementById("modal-price").textContent = "Rs. " + this.dataset.price;
+                        modal.classList.remove("hidden");
+                    });
+                });
+
+                // Attach event listener for the close button
+                document.getElementById("close-modal").addEventListener("click", function () {
+                    document.getElementById("product-modal").classList.add("hidden");
                 });
             })
             .catch(error => console.error("Error fetching data:", error));

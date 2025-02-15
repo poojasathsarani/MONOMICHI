@@ -13,12 +13,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
-    // Get payment method from hidden input
-    $payment_method = $_POST['payment_method'] ?? '';
-    if (empty($payment_method)) {
-        $errors[] = "Please select a payment method";
-    }
-    
     if (empty($errors)) {
         // Sanitize inputs
         $full_name = $db->real_escape_string($_POST['full-name']);
@@ -26,10 +20,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $city = $db->real_escape_string($_POST['city']);
         $postal_code = $db->real_escape_string($_POST['postal-code']);
         $country = $db->real_escape_string($_POST['country']);
-        $payment_method = $db->real_escape_string($payment_method);
-        
+        $payment_method = !empty($_POST['payment-method']) ? $db->real_escape_string($_POST['payment-method']) : NULL; // Allow NULL
+
         // Get user_id from session (assuming user is logged in)
-        $user_id = $_SESSION['user_id'] ?? 1; // Default to 1 for testing
+        $user_id = $_SESSION['id'];
         
         // Insert order into database
         $query = "INSERT INTO orders (user_id, full_name, address, city, postal_code, country, payment_method) 
@@ -210,7 +204,9 @@ $userProfileImage = $userIsLoggedIn ? $_SESSION['user']['profile_image'] : null;
             <h2 class="text-3xl font-semibold text-center text-gray-800 mb-6">Checkout</h2>
 
             <!-- Shipping Information Form -->
-            <form action="payment.php" method="POST" class="space-y-6">
+            <form id="checkout-form" action="payment.php" method="POST" class="space-y-6">
+                <input type="hidden" id="payment-method" name="payment-method" value="">
+
                 <div>
                     <label for="full-name" class="block text-lg text-gray-700">Full Name</label>
                     <input type="text" id="full-name" name="full-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
@@ -238,26 +234,22 @@ $userProfileImage = $userIsLoggedIn ? $_SESSION['user']['profile_image'] : null;
                 </div>
 
                 <div class="payment-methods">
-                    <label for="payment-method" class="block text-lg text-gray-700 mb-2">Payment Method</label>
+                    <label class="block text-lg text-gray-700 mb-2">Payment Method</label>
                     <div class="flex space-x-4">
-                        <!-- Credit Card -->
                         <div class="payment-option cursor-pointer" data-method="credit-card">
                             <img src="https://cdn0.iconfinder.com/data/icons/flat-design-business-set-3/24/payment-method-visa-512.png" alt="Credit Card" class="w-20 h-20 rounded-lg border-2 border-gray-300 hover:border-green-500">
                             <p class="text-center text-gray-700 mt-2">Credit Card</p>
                         </div>
-                        <!-- PayPal -->
                         <div class="payment-option cursor-pointer" data-method="paypal">
                             <img src="https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/250_Paypal_logo-512.png" alt="PayPal" class="w-20 h-20 rounded-lg border-2 border-gray-300 hover:border-green-500">
                             <p class="text-center text-gray-700 mt-2">PayPal</p>
                         </div>
-                        <!-- Bank Transfer -->
                         <div class="payment-option cursor-pointer" data-method="bank-transfer">
                             <img src="https://cdn-icons-png.flaticon.com/512/6404/6404655.png" alt="Bank Transfer" class="w-20 h-20 rounded-lg border-2 border-gray-300 hover:border-green-500">
                             <p class="text-center text-gray-700 mt-2">Bank Transfer</p>
                         </div>
-                        <!-- COD -->
                         <div class="payment-option cursor-pointer" data-method="cash-on-delivery">
-                            <img src="https://cdn-icons-png.flaticon.com/512/10351/10351648.png" alt="Bank Transfer" class="w-20 h-20 rounded-lg border-2 border-gray-300 hover:border-green-500">
+                            <img src="https://cdn-icons-png.flaticon.com/512/10351/10351648.png" alt="Cash On Delivery" class="w-20 h-20 rounded-lg border-2 border-gray-300 hover:border-green-500">
                             <p class="text-center text-gray-700 mt-2">Cash On Delivery</p>
                         </div>
                     </div>
@@ -432,37 +424,44 @@ $userProfileImage = $userIsLoggedIn ? $_SESSION['user']['profile_image'] : null;
     });
 
     // Get all payment option elements
-    const paymentOptions = document.querySelectorAll('.payment-option');
+    document.addEventListener("DOMContentLoaded", function () {
+        let selectedMethod = "";
+        
+        document.querySelectorAll(".payment-option").forEach(option => {
+            option.addEventListener("click", function () {
+                document.querySelectorAll(".payment-option").forEach(opt => {
+                    opt.classList.remove("border-green-500");
+                });
 
-    // Add click event listeners to each payment option
-    paymentOptions.forEach(option => {
-        option.addEventListener('click', () => {
-            const selectedMethod = option.dataset.method;
-            alert(`You selected: ${selectedMethod}. Redirecting to payment details page...`);
-            window.location.href = `payment.php?method=${selectedMethod}`; // Redirect to payment.php with method parameter
+                this.classList.add("border-green-500");
+                selectedMethod = this.getAttribute("data-method");
+                document.getElementById("payment-method").value = selectedMethod;
+            });
+        });
+
+        document.getElementById("checkout-form").addEventListener("submit", function (event) {
+            if (!selectedMethod) {
+                alert("Please select a payment method.");
+                event.preventDefault();
+            }
         });
     });
 
 
-    // On page load, check if data exists in localStorage and fill the form fields
-    document.addEventListener('DOMContentLoaded', function() {
-        if (localStorage.getItem('checkout_data')) {
-            const checkoutData = JSON.parse(localStorage.getItem('checkout_data'));
-            
-            document.getElementById('full-name').value = checkoutData['full-name'] || '';
-            document.getElementById('address').value = checkoutData['address'] || '';
-            // Similarly fill other fields here
+    fetch('process_order.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Handle successful order
+            alert(data.message);
+            window.location.href = 'order-confirmation.php?id=' + data.order_id;
+        } else {
+            // Handle errors
+            alert(data.message);
         }
-    });
-
-    // On form submit, save form data to localStorage
-    document.querySelector('form').addEventListener('submit', function() {
-        const checkoutData = {
-            'full-name': document.getElementById('full-name').value,
-            'address': document.getElementById('address').value,
-            // Include other fields as needed
-        };
-        localStorage.setItem('checkout_data', JSON.stringify(checkoutData));
     });
 </script>
 </html>
