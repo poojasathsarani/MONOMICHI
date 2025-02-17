@@ -117,42 +117,49 @@ if (!$found) {
 }
 }
 
-// Fetch Users (AJAX Request)
+
+
+
+
+
+// Fetch Users
 if (isset($_GET['fetch_users'])) {
     $query = "SELECT id, fullname, email, role FROM users";
     $result = $conn->query($query);
     
     if ($result) {
         $users = $result->fetch_all(MYSQLI_ASSOC);
-        echo json_encode($users);  // Return JSON Response
+        echo json_encode($users);
     } else {
         echo json_encode(["error" => "Database error: " . $conn->error]);
     }
     exit;
 }
 
-// Handle Edit User
+// Edit User
 if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit_user'])) {
     $stmt = $conn->prepare("UPDATE users SET fullname=?, email=?, role=? WHERE id=?");
     $stmt->bind_param("sssi", $_POST['fullname'], $_POST['email'], $_POST['role'], $_POST['user_id']);
-    $stmt->execute();
-    echo "<script>alert('User updated successfully!'); window.location.href='admindashboard.php';</script>";
+
+    if ($stmt->execute()) {
+        echo "User updated successfully!";
+    } else {
+        echo "Error updating user: " . $conn->error;
+    }
+    exit;
 }
 
-// Handle Delete User
+// Delete User
 if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['delete_user'])) {
     $stmt = $conn->prepare("DELETE FROM users WHERE id=?");
     $stmt->bind_param("i", $_POST['user_id']);
-    $stmt->execute();
-    echo "<script>alert('User deleted successfully!'); window.location.href='admindashboard.php';</script>";
-}
 
-// Handle Configure Privileges
-if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['configure_privileges'])) {
-    $stmt = $conn->prepare("UPDATE users SET role=? WHERE id=?");
-    $stmt->bind_param("si", $_POST['role'], $_POST['user_id']);
-    $stmt->execute();
-    echo "<script>alert('User privileges updated!'); window.location.href='admindashboard.php';</script>";
+    if ($stmt->execute()) {
+        echo "User deleted successfully!";
+    } else {
+        echo "Error deleting user: " . $conn->error;
+    }
+    exit;
 }
 
 
@@ -312,149 +319,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: admindashboard.php?error=1");
     }
     exit();
-}
-
-
-
-
-// Report generation functions
-function generateUserReport($conn, $start_date, $end_date) {
-    $query = "SELECT 
-                u.id,
-                u.fullname,
-                u.email,
-                u.registration_date,
-                u.role,
-                COUNT(DISTINCT o.id) as total_orders,
-                COUNT(DISTINCT p.id) as total_posts,
-                COUNT(DISTINCT c.id) as total_comments
-              FROM users u
-              LEFT JOIN orders o ON u.id = o.user_id AND o.order_date BETWEEN '$start_date' AND '$end_date'
-              LEFT JOIN posts p ON u.id = p.user_id AND p.created_at BETWEEN '$start_date' AND '$end_date'
-              LEFT JOIN comments c ON u.id = c.user_id AND c.created_at BETWEEN '$start_date' AND '$end_date'
-              GROUP BY u.id";
-    
-    $result = mysqli_query($conn, $query);
-    return mysqli_fetch_all($result, MYSQLI_ASSOC);
-}
-
-function generateSalesReport($conn, $start_date, $end_date) {
-    $query = "SELECT 
-                DATE(o.order_date) as sale_date,
-                COUNT(o.id) as total_orders,
-                SUM(o.total_amount) as daily_revenue,
-                o.status,
-                COUNT(DISTINCT o.user_id) as unique_customers
-              FROM orders o
-              WHERE o.order_date BETWEEN '$start_date' AND '$end_date'
-              GROUP BY DATE(o.order_date), o.status
-              ORDER BY sale_date DESC";
-    
-    $result = mysqli_query($conn, $query);
-    return mysqli_fetch_all($result, MYSQLI_ASSOC);
-}
-
-function generateProductReport($conn, $start_date, $end_date) {
-    $start_date = mysqli_real_escape_string($conn, $start_date);
-    $end_date = mysqli_real_escape_string($conn, $end_date);
-    
-    $query = "SELECT 
-                p.productid,
-                p.productname,
-                p.category,
-                p.price,
-                p.stock,
-                p.status,
-                p.brand,
-                COUNT(oi.id) as times_ordered
-              FROM products p
-              LEFT JOIN order_items oi ON p.productid = oi.product_id
-              LEFT JOIN orders o ON oi.order_id = o.id 
-                AND o.order_date BETWEEN '$start_date' AND '$end_date'
-              GROUP BY p.productid
-              ORDER BY times_ordered DESC";
-
-    // Debugging query
-    if ($result = mysqli_query($conn, $query)) {
-        $data = mysqli_fetch_all($result, MYSQLI_ASSOC);
-        return $data;
-    } else {
-        // Log query error
-        error_log("Error executing query: " . mysqli_error($conn));
-        return [];
-    }
-}
-
-function generateContentReport($conn, $start_date, $end_date) {
-    $query = "SELECT 
-                p.id,
-                p.title,
-                u.fullname as author,
-                p.status,
-                p.created_at,
-                COUNT(DISTINCT l.id) as like_count,
-                COUNT(DISTINCT c.id) as comment_count
-              FROM posts p
-              LEFT JOIN users u ON p.user_id = u.id
-              LEFT JOIN likes l ON p.id = l.post_id
-              LEFT JOIN comments c ON p.id = c.post_id
-              WHERE p.created_at BETWEEN '$start_date' AND '$end_date'
-              GROUP BY p.id
-              ORDER BY like_count DESC";
-    
-    $result = mysqli_query($conn, $query);
-    return mysqli_fetch_all($result, MYSQLI_ASSOC);
-}
-
-function generateCSV($data, $filename) {
-    $filepath = 'reports/' . $filename . '_' . date('Y-m-d_H-i-s') . '.csv';
-    $fp = fopen($filepath, 'w');
-
-    if (!empty($data)) {
-        // Write headers
-        fputcsv($fp, array_keys($data[0]));
-
-        // Write data
-        foreach ($data as $row) {
-            fputcsv($fp, $row);
-        }
-    } else {
-        // Write headers with "No data found" row if data is empty
-        fputcsv($fp, ["Message"]);
-        fputcsv($fp, ["No data found for the selected date range"]);
-    }
-
-    fclose($fp);
-    return $filepath;
-}
-
-// Handle report generation
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['report_type'])) {
-    $start_date = $_POST['start_date'];
-    $end_date = $_POST['end_date'];
-    $report_type = $_POST['report_type'];
-    
-    switch ($report_type) {
-        case 'user':
-            $data = generateUserReport($conn, $start_date, $end_date);
-            $file = generateCSV($data, 'user_report');
-            break;
-        case 'sales':
-            $data = generateSalesReport($conn, $start_date, $end_date);
-            $file = generateCSV($data, 'sales_report');
-            break;
-        case 'product':
-            $data = generateProductReport($conn, $start_date, $end_date);
-            $file = generateCSV($data, 'product_report');
-            break;
-        case 'content':
-            $data = generateContentReport($conn, $start_date, $end_date);
-            $file = generateCSV($data, 'content_report');
-            break;
-    }
-    
-    echo $file; // Return the file path
-    exit;
 }
 ?>
 
@@ -640,7 +504,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['report_type'])) {
 
                 <!-- Modal for User Management -->
                 <div id="user-management-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
-                    <div class="bg-white rounded-lg shadow-lg p-6 w-1/2">
+                    <div class="bg-white rounded-lg shadow-lg p-6 w-1/2 max-h-[80vh] overflow-y-auto">
                         <div class="flex justify-between items-center mb-4">
                             <h3 id="modal-title" class="text-xl font-bold text-gray-800">User Management</h3>
                             <button id="close-modal" class="text-gray-600 hover:text-gray-900 text-lg">&times;</button>
@@ -651,50 +515,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['report_type'])) {
                             <p class="mb-4">Select an option:</p>
                             <div class="space-y-3">
                                 <button id="view-users-btn" class="bg-blue-500 text-white px-4 py-2 rounded w-full">View Users</button>
-                                <button id="edit-user-btn" class="bg-yellow-500 text-white px-4 py-2 rounded w-full">Edit User</button>
-                                <button id="delete-user-btn" class="bg-red-500 text-white px-4 py-2 rounded w-full">Delete User</button>
-                                <button id="configure-privileges-btn" class="bg-green-500 text-white px-4 py-2 rounded w-full">Configure Privileges</button>
                             </div>
                         </div>
 
                         <!-- View Users Section -->
                         <div id="view-users-content" class="hidden">
                             <h3 class="text-lg font-semibold text-gray-800 mb-4">User List</h3>
-                            <table class="w-full border-collapse border border-gray-300">
-                                <thead>
-                                    <tr class="bg-gray-200">
-                                        <th class="border border-gray-300 p-2">ID</th>
-                                        <th class="border border-gray-300 p-2">Full Name</th>
-                                        <th class="border border-gray-300 p-2">Email</th>
-                                        <th class="border border-gray-300 p-2">Role</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="user-list"></tbody>
-                            </table>
-                        </div>
-
-                        <!-- Form Section -->
-                        <div id="form-section" class="hidden mt-4">
-                            <h3 id="form-title" class="text-lg font-semibold text-gray-800 mb-4"></h3>
-                            <form id="user-form">
-                                <input type="hidden" id="user-id">
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Full Name</label>
-                                    <input type="text" id="user-fullname" class="w-full border border-gray-300 p-2 rounded">
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Email</label>
-                                    <input type="email" id="user-email" class="w-full border border-gray-300 p-2 rounded">
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Role</label>
-                                    <select id="user-role" class="w-full border border-gray-300 p-2 rounded">
-                                        <option value="admin">Admin</option>
-                                        <option value="user">User</option>
-                                    </select>
-                                </div>
-                                <button type="submit" id="submit-btn" class="bg-blue-500 text-white px-4 py-2 rounded w-full"></button>
-                            </form>
+                            <div class="max-h-[60vh] overflow-y-auto border border-gray-300 rounded-lg">
+                                <table class="w-full border-collapse border border-gray-300">
+                                    <thead class="sticky top-0 bg-gray-200">
+                                        <tr>
+                                            <th class="border border-gray-300 p-2">ID</th>
+                                            <th class="border border-gray-300 p-2">Full Name</th>
+                                            <th class="border border-gray-300 p-2">Email</th>
+                                            <th class="border border-gray-300 p-2">Role</th>
+                                            <th class="border border-gray-300 p-2">Edit</th>
+                                            <th class="border border-gray-300 p-2">Delete</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="user-list"></tbody>
+                                </table>
+                            </div>
                         </div>
 
                         <!-- Back Button -->
@@ -865,91 +706,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['report_type'])) {
 
 
 
-            <!-- Modal Trigger -->
-            <div id="analytics" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300 cursor-pointer">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">Analytics & Reports</h3>
-                <p>Generate comprehensive reports and analyze platform metrics</p>
-            </div>
-
-            <!-- Modal Background Overlay -->
-            <div id="analyticsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
-                <!-- Modal Content -->
-                <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white">
-                    <!-- Modal Header -->
-                    <div class="flex justify-between items-center pb-3 border-b">
-                        <h3 class="text-2xl font-semibold text-gray-800">Generate Reports</h3>
-                        <button id="closeAnalyticsModal" class="text-gray-400 hover:text-gray-500">
-                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <!-- Report Categories -->
-                    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- User Analytics -->
-                        <div class="p-4 border rounded-lg hover:bg-blue-50 cursor-pointer transition" onclick="generateReport('users')">
-                            <h4 class="font-semibold text-gray-700">User Analytics</h4>
-                            <p class="text-sm text-gray-600 mt-1">Registration trends and user roles distribution</p>
-                        </div>
-
-                        <!-- Order Reports -->
-                        <div class="p-4 border rounded-lg hover:bg-blue-50 cursor-pointer transition" onclick="generateReport('orders')">
-                            <h4 class="font-semibold text-gray-700">Order Reports</h4>
-                            <p class="text-sm text-gray-600 mt-1">Sales data and order status analysis</p>
-                        </div>
-
-                        <!-- Product Analytics -->
-                        <div class="p-4 border rounded-lg hover:bg-blue-50 cursor-pointer transition" onclick="generateReport('products')">
-                            <h4 class="font-semibold text-gray-700">Product Analytics</h4>
-                            <p class="text-sm text-gray-600 mt-1">Product performance and inventory status</p>
-                        </div>
-
-                        <!-- Customer Feedback -->
-                        <div class="p-4 border rounded-lg hover:bg-blue-50 cursor-pointer transition" onclick="generateReport('customers')">
-                            <h4 class="font-semibold text-gray-700">Customer Feedback</h4>
-                            <p class="text-sm text-gray-600 mt-1">Customer messages and interaction analysis</p>
-                        </div>
-
-                        <!-- Community Engagement -->
-                        <div class="p-4 border rounded-lg hover:bg-blue-50 cursor-pointer transition" onclick="generateReport('engagement')">
-                            <h4 class="font-semibold text-gray-700">Community Engagement</h4>
-                            <p class="text-sm text-gray-600 mt-1">Posts, likes, and comments metrics</p>
-                        </div>
-
-                        <!-- Cultural Content -->
-                        <div class="p-4 border rounded-lg hover:bg-blue-50 cursor-pointer transition" onclick="generateReport('cultural')">
-                            <h4 class="font-semibold text-gray-700">Cultural Content</h4>
-                            <p class="text-sm text-gray-600 mt-1">Cultural guidance posts analytics</p>
-                        </div>
-                    </div>
-
-                    <!-- Date Range Selector -->
-                    <div class="mt-6 p-4 border rounded-lg bg-gray-50">
-                        <h4 class="font-semibold text-gray-700 mb-3">Select Date Range</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm text-gray-600 mb-1">Start Date</label>
-                                <input type="date" id="startDate" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label class="block text-sm text-gray-600 mb-1">End Date</label>
-                                <input type="date" id="endDate" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="mt-6 flex justify-end space-x-3">
-                        <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition">
-                            Cancel
-                        </button>
-                        <button id="generateBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
-                            Generate Report
-                        </button>
-                    </div>
+            <!-- Analytics & Reports -->
+            <a href="generate_report.php">
+                <div id="analytics" class="bg-white p-6 rounded-lg shadow-lg mb-8 hover:shadow-2xl transition duration-300 cursor-pointer">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Analytics & Reports</h3>
+                    <p>Generate comprehensive reports and analyze platform metrics</p>
                 </div>
-            </div>
+            </a>
         </div>
     </div>
 
@@ -1083,8 +846,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['report_type'])) {
 
 
 
+
+
     $(document).ready(function () {
-        // Open & Close Modal Functions
         function toggleModal(show = true) {
             if (show) {
                 $("#user-management-modal").removeClass("hidden");
@@ -1094,65 +858,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['report_type'])) {
             }
         }
 
-        // Reset Modal Content
         function resetModal() {
             $("#modal-content").show();
-            $("#view-users-content, #form-section, #back-btn").hide();
+            $("#view-users-content, #back-btn").hide();
         }
 
-        // Fetch and Load Users
+        // Fetch Users
         function loadUsers() {
             $.ajax({
-                url: "admindashboard.php?fetch_users=1",  // Ensure the correct file path
+                url: "admindashboard.php?fetch_users=1",
                 method: "GET",
                 dataType: "json",
-                success: function(response) {
+                success: function (response) {
                     if (response.error) {
                         alert("Error: " + response.error);
                         return;
                     }
 
                     let rows = response.map(user => 
-                        `<tr>
+                        `<tr data-id="${user.id}">
                             <td>${user.id}</td>
-                            <td>${user.fullname}</td>
-                            <td>${user.email}</td>
-                            <td>${user.role}</td>
+                            <td><input type="text" class="edit-field fullname" value="${user.fullname}" disabled></td>
+                            <td><input type="text" class="edit-field email" value="${user.email}" disabled></td>
+                            <td><input type="text" class="edit-field role" value="${user.role}" disabled></td>
+                            <td>
+                                <button class="edit-user bg-yellow-500 text-white px-2 py-1 rounded">Edit</button>
+                                <button class="save-user bg-green-500 text-white px-2 py-1 rounded hidden">Save</button>
+                            </td>
+                            <td><button class="delete-user bg-red-500 text-white px-2 py-1 rounded">Delete</button></td>
                         </tr>`
                     ).join('');
                     $("#user-list").html(rows);
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     alert("AJAX Error: " + error);
-                    console.log(xhr.responseText);  // Debugging
+                    console.log(xhr.responseText);
                 }
             });
         }
 
-        // Open Modal
         $("#user-management").click(() => toggleModal(true));
-
-        // Close Modal
         $("#close-modal").click(() => toggleModal(false));
 
-        // View Users
         $("#view-users-btn").click(() => {
             $("#modal-content").hide();
             $("#view-users-content, #back-btn").show();
             loadUsers();
         });
 
-        // Handle Form Actions (Edit, Delete, Configure)
-        $("#edit-user-btn, #delete-user-btn, #configure-privileges-btn").click(function () {
-            let action = $(this).attr("id").replace("-btn", "");
-            $("#modal-content").hide();
-            $("#form-section, #back-btn").show();
-            $("#form-title").text(action.replace("-", " ").toUpperCase());
-            $("#submit-btn").text(action.replace("-", " "));
+        $("#back-btn").click(() => resetModal());
+
+        // Edit User
+        $(document).on("click", ".edit-user", function () {
+            let row = $(this).closest("tr");
+            row.find(".edit-field").prop("disabled", false);
+            row.find(".edit-user").hide();
+            row.find(".save-user").removeClass("hidden");
         });
 
-        // Back Button
-        $("#back-btn").click(() => resetModal());
+        // Save User
+        $(document).on("click", ".save-user", function () {
+            let row = $(this).closest("tr");
+            let userId = row.data("id");
+            let fullname = row.find(".fullname").val();
+            let email = row.find(".email").val();
+            let role = row.find(".role").val();
+
+            $.post("admindashboard.php", { edit_user: 1, user_id: userId, fullname, email, role }, function (response) {
+                alert(response);
+                loadUsers();
+            });
+        });
+
+        // Delete User
+        $(document).on("click", ".delete-user", function () {
+            let row = $(this).closest("tr");
+            let userId = row.data("id");
+
+            if (confirm("Are you sure you want to delete this user?")) {
+                $.post("admindashboard.php", { delete_user: 1, user_id: userId }, function (response) {
+                    alert(response);
+                    loadUsers();
+                });
+            }
+        });
     });
 
 
@@ -1243,6 +1032,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['report_type'])) {
         // Set content with line breaks preserved
         const contentElement = document.getElementById('modal-content');
         contentElement.innerHTML = blog.content ? blog.content.replace(/\n/g, "<br>") : 'No content available';
+
+        // Ensure content scrolls properly
+        contentElement.classList.add("overflow-y-auto", "max-h-[500px]");
         
         // Set status with color coding
         const statusElement = document.getElementById('modal-status');
@@ -1379,6 +1171,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['report_type'])) {
         }
     }
 
+
+
+
+
+
     document.addEventListener('DOMContentLoaded', function() {
         const culturalGuidanceHeading = document.getElementById('cultural-guidance-heading');
         const culturalGuidanceModal = document.getElementById('cultural-guidance-modal');
@@ -1444,7 +1241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['report_type'])) {
 
 
 
-    // Modal functionality
+    // Report Generate
     document.addEventListener('DOMContentLoaded', function() {
         const analytics = document.getElementById('analytics');
         const modal = document.getElementById('analyticsModal');

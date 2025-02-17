@@ -186,9 +186,6 @@ require "db_connection.php";
 
                             <!-- Hide Order History for Admins & Managers -->
                             <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'customer'): ?>
-                                <li>
-                                    <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
-                                </li>
                             <?php endif; ?>
 
                             <li>
@@ -515,7 +512,7 @@ require "db_connection.php";
             <div id="product-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                 <div class="relative bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
                     <!-- Close Button -->
-                    <button id="close-modal" class="absolute top-3 right-3 bg-gray-500 text-white px-2 py-1 rounded-full hover:bg-gray-700">X</button>
+                    <button id="close-product-modal" class="absolute top-3 right-3 bg-gray-500 text-white px-2 py-1 rounded-full hover:bg-gray-700">X</button>
                     
                     <!-- Product Image -->
                     <div class="w-full h-64 bg-gray-200 flex justify-center items-center">
@@ -813,7 +810,7 @@ require "db_connection.php";
                                     ${subcategory.products.map(product => `
                                         <div class="border rounded-lg p-4 shadow-lg">
                                             <img src="${product.image}" alt="${product.productname}" class="w-full h-48 object-cover rounded-md">
-                                            <h4 class="text-lg font-bold mt-2 product-name cursor-pointer text-blue-500 hover:underline"
+                                            <h4 class="text-lg font-bold mt-2 product-name cursor-pointer text-blue-500"
                                                 data-id="${product.productid}"
                                                 data-name="${product.productname}"
                                                 data-description="${product.description}"
@@ -857,13 +854,22 @@ require "db_connection.php";
                         modal.classList.remove("hidden");
                     });
                 });
-
-                // Attach event listener for the close button
-                document.getElementById("close-modal").addEventListener("click", function () {
-                    document.getElementById("product-modal").classList.add("hidden");
-                });
             })
             .catch(error => console.error("Error fetching data:", error));
+
+
+        // Make sure the click listener for the product modal works
+        document.addEventListener('click', function(e) {
+            // If the close button was clicked
+            if (e.target && e.target.id === 'close-modal') {
+                document.getElementById("product-modal").classList.add("hidden");
+            }
+            
+            // You can also close by clicking outside the modal content
+            if (e.target && e.target.id === 'product-modal') {
+                document.getElementById("product-modal").classList.add("hidden");
+            }
+        });
 
         // Add product to wishlist
         document.body.addEventListener("click", function (event) {

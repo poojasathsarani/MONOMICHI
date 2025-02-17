@@ -168,10 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div id="profile-menu" class="absolute right-0 mt-80 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
                 <ul class="py-2 text-sm text-gray-700">
                     <li>
-                        <a href="../views/my-account.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
-                    </li>
-                    <li>
-                        <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
+                        <a href="../views/myaccount.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
                     </li>
                 </ul>
             </div>
@@ -183,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="bg-white shadow-lg rounded-lg p-8 mb-6 mr-20 ml-44">
             <h2 class="text-3xl font-semibold text-gray-800">Welcome, <?php echo htmlspecialchars($name); ?>!</h2>
             <p class="text-lg text-gray-600">Email: <?php echo htmlspecialchars($email); ?></p>
-            <p class="text-lg text-gray-600">Role: <?php echo htmlspecialchars(ucwords($role)); ?></p>
+            <p class="text-lg text-gray-600"><?php echo htmlspecialchars(ucwords($role)); ?></p>
         </div>
 
         <!-- Update Profile Form -->
@@ -239,16 +236,61 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <?php if ($role === 'customer'): ?>
             <!-- Order History Section -->
-            <div class="bg-white shadow-lg rounded-lg p-8 mb-6">
+            <div class="bg-white shadow-lg rounded-lg p-8 mb-6 ml-48 mr-20">
                 <h3 class="text-2xl font-semibold text-gray-800 mb-4">Order History</h3>
                 <?php
-                // Fetch order history for the user
-                $orderSql = "SELECT id, order_date, status FROM orders WHERE user_id = ?";
+                // First, get the order totals
+                $totalSql = "SELECT o.id, SUM(od.quantity * od.price) as order_total
+                            FROM orders o
+                            LEFT JOIN order_details od ON o.id = od.order_id
+                            WHERE o.user_id = ?
+                            GROUP BY o.id";
+                
+                $totalStmt = $conn->prepare($totalSql);
+                $totalStmt->bind_param("i", $userId);
+                $totalStmt->execute();
+                $totalResult = $totalStmt->get_result();
+                
+                $orderTotalMap = array();
+                while ($row = $totalResult->fetch_assoc()) {
+                    $orderTotalMap[$row['id']] = $row['order_total'];
+                }
+                $totalStmt->close();
+                
+                // Now fetch the actual order details
+                $orderSql = "SELECT o.id, o.order_date, o.status, od.product_id, od.quantity, od.price, p.productname
+                            FROM orders o
+                            LEFT JOIN order_details od ON o.id = od.order_id
+                            LEFT JOIN Products p ON od.product_id = p.productid
+                            WHERE o.user_id = ? 
+                            ORDER BY o.id DESC, od.id ASC";
+                
                 $orderStmt = $conn->prepare($orderSql);
                 $orderStmt->bind_param("i", $userId);
                 $orderStmt->execute();
-                $orderStmt->store_result();
-                $orderStmt->bind_result($orderId, $orderDate, $orderStatus);
+                $result = $orderStmt->get_result();
+                
+                // Group orders and their products
+                $orders = array();
+                while ($row = $result->fetch_assoc()) {
+                    if (!isset($orders[$row['id']])) {
+                        $orders[$row['id']] = array(
+                            'id' => $row['id'],
+                            'order_date' => $row['order_date'],
+                            'status' => $row['status'],
+                            'products' => array(),
+                            'total' => isset($orderTotalMap[$row['id']]) ? $orderTotalMap[$row['id']] : 0
+                        );
+                    }
+                    
+                    $orders[$row['id']]['products'][] = array(
+                        'name' => $row['productname'],
+                        'quantity' => $row['quantity'],
+                        'price' => $row['price'],
+                        'subtotal' => $row['quantity'] * $row['price']
+                    );
+                }
+                $orderStmt->close();
                 ?>
 
                 <table class="table-auto w-full mt-4 border-collapse border border-gray-300">
@@ -257,28 +299,54 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <th class="px-4 py-2 border border-gray-300">Order ID</th>
                             <th class="px-4 py-2 border border-gray-300">Order Date</th>
                             <th class="px-4 py-2 border border-gray-300">Status</th>
+                            <th class="px-4 py-2 border border-gray-300">Product</th>
+                            <th class="px-4 py-2 border border-gray-300">Quantity</th>
+                            <th class="px-4 py-2 border border-gray-300">Price</th>
+                            <th class="px-4 py-2 border border-gray-300">Subtotal</th>
+                            <th class="px-4 py-2 border border-gray-300">Order Total</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
-                        if ($orderStmt->num_rows > 0) {
-                            while ($orderStmt->fetch()) {
-                                echo "<tr>
-                                        <td class='px-4 py-2 border border-gray-300'>{$orderId}</td>
-                                        <td class='px-4 py-2 border border-gray-300'>{$orderDate}</td>
-                                        <td class='px-4 py-2 border border-gray-300'>{$orderStatus}</td>
-                                    </tr>";
+                        if (count($orders) > 0) {
+                            foreach ($orders as $order) {
+                                $rowspan = count($order['products']);
+                                $firstProduct = true;
+                                
+                                foreach ($order['products'] as $index => $product) {
+                                    echo "<tr>";
+                                    
+                                    // Order details cells (only for the first product in each order)
+                                    if ($firstProduct) {
+                                        echo "<td class='px-4 py-2 border border-gray-300' rowspan='{$rowspan}'>{$order['id']}</td>";
+                                        echo "<td class='px-4 py-2 border border-gray-300' rowspan='{$rowspan}'>{$order['order_date']}</td>";
+                                        echo "<td class='px-4 py-2 border border-gray-300' rowspan='{$rowspan}'>{$order['status']}</td>";
+                                        $firstProduct = false;
+                                    }
+                                    
+                                    // Product details
+                                    echo "<td class='px-4 py-2 border border-gray-300'>{$product['name']}</td>";
+                                    echo "<td class='px-4 py-2 border border-gray-300'>{$product['quantity']}</td>";
+                                    echo "<td class='px-4 py-2 border border-gray-300'>Rs. " . number_format($product['price'], 2) . "</td>";
+                                    echo "<td class='px-4 py-2 border border-gray-300'>Rs. " . number_format($product['subtotal'], 2) . "</td>";
+                                    
+                                    // Order total (only for the first product in each order)
+                                    if ($index === 0) {
+                                        echo "<td class='px-4 py-2 border border-gray-300' rowspan='{$rowspan}'>Rs. " . number_format($order['total'], 2) . "</td>";
+                                    }
+                                    
+                                    echo "</tr>";
+                                }
                             }
                         } else {
-                            echo "<tr><td colspan='3' class='px-4 py-2 border border-gray-300 text-center'>No orders found</td></tr>";
+                            echo "<tr><td colspan='8' class='px-4 py-2 border border-gray-300 text-center'>No orders found</td></tr>";
                         }
                         ?>
                     </tbody>
                 </table>
-                <?php $orderStmt->close(); ?>
             </div>
         <?php endif; ?>
-    </div>
+
 
     <!-- Footer -->
     <footer class="bg-gray-50 px-40 py-10 text-gray-700">

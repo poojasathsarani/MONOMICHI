@@ -189,7 +189,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <!-- Contact Section -->
     <section class="container mx-auto py-16 px-44">
-        <h2 class="text-4xl font-bold text-center text-gray-800">Contact Us</h2>
+        <h2 class="text-4xl font-bold text-center text-gray-800">Send us a Feedback</h2>
         <p class="text-lg text-center text-gray-600 mt-4 max-w-3xl mx-auto">
             We'd love to hear from you! Whether you have a question about our products, services, or anything else, feel free to reach out.
         </p>
@@ -197,7 +197,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-12">
             <!-- Contact Form -->
             <div class="bg-white p-8 rounded-lg shadow-xl">
-                <h3 class="text-2xl font-semibold text-gray-800">Send Us a Message</h3>
+                <h3 class="text-2xl font-semibold text-gray-800">Send Us Some Feedback</h3>
                 <form action="contactus.php" method="POST" class="mt-6">
                     <div class="mb-4">
                         <label for="name" class="block text-gray-700">Your Name</label>

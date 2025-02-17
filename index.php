@@ -660,5 +660,14 @@ $userProfileImage = isset($_SESSION['profile_image']) && $_SESSION['profile_imag
     document.getElementById('closePopup').addEventListener('click', function() {
         document.getElementById('popupMessage').style.display = 'none';
     });
+
+    // Close popup when clicking outside the popup
+    window.addEventListener('click', function(event) {
+        const popup = document.getElementById('popupMessage');
+        // Check if the clicked target is outside the popup
+        if (event.target === popup) {
+            popup.style.display = 'none';
+        }
+    });
 </script>
 </html>

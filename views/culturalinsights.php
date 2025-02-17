@@ -107,22 +107,6 @@
 
             <!-- Right Side Icons -->
             <div class="flex items-center space-x-6 pr-4 ml-auto">
-                <!-- Wishlist Icon -->
-                <a href="../views/wishlist.php" class="relative">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8a4 4 0 016-3.92A4 4 0 0121 8c0 4-6 8-9 8s-9-4-9-8z" />
-                    </svg>
-                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"></span>
-                </a>
-
-                <!-- Shopping Cart Icon -->
-                <a href="../views/cart.php" class="relative">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.879 1.514M7 16a2 2 0 104 0M13 16a2 2 0 104 0M5.058 6H20.86l-2.35 7H7.609m2.788 5H6M21 21H6"></path>
-                    </svg>
-                    <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"></span>
-                </a>
-
                 <!-- Profile Icon (Trigger) -->
                 <button id="profile-button" class="flex items-center space-x-2 p-0 bg-gray-200 rounded-full hover:bg-gray-300 focus:outline-none">
                     <!-- Conditional Rendering of User Avatar or Profile Icon -->
@@ -130,142 +114,95 @@
                 </button>
 
                 <!-- Dropdown Menu -->
-                <div id="profile-menu" class="absolute right-0 mt-80 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
+                <div id="profile-menu" class="absolute right-0 mt-40 w-40 bg-white rounded-lg shadow-lg border border-gray-200 hidden opacity-0 transform -translate-y-2 transition-all duration-200">
                     <ul class="py-2 text-sm text-gray-700">
-                        <li>
-                            <a href="../views/signup.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Sign Up</a>
-                        </li>
-                        <li>
-                            <a href="../views/login.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Log In</a>
-                        </li>
-                        <li>
-                            <a href="../views/my-account.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
-                        </li>
-                        <li>
-                            <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
-                        </li>
-                        <li>
-                            <a href="../views/settings.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Settings</a>
-                        </li>
+                        <?php if (isset($_SESSION['id'])): ?>
+                            <li>
+                                <a href="../views/myaccount.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">My Account</a>
+                            </li>
+
+                            <!-- Hide Order History for Admins & Managers -->
+                            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'customer'): ?>
+                            <?php endif; ?>
+
+                            <li>
+                                <a href="../views/logout.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Logout</a>
+                            </li>
+                        <?php else: ?>
+                            <li>
+                                <a href="../views/signup.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Sign Up</a>
+                            </li>
+                            <li>
+                                <a href="../views/login.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Log In</a>
+                            </li>
+                        <?php endif; ?>
                     </ul>
                 </div>
             </div>
     </header>
 
-    <!-- Cultural Insights Section -->
-    <section id="cultural-insights" class="container mx-auto px-60 py-16">
+
+    
+    <section id="cultural-insights" class="container mx-auto px-4 md:px-60 py-16">
         <h3 class="text-3xl font-semibold text-center text-gray-800">Learn About Japanese Culture</h3>
 
-        <!-- First Insight Row -->
-        <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Image in the 1st Column -->
-            <div class="w-full">
-                <img src="https://www.sugimotousa.com/asset/5f1208aa97626" alt="Culture 1" class="w-full h-48 object-cover rounded-lg shadow-lg">
-            </div>
-            <!-- Description in the 2nd Column -->
-            <div class="col-span-2">
-                <h4 class="text-xl font-semibold">Tea Ceremony</h4>
-                <p class="mt-2 text-gray-600">The Japanese Tea Ceremony (Sadō) is a traditional ritual where powdered green tea (matcha) is prepared and served to guests in a calm, methodical way. Rooted in Zen Buddhism, it emphasizes harmony, respect, purity, and tranquility.</p>
+        <?php
+        // Database connection
+        require_once 'db_connection.php';
 
-                <p class="mt-2 text-gray-600"><b>Key elements include:</b>
+        // Query to get cultural guidance posts
+        $sql = "SELECT post_id, title, content, image_path FROM cultural_guidance_posts ORDER BY created_at DESC";
+        $result = $conn->query($sql);
 
-                The Setting: A minimalistic tea room or garden, fostering a peaceful atmosphere.
-                The Process: The host carefully prepares the tea, and guests drink it with respect and mindfulness.
-                Utensils: Essential items like the tea bowl (chawan), whisk (chasen), and scoop (chashaku).
-                Philosophy: Focuses on mindfulness, with each gesture reflecting Zen principles.
-                It is a practice that fosters connections, mindfulness, and appreciation for simplicity.</p>
-            </div>
-        </div>
+        if ($result && $result->num_rows > 0) {
+            $counter = 0;
+            while ($row = $result->fetch_assoc()) {
+                $post_id = $row['post_id'];
+                $title = htmlspecialchars($row['title']);
+                $content = nl2br(htmlspecialchars($row['content']));
+                $image_path = htmlspecialchars($row['image_path']);
+                
+                // Ensure the correct image URL format
+                $image_url = "http://localhost/MONOMICHI/" . $image_path;
+        ?>
+                <!-- Wrap Each Post in a Separate Div -->
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                    <?php if ($counter % 2 == 0) { ?>
+                        <!-- Image First -->
+                        <div class="w-full">
+                            <img src="<?php echo $image_url; ?>" alt="<?php echo $title; ?>" 
+                                class="w-full h-48 object-cover rounded-lg shadow-lg">
+                        </div>
+                        <!-- Description Second -->
+                        <div class="col-span-2">
+                            <h4 class="text-xl font-semibold"><?php echo $title; ?></h4>
+                            <div class="mt-2 text-gray-600 cultural-content"><?php echo $content; ?></div>
+                        </div>
+                    <?php } else { ?>
+                        <!-- Description First -->
+                        <div class="col-span-2">
+                            <h4 class="text-xl font-semibold"><?php echo $title; ?></h4>
+                            <div class="mt-2 text-gray-600 cultural-content"><?php echo $content; ?></div>
+                        </div>
+                        <!-- Image Second -->
+                        <div class="w-full">
+                            <img src="<?php echo $image_url; ?>" alt="<?php echo $title; ?>" 
+                                class="w-full h-48 object-cover rounded-lg shadow-lg">
+                        </div>
+                    <?php } ?>
+                </div>
+        <?php
+                $counter++;
+            }
+        } else {
+            echo '<p class="mt-8 text-center text-gray-600">No cultural insights available at the moment.</p>';
+        }
 
-        <!-- Second Insight Row -->
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Description in the 2nd Column -->
-            <div class="col-span-2">
-                <h4 class="text-xl font-semibold">Sakura Viewing</h4>
-                <p class="mt-2 text-gray-600">Sakura is more than just a flower in Japanese culture. It represents the fleeting nature of life. The blossoms bloom in full glory, often in late March to early April, but only for a short period — typically about one to two weeks. This brevity is what gives the sakura its poignant significance. It serves as a reminder of life’s transience, the impermanence of beauty, and the inevitability of change. It aligns with the Buddhist concept of mono no aware (物の哀れ), which refers to the awareness of the impermanence of things, and the beauty that is found in this fleeting nature.</p>
-            </div>
-            <!-- Image in the 1st Column -->
-            <div class="w-full">
-                <img src="https://sakura.hirosakipark.jp/wp-content/themes/tebura/en/images/IMG_1730.jpg" alt="Culture 2" class="w-full h-48 object-cover rounded-lg shadow-lg">
-            </div>
-        </div> <!-- End of Second Insight Row -->
-
-        <!-- Third Insight Row -->
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Image in the 1st Column -->
-            <div class="w-full">
-                <img src="https://blog.janbox.com/wp-content/uploads/2022/10/what-is-matsuri.jpg" alt="Culture 3" class="w-full h-48 object-cover rounded-lg shadow-lg">
-            </div>
-            <!-- Description in the 2nd Column -->
-            <div class="col-span-2">
-                <h4 class="text-xl font-semibold">Festivals (Matsuri)</h4>
-                <p class="mt-2 text-gray-600">The word matsuri (祭り) refers to a festival or celebration, and these events are typically tied to local shrines, temples, and community traditions. Many matsuri have religious roots, with the purpose of appeasing or honoring deities, spirits, or ancestors. The belief is that these festivals will bring blessings, good harvests, health, and prosperity.</p>
-                <p class="mt-2 text-gray-600">Traditionally, matsuri were a way to honor the kami (gods or spirits) in Shinto beliefs, as well as spirits in Buddhist practices. Over time, they evolved to incorporate seasonal celebrations and local traditions, and now they serve as an important way for communities to bond and celebrate their shared cultural identity.</p>
-            </div>
-        </div>
-
-        <!-- Fourth Insight Row -->
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Description in the 2nd Column -->
-            <div class="col-span-2">
-                <h4 class="text-xl font-semibold">Kimonos</h4>
-                <p class="mt-2 text-gray-600">The kimono's history dates back over a thousand years, with its roots in the Heian period (794-1185). Originally, people wore simpler garments, but over time, the kimono evolved into the elaborate and highly structured form we recognize today. The word "kimono" literally means "thing to wear" (着物), and its design and construction became increasingly intricate as Japanese society became more formal and stratified.</p>
-                <p class="mt-2 text-gray-600">Historically, the kimono was worn by both men and women, but its designs, colors, and styles have evolved, with women’s kimonos being more elaborate and colorful. Over time, Western-style clothing became more popular in Japan, and the kimono transitioned from everyday wear to a garment reserved for special occasions. Despite this, the kimono remains a symbol of cultural pride and is still worn on important events and ceremonies.</p>
-            </div>
-            <!-- Image in the 1st Column -->
-            <div class="w-full">
-                <img src="https://www.dhresource.com/webp/m/0x0/f2/albu/g9/M00/65/18/rBVaWF0LQSOASWxGAABhwA7T7w8291.jpg" alt="Culture 4" class="w-full h-48 object-cover rounded-lg shadow-lg">
-            </div>
-        </div>
-
-        <!-- Fifth Insight Row -->
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Image in the 1st Column -->
-            <div class="w-full">
-                <img src="https://img.freepik.com/free-photo/freshness-variety-plate-sushi-culture-japan-generated-by-artificial-intelligence_25030-67081.jpg" alt="Culture 5" class="w-full h-48 object-cover rounded-lg shadow-lg">
-            </div>
-            <!-- Description in the 2nd Column -->
-            <div class="col-span-2">
-                <h4 class="text-xl font-semibold">Sushi Culture</h4>
-                <p class="mt-2 text-gray-600">Sushi has a long history that can be traced back to ancient Japan. Its origins are believed to date back to the 8th century, where it was initially used as a preservation method for fish. The fish was fermented with rice, and over time, the rice would ferment and become sour. The rice was eventually discarded, and only the fish was consumed. This early form of sushi, known as narezushi, was quite different from the sushi we know today.</p>
-                <p class="mt-2 text-gray-600">It wasn’t until the Edo period (1603-1868) that the modern style of sushi, nigiri sushi (hand-pressed sushi), emerged. This form of sushi used fresh fish placed on top of vinegared rice, which made it a much quicker and more accessible dish. The introduction of soy sauce and wasabi further refined the sushi experience, making it a delicacy that people of all classes could enjoy.</p>
-            </div>
-        </div>
-
-        <!-- Sixth Insight Row -->
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Description in the 2nd Column -->
-            <div class="col-span-2">
-                <h4 class="text-xl font-semibold">Ikebana (Flower Arranging)</h4>
-                <p class="mt-2 text-gray-600">The practice of Ikebana dates back to the 6th century when Buddhist monks brought flowers to Japan as offerings to the Buddha. Initially, flowers were used purely for religious and ceremonial purposes. Over time, Ikebana evolved into a highly developed art form. By the 15th century, during the Muromachi period (1336-1573), Ikebana became popular in the homes of samurai and aristocrats, and it began to be formalized into various schools of thought and styles.</p>
-            </div>
-            <!-- Image in the 1st Column -->
-            <div class="w-full">
-                <img src="https://t3.ftcdn.net/jpg/04/99/86/88/360_F_499868875_MUdVb0Eg1JD1VNaGfRBcmV4btdgaCbMM.jpg" alt="Culture 6" class="w-full h-48 object-cover rounded-lg shadow-lg">
-            </div>
-        </div>
-
-        <!-- Seventh Insight Row -->
-        <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Image in the 1st Column -->
-            <div class="w-full">
-                <img src="https://willowalexandergardens.co.uk/wp-content/uploads/2024/10/Japanese-1.jpg" alt="Japanese Garden" class="w-full h-48 object-cover rounded-lg shadow-lg">
-            </div>
-            <!-- Description in the 2nd Column -->
-            <div class="col-span-2">
-                <h4 class="text-xl font-semibold">Japanese Gardens</h4>
-                <p class="mt-2 text-gray-600">Japanese gardens are designed to reflect the beauty of nature through a harmonious layout of plants, water, rocks, and pathways. They often aim to create a sense of tranquility and a connection with the natural world.</p>
-
-                <p class="mt-2 text-gray-600"><b>Key elements include:</b>
-
-                Water Features: Ponds, streams, or waterfalls are common, representing life and the flow of time.
-                Rocks and Sand: Rocks symbolize mountains, while raked sand represents water or waves.
-                Plants: Carefully selected plants that change with the seasons, creating a sense of impermanence.
-                Paths: Winding paths invite contemplation and slow movement through the garden, emphasizing mindfulness.
-                Japanese gardens embody Zen principles, with a focus on balance, simplicity, and the passage of time.</p>
-            </div>
-        </div>
+        // Close connection
+        $conn->close();
+        ?>
     </section>
+
 
     <!-- Footer -->
     <footer class="bg-gray-50 px-40 py-10 text-gray-700">
@@ -456,49 +393,31 @@
         });
     };
 
-    // Get all the star rating elements
-    const ratings = document.querySelectorAll('.star');
 
-    ratings.forEach(star => {
-        // Hover effect
-        star.addEventListener('mouseenter', function () {
-            const index = parseInt(this.getAttribute('data-index'));
-            const stars = this.parentElement.querySelectorAll('.star');
-            stars.forEach((s, i) => {
-                if (i < index) {
-                    s.classList.add('text-yellow-500');
-                    s.classList.remove('text-gray-300');
-                } else {
-                    s.classList.remove('text-yellow-500');
-                    s.classList.add('text-gray-300');
+    // Optional: Format content with proper paragraphs and formatting
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.cultural-content').forEach(function(element) {
+            // If you want to process content with JS, you can do it here
+            // For example, you might want to parse markdown or format lists
+            
+            // Example: Convert bullet points with <b>Key elements include:</b> pattern
+            if (element.innerHTML.includes('<b>Key elements include:</b>')) {
+                let content = element.innerHTML;
+                let parts = content.split('<b>Key elements include:</b>');
+                
+                if (parts.length > 1) {
+                    let listItems = parts[1].split(/\n/).filter(item => item.trim() !== '');
+                    let listHTML = '<p><b>Key elements include:</b></p><ul class="list-disc pl-6 mt-2 space-y-1">';
+                    
+                    listItems.forEach(item => {
+                        listHTML += `<li>${item.trim()}</li>`;
+                    });
+                    
+                    listHTML += '</ul>';
+                    element.innerHTML = parts[0] + listHTML;
                 }
-            });
-            this.style.cursor = "pointer"; // Change the cursor to pointer on hover
+            }
         });
-
-        // Reset the color on mouse leave
-        star.addEventListener('mouseleave', function () {
-            const stars = this.parentElement.querySelectorAll('.star');
-            stars.forEach(s => {
-                s.classList.remove('text-yellow-500');
-                s.classList.add('text-gray-300');
-            });
-        });
-
-        // Click event to select the rating
-        star.addEventListener('click', function () {
-            const index = parseInt(this.getAttribute('data-index'));
-            const stars = this.parentElement.querySelectorAll('.star');
-            stars.forEach((s, i) => {
-                if (i <= index) {  // Color all stars to the left of and including the clicked star yellow
-                    s.classList.add('text-yellow-500');
-                    s.classList.remove('text-gray-300');
-                } else {
-                    s.classList.remove('text-yellow-500');
-                    s.classList.add('text-gray-300');
-                }
-            });
-        });
-    });
+    });    
 </script>
 </html>
