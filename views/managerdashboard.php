@@ -153,6 +153,7 @@ $result = $conn->query($sql);
 
 
 
+
 // Fetch orders and order details
 $query = "
     SELECT o.id AS order_id, o.user_id, o.full_name, o.address, o.city, o.postal_code, o.country, 
@@ -166,37 +167,13 @@ $result = $conn->query($query);
 
 // Check if there are any orders
 if ($result->num_rows > 0) {
-    echo '<table class="order-table">';
-    echo '<thead>';
-    echo '<tr>';
-    echo '<th>Order ID</th><th>User ID</th><th>Full Name</th><th>Address</th><th>City</th><th>Postal Code</th><th>Country</th><th>Payment Method</th><th>Status</th><th>Order Date</th><th>Product ID</th><th>Quantity</th><th>Price</th>';
-    echo '</tr>';
-    echo '</thead>';
-    echo '<tbody>';
-
-    // Loop through and display orders and order details
+    // Store orders in a variable for later use in the modal
+    $orders = [];
     while ($row = $result->fetch_assoc()) {
-        echo '<tr>';
-        echo '<td>' . $row['order_id'] . '</td>';
-        echo '<td>' . $row['user_id'] . '</td>';
-        echo '<td>' . $row['full_name'] . '</td>';
-        echo '<td>' . $row['address'] . '</td>';
-        echo '<td>' . $row['city'] . '</td>';
-        echo '<td>' . $row['postal_code'] . '</td>';
-        echo '<td>' . $row['country'] . '</td>';
-        echo '<td>' . $row['payment_method'] . '</td>';
-        echo '<td>' . $row['status'] . '</td>';
-        echo '<td>' . $row['order_date'] . '</td>';
-        echo '<td>' . $row['product_id'] . '</td>';
-        echo '<td>' . $row['quantity'] . '</td>';
-        echo '<td>' . $row['price'] . '</td>';
-        echo '</tr>';
+        $orders[] = $row;
     }
-
-    echo '</tbody>';
-    echo '</table>';
 } else {
-    echo 'No orders found.';
+    $orders = [];
 }
 ?>
 
@@ -800,12 +777,77 @@ if ($result->num_rows > 0) {
                             </button>
                         </a>
 
-                        <button class="manager-option bg-red-100 hover:bg-red-200 p-4 rounded-lg flex flex-col items-center" onclick="window.location.href='managerdashboard.php';">
+                        <!-- Button to open modal -->
+                        <button class="manager-option bg-red-100 hover:bg-red-200 p-4 rounded-lg flex flex-col items-center" id="openModalButton">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                             </svg>
                             <span class="font-semibold text-red-800">Manage Orders</span>
                         </button>
+
+                        <!-- Modal HTML Structure -->
+                        <div id="orderModal" class="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50 hidden z-50">
+                            <div class="bg-white p-6 rounded-lg w-full max-w-3xl max-h-[80vh] overflow-auto shadow-lg">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h2 class="text-xl font-semibold">Manage Orders</h2>
+                                    <button id="closeModal" class="text-red-600 hover:text-red-800 text-2xl font-bold">&times;</button>
+                                </div>
+
+                                <div class="overflow-x-auto">
+                                    <?php if (count($orders) > 0): ?>
+                                        <table class="w-full border-collapse text-sm">
+                                            <thead class="bg-gray-100 text-xs">
+                                                <tr>
+                                                    <th class="px-3 py-2 border">Order ID</th>
+                                                    <th class="px-4 py-2 border w-40">Full Name</th>
+                                                    <th class="px-3 py-2 border">City</th>
+                                                    <th class="px-4 py-2 border w-32">Country</th>
+                                                    <th class="px-3 py-2 border">Status</th>
+                                                    <th class="px-4 py-2 border w-36">Order Date</th>
+                                                    <th class="px-2 py-2 border">Total Quantity</th>
+                                                    <th class="px-3 py-2 border font-semibold">Total Price</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php
+                                                $orderTotals = [];
+                                                foreach ($orders as $order) {
+                                                    $orderId = $order['order_id'];
+                                                    if (!isset($orderTotals[$orderId])) {
+                                                        $orderTotals[$orderId] = [
+                                                            'full_name' => $order['full_name'],
+                                                            'city' => $order['city'],
+                                                            'country' => $order['country'],
+                                                            'status' => $order['status'],
+                                                            'order_date' => $order['order_date'],
+                                                            'total_quantity' => 0,
+                                                            'total_price' => 0
+                                                        ];
+                                                    }
+                                                    $orderTotals[$orderId]['total_quantity'] += $order['quantity'];
+                                                    $orderTotals[$orderId]['total_price'] += $order['quantity'] * $order['price'];
+                                                }
+
+                                                foreach ($orderTotals as $orderId => $order): ?>
+                                                    <tr class="hover:bg-gray-50">
+                                                        <td class="px-3 py-2 border"><?= $orderId ?></td>
+                                                        <td class="px-4 py-2 border"><?= $order['full_name'] ?></td>
+                                                        <td class="px-3 py-2 border"><?= $order['city'] ?></td>
+                                                        <td class="px-4 py-2 border"><?= $order['country'] ?></td>
+                                                        <td class="px-3 py-2 border"><?= $order['status'] ?></td>
+                                                        <td class="px-4 py-2 border"><?= date("d M Y", strtotime($order['order_date'])) ?></td>
+                                                        <td class="px-2 py-2 border"><?= $order['total_quantity'] ?></td>
+                                                        <td class="px-3 py-2 border font-semibold">$<?= number_format($order['total_price'], 2) ?></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    <?php else: ?>
+                                        <p class="text-sm text-gray-600">No orders found.</p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -979,6 +1021,29 @@ if ($result->num_rows > 0) {
             closeModalBtn.addEventListener("click", function () {
                 modal.classList.add("hidden");
             });
+        }
+    });
+
+
+    // Get the modal, open button, and close button
+    const modal = document.getElementById('orderModal');
+    const openButton = document.getElementById('openModalButton');
+    const closeButton = document.getElementById('closeModal');
+
+    // Open the modal when the button is clicked
+    openButton.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+    });
+
+    // Close the modal when the close button is clicked
+    closeButton.addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
+    // Close the modal if the user clicks outside of it
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.classList.add('hidden');
         }
     });
 

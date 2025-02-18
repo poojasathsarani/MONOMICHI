@@ -388,6 +388,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             Analytics & Reports
                         </a>
                     </li>
+
+                    <li>
+                        <a href="../index.php" class="flex items-center p-3 hover:bg-white/10 rounded-lg transition duration-300 group">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9m0 0l9 9m-9-9v18" />
+                        </svg>
+                            Home
+                        </a>
+                    </li>
                     </ul>
                 </nav>
             </div>

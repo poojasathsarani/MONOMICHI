@@ -10,6 +10,19 @@ if (!isset($_SESSION['id'])) {
 
 $userId = $_SESSION['id'];
 
+$role = isset($_SESSION['role']) ? $_SESSION['role'] : null;
+
+// Redirect based on role
+if (isset($_SESSION['id'])) {
+    if ($role === 'manager') {
+        header("Location: managerdashboard.php"); // Redirect to manager dashboard
+        exit();
+    } elseif ($role === 'admin') {
+        header("Location: admindashboard.php"); // Redirect to admin dashboard
+        exit();
+    }
+}
+
 // Fetch user details
 $sql = "SELECT email, fullname, role FROM users WHERE id = ?";
 $stmt = $conn->prepare($sql);
@@ -101,6 +114,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </button>
                 </form>
             </div>
+
+            <!-- Dashboard Button (For Manager & Admin) -->
+            <?php if ($role === 'manager' || $role === 'admin'): ?>
+                <div class="ml-4">
+                    <a href="<?php echo $role === 'manager' ? 'managerdashboard.php' : 'admindashboard.php'; ?>" class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-pink-600 to-white-300 
+                        text-white font-semibold rounded-xl shadow-md hover:from-pink-700 hover:to-pink-800 
+                        transition-all duration-300 ease-in-out transform hover:scale-105">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h13m0 0l-3-3m3 3l-3 3"/>
+                        </svg>
+                        Dashboard
+                    </a>
+                </div>
+            <?php endif; ?>
 
             <!-- Logout Button -->
             <div class="ml-auto">

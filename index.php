@@ -2,8 +2,8 @@
 session_start();
 $role = isset($_SESSION['role']) ? $_SESSION['role'] : null;
 
-// Check if the user is logged in
-if (isset($_SESSION['id'])) {
+// Check if the user is logged in and the role is 'customer'
+if (isset($_SESSION['id']) && $role === 'customer') {
     // Set a session variable to show the popup message only once
     $_SESSION['popup_shown'] = true;
 }
@@ -110,24 +110,6 @@ $userProfileImage = isset($_SESSION['profile_image']) && $_SESSION['profile_imag
 
             <!-- Right Side Icons -->
             <div class="flex items-center space-x-6 pr-4 ml-auto">
-                <?php if (isset($_SESSION['id'])): ?>
-                    <?php if (isset($_SESSION['id']) && $role === 'customer'): ?>
-                        <!-- Wishlist Icon -->
-                        <a href="../views/products.php#wishlist-sidebar" class="relative">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8a4 4 0 016-3.92A4 4 0 021 8c0 4-6 8-9 8s-9-4-9-8z" />
-                            </svg>
-                        </a>
-
-                        <!-- Shopping Cart Icon -->
-                        <a href="../views/products.php#cart-sidebar" class="relative">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-800 hover:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.879 1.514M7 16a2 2 0 104 0M13 16a2 2 0 104 0M5.058 6H20.86l-2.35 7H7.609m2.788 5H6M21 21H6"></path>
-                            </svg>
-                        </a>
-                    <?php endif; ?>
-                <?php endif; ?>
-
                 <!-- Profile Icon (Trigger) -->
                 <button id="profile-button" class="flex items-center space-x-2 p-0 bg-gray-200 rounded-full hover:bg-gray-300 focus:outline-none">
                 <img src="<?php echo htmlspecialchars($userProfileImage, ENT_QUOTES, 'UTF-8'); ?>" alt="User Profile" class="w-14 h-14 rounded-full border border-gray-300 transition-transform transform hover:scale-110 hover:shadow-lg">
@@ -143,9 +125,6 @@ $userProfileImage = isset($_SESSION['profile_image']) && $_SESSION['profile_imag
 
                             <!-- Hide Order History for Admins & Managers -->
                             <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'customer'): ?>
-                                <li>
-                                    <a href="../views/order-history.php" class="block px-4 py-2 hover:bg-gray-100 hover:text-pink-600 transform transition-all duration-200 ease-in-out">Order History</a>
-                                </li>
                             <?php endif; ?>
 
                             <li>

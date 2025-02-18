@@ -11,6 +11,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Sanitize and retrieve form data
     $email = $_POST["email"];
     $password = $_POST["password"];
+    $rememberMe = isset($_POST["remember"]) ? true : false;
     
     // Query to get user details based on the email
     $sql = "SELECT id, email, password, role FROM users WHERE email = ?";
@@ -27,15 +28,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             // Verify password
             if (password_verify($password, $storedPassword)) {
-                // Password is correct, set session variables and redirect based on role
+                // Password is correct, set session variables
                 $_SESSION['id'] = $userId;
+                $_SESSION['email'] = $storedEmail;
+                $_SESSION['role'] = $role;
                 
                 // Set success flag for the popup
                 $success = true;
                 
-                // Inside the login handling logic
+                // If 'Remember Me' is checked, set cookies
+                if ($rememberMe) {
+                    setcookie("email", $email, time() + (86400 * 30), "/"); // 30 days
+                    setcookie("role", $role, time() + (86400 * 30), "/");  // 30 days
+                } else {
+                    // If 'Remember Me' is unchecked, delete any existing cookies
+                    setcookie("email", "", time() - 3600, "/");
+                    setcookie("role", "", time() - 3600, "/");
+                }
+                
+                // Redirect based on role
                 if ($role == 'customer') {
-                    // Redirect to the index.php inside the MONOMICHI folder
                     header("Location: ../index.php");
                     exit;
                 } elseif ($role == 'admin') {
@@ -58,6 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -159,16 +172,12 @@ $conn->close();
             </aside>
         </div>
     </header>
-
-    <!-- HTML Form and Popup (show the popup on success) -->
     <section class="min-h-screen flex items-center justify-center bg-gray-100 relative">
-        <!-- Background Video -->
         <video autoplay loop muted class="absolute inset-0 w-full h-full object-cover z-0" style="filter: blur(2px);">
             <source src="../images/bg4.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
 
-        <!-- Form Container -->
         <div class="max-w-lg mx-auto bg-white shadow-lg shadow-pink-600 border-4 border-pink-200 rounded-lg p-8 z-10 relative">
             <h2 class="text-3xl font-semibold text-center text-gray-800 mb-6">Log In</h2>
 
@@ -182,7 +191,7 @@ $conn->close();
             <form action="login.php" method="POST">
                 <div class="mb-4">
                     <label for="email" class="block text-lg text-gray-700">Email</label>
-                    <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required>
+                    <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600" required value="<?php echo isset($email) ? htmlspecialchars($email) : ''; ?>">
                 </div>
 
                 <div class="mb-6 relative">
@@ -196,7 +205,7 @@ $conn->close();
 
                 <div class="flex justify-between items-center mb-6 space-x-20">
                     <div>
-                        <input type="checkbox" id="remember" name="remember" class="mr-2">
+                        <input type="checkbox" id="remember" name="remember" class="mr-2" <?php echo isset($_COOKIE['email']) ? 'checked' : ''; ?>>
                         <label for="remember" class="text-gray-700">Remember Me</label>
                     </div>
                     <a href="forgot-password.php" class="text-pink-600 hover:text-pink-700">Forgot Password?</a>

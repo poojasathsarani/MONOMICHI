@@ -478,36 +478,6 @@ require "db_connection.php";
 
             <br><br><br><br><br>
 
-            <!-- Food & Drinks --> 
-            <section id="food-drinks-section"> 
-                <h2 class="text-2xl font-bold text-center mb-6 text-pink-700">Food & Drinks</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    <!-- Products will be dynamically loaded here -->
-                </div>
-            </section>
-
-            <br><br><br><br><br>
-
-            <!-- Stationeries & Collectibles --> 
-            <section id="stationeries-collectibles-section"> 
-                <h2 class="text-2xl font-bold text-center mb-6 text-pink-700">Stationeries & Collectibles</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    <!-- Products will be dynamically loaded here -->
-                </div>
-            </section>
-            
-            <br><br><br><br><br>
-
-            <!-- Books & Movies --> 
-            <section id="books-movies-section"> 
-                <h2 class="text-2xl font-bold text-center mb-6 text-pink-700">Books & Movies</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    <!-- Products will be dynamically loaded here -->
-                </div>
-            </section>
-
-            <br><br><br><br><br>
-
             <!-- Product Modal -->
             <div id="product-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                 <div class="relative bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
@@ -799,8 +769,10 @@ require "db_connection.php";
         fetch("get_products.php")
             .then(response => response.json())
             .then(categories => {
+                console.log(categories);
                 categories.forEach(category => {
-                    let categorySection = document.getElementById(category.categoryname.toLowerCase().replace(/\s/g, '-') + "-section");
+                    let sectionId = category.categoryname.toLowerCase().replace(/\s*&\s*/g, '-').replace(/\s+/g, '-') + "-section";
+                    let categorySection = document.getElementById(sectionId);
                     if (categorySection) {
                         category.subcategories.forEach(subcategory => {
                             let subcategoryContainer = document.createElement("div");
@@ -809,7 +781,7 @@ require "db_connection.php";
                                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4">
                                     ${subcategory.products.map(product => `
                                         <div class="border rounded-lg p-4 shadow-lg">
-                                            <img src="${product.image}" alt="${product.productname}" class="w-full h-48 object-cover rounded-md">
+                                            <img src="${product.image}" alt="${product.productname}" class="w-full h-48 object-cover rounded-md" onError="this.onerror=null; this.src='path/to/placeholder-image.jpg';">
                                             <h4 class="text-lg font-bold mt-2 product-name cursor-pointer text-blue-500"
                                                 data-id="${product.productid}"
                                                 data-name="${product.productname}"
@@ -856,7 +828,6 @@ require "db_connection.php";
                 });
             })
             .catch(error => console.error("Error fetching data:", error));
-
 
         // Make sure the click listener for the product modal works
         document.addEventListener('click', function(e) {

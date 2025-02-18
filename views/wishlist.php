@@ -41,6 +41,9 @@ if ($result->num_rows > 0) {
     if ($stmt->execute()) {
         $response["message"] = "Added to Wishlist!";
         $response["success"] = true; // Adding success flag for the popup
+        
+        // Set a cookie to remember the added product (expires in 1 hour)
+        setcookie("wishlist_last_added", $product_name, time() + 3600, "/"); // expires in 1 hour
     } else {
         $response["message"] = "Error adding to Wishlist.";
         $response["success"] = false;

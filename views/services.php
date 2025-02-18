@@ -1,4 +1,5 @@
 <?php
+require_once 'db_connection.php';
 session_start();
 $role = isset($_SESSION['role']) ? $_SESSION['role'] : null;
 
@@ -12,6 +13,17 @@ if (isset($_SESSION['id'])) {
 $userProfileImage = isset($_SESSION['profile_image']) && $_SESSION['profile_image'] !== null 
     ? $_SESSION['profile_image'] 
     : 'https://w7.pngwing.com/pngs/423/634/png-transparent-find-user-profile-person-avatar-people-account-search-general-pack-icon.png';
+
+
+$query = "SELECT name, message, created_at FROM customers ORDER BY created_at DESC LIMIT 5"; // Fetch latest 5 testimonials
+$result = $conn->query($query);
+
+$testimonials = [];
+while ($row = $result->fetch_assoc()) {
+    $testimonials[] = $row;
+}
+
+
 ?>
 
 <!DOCTYPE html>
@@ -151,121 +163,48 @@ $userProfileImage = isset($_SESSION['profile_image']) && $_SESSION['profile_imag
             <h2 class="text-3xl font-bold text-center text-gray-800 mb-10">Our Services</h2>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Service Card 1 -->
-                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition-shadow hover:scale-105">
-                    <img src="https://cdn-icons-png.flaticon.com/512/1066/1066631.png" alt="Product Customization" class="w-16 h-16 mx-auto mb-4">
-                    <h3 class="text-xl font-semibold text-gray-800 text-center">Product Customization</h3>
-                    <p class="text-gray-600 text-center mt-2">We offer personalized customization of traditional Japanese products to meet your unique preferences and needs.</p>
-                    
-                    <!-- Accordion -->
-                    <div class="accordion mt-4">
-                        <div class="accordion-content px-4 py-2 text-gray-600">
-                            <p>Our customization services include embroidery, engraving, and color choices. Whether you're looking for a personalized gift or unique decoration for your home, we ensure each product reflects your personality and style.</p>
-                        </div>
-                    </div>
-                </div>
-                
+                <service-card 
+                    icon="https://cdn-icons-png.flaticon.com/512/1066/1066631.png" 
+                    title="Product Customization" 
+                    description="We offer personalized customization of traditional Japanese products to meet your unique preferences and needs."
+                    accordion-content="Our customization services include embroidery, engraving, and color choices. Whether you're looking for a personalized gift or unique decoration for your home, we ensure each product reflects your personality and style.">
+                </service-card>
+
                 <!-- Service Card 2 -->
-                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition-shadow hover:scale-105">
-                    <img src="https://cdn-icons-png.flaticon.com/512/1066/1066632.png" alt="Gift Wrapping" class="w-16 h-16 mx-auto mb-4">
-                    <h3 class="text-xl font-semibold text-gray-800 text-center">Gift Wrapping</h3>
-                    <p class="text-gray-600 text-center mt-2">We offer elegant gift wrapping for a perfect presentation of your gifts, making them extra special for your loved ones.</p>
-                    
-                    <!-- Accordion -->
-                    <div class="accordion mt-4">
-                        <div class="accordion-content px-4 py-2 text-gray-600">
-                            <p>Our premium wrapping service includes unique designs, ribbons, and cards for different occasions like birthdays, holidays, and celebrations.</p>
-                        </div>
-                    </div>
-                </div>
-                
+                <service-card 
+                    icon="https://cdn-icons-png.flaticon.com/512/1066/1066632.png" 
+                    title="Gift Wrapping" 
+                    description="We offer elegant gift wrapping for a perfect presentation of your gifts, making them extra special for your loved ones."
+                    accordion-content="Our premium wrapping service includes unique designs, ribbons, and cards for different occasions like birthdays, holidays, and celebrations.">
+                </service-card>
+
                 <!-- Service Card 3 -->
-                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition-shadow hover:scale-105">
-                    <img src="https://cdn-icons-png.flaticon.com/512/1066/1066633.png" alt="Cultural Guidance" class="w-16 h-16 mx-auto mb-4">
-                    <h3 class="text-xl font-semibold text-gray-800 text-center">Cultural Guidance</h3>
-                    <p class="text-gray-600 text-center mt-2">We provide cultural insights and personalized guidance about Japan's history, customs, and traditions to enhance your experience.</p>
-                    
-                    <!-- Accordion -->
-                    <div class="accordion mt-4">
-                        <div class="accordion-content px-4 py-2 text-gray-600">
-                            <p>Our guidance services are available for individuals or groups, including tailored experiences based on your interests, such as tea ceremonies, traditional arts, or exploring historical sites.</p>
-                        </div>
-                    </div>
-                </div>
+                <service-card 
+                    icon="https://cdn-icons-png.flaticon.com/512/1066/1066633.png" 
+                    title="Cultural Guidance" 
+                    description="We provide cultural insights and personalized guidance about Japan's history, customs, and traditions to enhance your experience."
+                    accordion-content="Our guidance services are available for individuals or groups, including tailored experiences based on your interests, such as tea ceremonies, traditional arts, or exploring historical sites.">
+                </service-card>
             </div>
         </div>
     </section>
 
-    <!-- Testimonials -->
+    <!-- Testimonials Section -->
     <section id="testimonials" class="py-16 bg-gray-100 px-4 sm:px-8 md:px-16 lg:px-40">
         <div class="container mx-auto px-6">
             <h2 class="text-3xl font-bold text-center text-gray-800 mb-10">What Our Customers Say</h2>
             <div class="flex flex-wrap justify-center gap-6">
-                <!-- Testimonial 1 -->
-                <div class="bg-white rounded-lg shadow-md p-6 w-full sm:w-80 md:w-80 lg:w-80 xl:w-1/4">
-                    <p class="text-gray-600">"I ordered a kimono, and the service was excellent! It was exactly what I wanted, and the quality was amazing!"</p>
-                    <div class="mt-4 flex items-center">
-                        <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Customer 1" class="h-12 w-12 rounded-full mr-4">
-                        <div>
-                            <p class="font-semibold text-gray-800">Yoken Smith</p>
-                            <p class="text-sm text-gray-500">Colombo, Sri Lanka</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Testimonial 2 -->
-                <div class="bg-white rounded-lg shadow-md p-6 w-full sm:w-80 md:w-80 lg:w-80 xl:w-1/4">
-                    <p class="text-gray-600">"Highly recommend!"</p>
-                    <div class="mt-4 flex items-center">
-                        <img src="https://randomuser.me/api/portraits/women/2.jpg" alt="Customer 2" class="h-12 w-12 rounded-full mr-4">
-                        <div>
-                            <p class="font-semibold text-gray-800">Asuka Indo</p>
-                            <p class="text-sm text-gray-500">Kadawatha, Sri Lanka</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Testimonial 3 -->
-                <div class="bg-white rounded-lg shadow-md p-6 w-full sm:w-80 md:w-80 lg:w-80 xl:w-1/4">
-                    <p class="text-gray-600">"I love the range of traditional Japanese items. The quality is top-notch, and the delivery was super fast!"</p>
-                    <div class="mt-4 flex items-center">
-                        <img src="https://randomuser.me/api/portraits/men/3.jpg" alt="Customer 3" class="h-12 w-12 rounded-full mr-4">
-                        <div>
-                            <p class="font-semibold text-gray-800">Taro Tanaka</p>
-                            <p class="text-sm text-gray-500">Kandy, Sri Lanka</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Testimonial 4 -->
-                <div class="bg-white rounded-lg shadow-md p-6 w-full sm:w-80 md:w-80 lg:w-80 xl:w-1/4">
-                    <p class="text-gray-600">"The tea set I bought is absolutely beautiful. It's perfect for our tea ceremonies, and the craftsmanship is exquisite!"</p>
-                    <div class="mt-4 flex items-center">
-                        <img src="https://randomuser.me/api/portraits/women/3.jpg" alt="Customer 4" class="h-12 w-12 rounded-full mr-4">
-                        <div>
-                            <p class="font-semibold text-gray-800">Aya Sato</p>
-                            <p class="text-sm text-gray-500">Galle, Sri Lanka</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Testimonial 5 -->
-                <div class="bg-white rounded-lg shadow-md p-6 w-full sm:w-80 md:w-80 lg:w-80 xl:w-1/4">
-                    <p class="text-gray-600">"I ordered the stationery for my office, and they add such a beautiful Japanese touch to the space. Absolutely love them!"</p>
-                    <div class="mt-4 flex items-center">
-                        <img src="https://randomuser.me/api/portraits/men/4.jpg" alt="Customer 5" class="h-12 w-12 rounded-full mr-4">
-                        <div>
-                            <p class="font-semibold text-gray-800">Hiroshi Takeda</p>
-                            <p class="text-sm text-gray-500">Negombo, Sri Lanka</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Testimonial 6 -->
-                <div class="bg-white rounded-lg shadow-md p-6 w-full sm:w-80 md:w-80 lg:w-80 xl:w-1/4">
-                    <p class="text-gray-600">"The exclusive collectible I bought was stunning, and it arrived in perfect condition. So happy with my purchase!"</p>
-                    <div class="mt-4 flex items-center">
-                        <img src="https://randomuser.me/api/portraits/women/4.jpg" alt="Customer 6" class="h-12 w-12 rounded-full mr-4">
-                        <div>
-                            <p class="font-semibold text-gray-800">Keiko Fujimoto</p>
-                            <p class="text-sm text-gray-500">Nuwara Eliya, Sri Lanka</p>
-                        </div>
-                    </div>
-                </div>
+                <?php if (!empty($testimonials)): ?>
+                    <?php foreach ($testimonials as $testimonial): ?>
+                        <testimonial-card 
+                            message="<?= htmlspecialchars($testimonial['message']) ?>"
+                            name="<?= htmlspecialchars($testimonial['name']) ?>"
+                            created-at="<?= date("d M Y", strtotime($testimonial['created_at'])) ?>">
+                        </testimonial-card>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p class="text-center text-gray-600">No testimonials yet. Be the first to share your experience!</p>
+                <?php endif; ?>
             </div>
         </div>
     </section>
@@ -432,5 +371,117 @@ $userProfileImage = isset($_SESSION['profile_image']) && $_SESSION['profile_imag
             profileMenu.classList.add('-translate-y-2');
         }
     });
+
+    // Define Service Card Component
+    class ServiceCard extends HTMLElement {
+        constructor() {
+            super();
+            this.attachShadow({mode: 'open'});
+        }
+
+        connectedCallback() {
+            this.render();
+        }
+
+        render() {
+            this.shadowRoot.innerHTML = `
+                <style>
+                    .card {
+                        background: white;
+                        border-radius: 10px;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                        padding: 24px;
+                        text-align: center;
+                        transition: all 0.3s ease;
+                    }
+                    .card:hover {
+                        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+                        transform: scale(1.05);
+                    }
+                    .card img {
+                        width: 64px;
+                        height: 64px;
+                        margin-bottom: 16px;
+                    }
+                    .accordion-content {
+                        display: none;
+                        padding: 12px;
+                        background-color: #f9f9f9;
+                        border-radius: 5px;
+                    }
+                    .accordion-content.active {
+                        display: block;
+                    }
+                </style>
+                <div class="card">
+                    <img src="${this.getAttribute('icon')}" alt="${this.getAttribute('title')}">
+                    <h3 class="text-xl font-semibold text-gray-800">${this.getAttribute('title')}</h3>
+                    <p class="text-gray-600 mt-2">${this.getAttribute('description')}</p>
+                    <div class="accordion mt-4">
+                        <button class="accordion-toggle text-gray-600">Learn More</button>
+                        <div class="accordion-content">
+                            <p>${this.getAttribute('accordion-content')}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            this.shadowRoot.querySelector('.accordion-toggle').addEventListener('click', () => {
+                const content = this.shadowRoot.querySelector('.accordion-content');
+                content.classList.toggle('active');
+            });
+        }
+    }
+
+    customElements.define('service-card', ServiceCard);
+
+    // Define Testimonial Card Component
+    class TestimonialCard extends HTMLElement {
+        constructor() {
+            super();
+            this.attachShadow({mode: 'open'});
+        }
+
+        connectedCallback() {
+            this.render();
+        }
+
+        render() {
+            this.shadowRoot.innerHTML = `
+                <style>
+                    .testimonial {
+                        background: white;
+                        border-radius: 10px;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                        padding: 24px;
+                        width: 300px;
+                        text-align: center;
+                    }
+                    .testimonial p {
+                        color: #4a4a4a;
+                    }
+                    .testimonial .author {
+                        margin-top: 16px;
+                    }
+                    .testimonial .author p {
+                        font-weight: bold;
+                        color: #333;
+                    }
+                    .testimonial .date {
+                        font-size: 12px;
+                        color: #aaa;
+                    }
+                </style>
+                <div class="testimonial">
+                    <p>"${this.getAttribute('message')}"</p>
+                    <div class="author">
+                        <p>${this.getAttribute('name')}</p>
+                        <p class="date">${this.getAttribute('created-at')}</p>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    customElements.define('testimonial-card', TestimonialCard);
 </script>
 </html>
