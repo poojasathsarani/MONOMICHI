@@ -149,6 +149,55 @@ $sql = "SELECT sr.id, u.fullname AS customer_name, sr.item_name, sr.description,
         ORDER BY sr.created_at DESC";
 
 $result = $conn->query($sql);
+
+
+
+
+// Fetch orders and order details
+$query = "
+    SELECT o.id AS order_id, o.user_id, o.full_name, o.address, o.city, o.postal_code, o.country, 
+           o.payment_method, o.status, o.order_date, od.product_id, od.quantity, od.price
+    FROM orders o
+    LEFT JOIN order_details od ON o.id = od.order_id
+    ORDER BY o.order_date DESC
+";
+
+$result = $conn->query($query);
+
+// Check if there are any orders
+if ($result->num_rows > 0) {
+    echo '<table class="order-table">';
+    echo '<thead>';
+    echo '<tr>';
+    echo '<th>Order ID</th><th>User ID</th><th>Full Name</th><th>Address</th><th>City</th><th>Postal Code</th><th>Country</th><th>Payment Method</th><th>Status</th><th>Order Date</th><th>Product ID</th><th>Quantity</th><th>Price</th>';
+    echo '</tr>';
+    echo '</thead>';
+    echo '<tbody>';
+
+    // Loop through and display orders and order details
+    while ($row = $result->fetch_assoc()) {
+        echo '<tr>';
+        echo '<td>' . $row['order_id'] . '</td>';
+        echo '<td>' . $row['user_id'] . '</td>';
+        echo '<td>' . $row['full_name'] . '</td>';
+        echo '<td>' . $row['address'] . '</td>';
+        echo '<td>' . $row['city'] . '</td>';
+        echo '<td>' . $row['postal_code'] . '</td>';
+        echo '<td>' . $row['country'] . '</td>';
+        echo '<td>' . $row['payment_method'] . '</td>';
+        echo '<td>' . $row['status'] . '</td>';
+        echo '<td>' . $row['order_date'] . '</td>';
+        echo '<td>' . $row['product_id'] . '</td>';
+        echo '<td>' . $row['quantity'] . '</td>';
+        echo '<td>' . $row['price'] . '</td>';
+        echo '</tr>';
+    }
+
+    echo '</tbody>';
+    echo '</table>';
+} else {
+    echo 'No orders found.';
+}
 ?>
 
 
@@ -199,27 +248,11 @@ $result = $conn->query($sql);
                             </a>
                         </li>
                         <li>
-                            <a href="#limited-time-drops-management" class="flex items-center p-3 hover:bg-white/10 rounded-lg transition duration-300 group">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8V4M8 12H4m16 0h-4m-4 4v4m4-4l4 4m-8-8l-4 4m0-8l4-4"/>
-                                </svg>
-                                Limited Time Drops Management
-                            </a>
-                        </li>
-                        <li>
                             <a href="#order-management" class="flex items-center p-3 hover:bg-white/10 rounded-lg transition duration-300 group">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h18l-2 12H5L3 4zm0 0l3 6h12l3-6"/>
                                 </svg>
                                 Order Management
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#blog-management" class="flex items-center p-3 hover:bg-white/10 rounded-lg transition duration-300 group">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-blue-200 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h10"/>
-                                </svg>
-                                Blog Management
                             </a>
                         </li>
                         <li>
@@ -758,32 +791,20 @@ $result = $conn->query($sql);
                         });
                         </script>
 
-                        <button class="manager-option bg-yellow-100 hover:bg-yellow-200 p-4 rounded-lg flex flex-col items-center" data-action="holiday-drops">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-yellow-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <span class="font-semibold text-yellow-800">Holiday Drops</span>
-                        </button>
+                        <a href="generate_report.php" class="manager-option bg-purple-100 hover:bg-purple-200 p-4 rounded-lg flex flex-col items-center">
+                            <button class="manager-option">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-purple-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                                <span class="font-semibold text-purple-800">Reports</span>
+                            </button>
+                        </a>
 
-                        <button class="manager-option bg-purple-100 hover:bg-purple-200 p-4 rounded-lg flex flex-col items-center" data-action="reports">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-purple-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                            <span class="font-semibold text-purple-800">Reports</span>
-                        </button>
-
-                        <button class="manager-option bg-red-100 hover:bg-red-200 p-4 rounded-lg flex flex-col items-center" data-action="orders">
+                        <button class="manager-option bg-red-100 hover:bg-red-200 p-4 rounded-lg flex flex-col items-center" onclick="window.location.href='managerdashboard.php';">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                             </svg>
                             <span class="font-semibold text-red-800">Manage Orders</span>
-                        </button>
-
-                        <button class="manager-option bg-indigo-100 hover:bg-indigo-200 p-4 rounded-lg flex flex-col items-center" data-action="blog-interactions">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                            </svg>
-                            <span class="font-semibold text-indigo-800">Blog Interactions</span>
                         </button>
                     </div>
                 </div>
